@@ -9,9 +9,10 @@ export const CAIP2: Record<Network, string> = {
   mainnet: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
 };
 
+// Verified on chain 2026-10-07: mainnet = Circle USDC (Token program, 6 dp); devnet = Circle devnet USDC.
 export const USDC: Record<Network, string> = {
   devnet: "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
-  mainnet: "EPjFWyuoUCLnmGUFknyNPTrrqaJpyAyBMgxw6Qmx5d6Y",
+  mainnet: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
 };
 
 function req(name: string): string {
