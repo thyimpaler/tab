@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TAB Technical Brief</title>
+<style>
+  :root{--ink:#0a0a09;--ink2:#5b5a55;--line:#d6d4cd;--accent:#b8321a;--paper:#fbfaf7}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 "Segoe UI",system-ui,-apple-system,sans-serif}
+  main{max-width:820px;margin:0 auto;padding:48px 24px 80px}
+  h1{font-size:40px;line-height:1.05;letter-spacing:-.03em;margin:0 0 8px}
+  h2{font-size:24px;letter-spacing:-.02em;margin:44px 0 12px;padding-top:18px;border-top:2px solid var(--ink);page-break-after:avoid}
+  h3{font-size:17px;margin:26px 0 8px;page-break-after:avoid}
+  p,li{margin:0 0 10px}
+  ul,ol{padding-left:22px;margin:0 0 14px}
+  code{font:13px Consolas,"Cascadia Mono",monospace;background:#efede8;padding:1px 5px;border-radius:4px}
+  pre{font:12.5px/1.55 Consolas,"Cascadia Mono",monospace;background:#efede8;padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre-wrap;page-break-inside:avoid}
+  table{border-collapse:collapse;width:100%;margin:8px 0 18px;font-size:14px;page-break-inside:avoid}
+  th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2)}
+  .meta{color:var(--ink2);font-size:13px;margin-bottom:24px}
+  .box{border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:12px 0 18px;background:#fff;page-break-inside:avoid}
+  .box strong:first-child{display:block;margin-bottom:6px}
+  .warn{border-color:var(--accent)}
+  .warn strong:first-child{color:var(--accent)}
+  @media print{body{background:#fff;font-size:12.5px}main{padding:0}h2{margin-top:28px}a{color:inherit}}
+</style>
+</head>
+<body>
+<main>
+
+<h1>TAB: technical brief</h1>
+<div class="meta">Spending limits for AI agents, paid in USDC on Solana over x402. Prepared 8 Oct 2026 for internal review. Live product: tab-agent-one.vercel.app (Solana mainnet). This document is self-contained so it can be read by a person or uploaded to an AI assistant.</div>
+
+<div class="box">
+<strong>How to use this document with an AI assistant</strong>
+Upload this file and ask questions such as: "Explain TAB to a non-technical investor", "What are the main risks before launch?", "Walk me through what happens when an agent pays for something", or "How does TAB make money and what does it cost to run?". Every number and behaviour below describes the system as built, not a plan, unless it is marked as pending.
+</div>
+
+<h2>1. The product in one paragraph</h2>
+<p>AI agents increasingly need to pay for things on their own: API calls, model inference, data, scraping, one request at a time. Today the only way to let an agent pay with crypto is to give it a wallet, which means giving it the private key and everything in that wallet. <b>TAB gives an agent a "tab" instead: a USDC allowance with a hard limit, a maximum per payment, an expiry date and an optional list of approved services.</b> The agent gets a key that lets it ask TAB to pay, never a wallet key. The person who opened the tab can revoke it at any moment, and whatever is unspent goes back to their wallet.</p>
+
+<h3>Key terms</h3>
+<table>
+<tr><th>Term</th><th>Meaning</th></tr>
+<tr><td>Tab</td><td>One spending allowance: limit, max per payment, expiry, optional allowlist. A user can have many.</td></tr>
+<tr><td>Owner</td><td>The human (or company) who opens and funds the tab with their own Solana wallet.</td></tr>
+<tr><td>Agent</td><td>The AI program that spends from the tab. It holds only an agent key (credential).</td></tr>
+<tr><td>Agent key</td><td>A random secret of the form <code>tab_live_…</code>, shown once, stored by TAB only as a keyed hash. Works for exactly one tab.</td></tr>
+<tr><td>x402</td><td>An open standard for paying for web requests: a service answers HTTP 402 "Payment Required" with a price, the client pays and retries. TAB implements x402 version 2, "exact" scheme on Solana.</td></tr>
+<tr><td>Facilitator</td><td>Part of x402. The service's helper that checks a signed payment, pays the Solana network fee and submits it to the chain.</td></tr>
+<tr><td>Delegate / allowance</td><td>A native feature of Solana's token program: an account owner can approve another key to move up to N tokens from that account. TAB's key is that "delegate".</td></tr>
+<tr><td>USDC</td><td>The dollar stablecoin. Amounts are handled in base units: 1 USDC = 1,000,000 units.</td></tr>
+</table>
+
+<h2>2. Why it is non-custodial</h2>
+<p>TAB never holds anyone's money. This was a founding decision and the whole design follows from it.</p>
+<ol>
+<li>When the owner opens a tab, their wallet signs <b>one Solana transaction</b> that creates a brand-new token account <b>owned by the owner's wallet</b>, moves the tab's limit into it, and approves TAB's delegate key to spend <b>up to exactly the limit</b> from it.</li>
+<li>The money sits in the owner's own account. TAB only holds a permission to spend from it, and that permission is enforced by the Solana token program itself, not by TAB's database. Even if TAB's database had a bug, the chain would refuse to move more than the approved amount.</li>
+<li>The owner can revoke that permission or close the account <b>directly from their wallet, without TAB</b>, even if TAB's servers are down.</li>
+<li>Each tab gets its own account because a Solana token account can only have one delegate and one allowance at a time.</li>
+</ol>
+
+<div class="box">
+<strong>What TAB can and cannot do</strong>
+<b>Can:</b> sign payments from a tab up to what is left of its limit; refuse any payment that breaks a rule; stop signing the moment the owner revokes.<br>
+<b>Cannot:</b> touch anything else in the owner's wallet; spend past the limit (the token program blocks it on chain); stop the owner revoking or closing from their wallet.
+</div>
+
+<p>This was proven before building anything: a "spike" on Solana devnet on 7 Oct 2026 showed that a delegate-signed x402 payment is accepted, settled and returns the paid resource; that a payment above the remaining allowance is rejected before anything moves; and that after the owner revokes, payments fail and nothing moves.</p>
+
+<h2>3. How it works, step by step</h2>
+
+<h3>3.1 Opening a tab (owner)</h3>
+<ol>
+<li>The owner connects a Solana wallet (Phantom, Solflare, Backpack or any Wallet Standard wallet) on the dashboard and signs in by <b>signing a text message</b> (Sign-In With Solana). Signing in costs nothing and moves nothing.</li>
+<li>They choose: a limit (1 to 1,000 USDC during beta), a max per payment (or none), an expiry (1 hour, 1 day, 7 days, 30 days) and optionally an allowlist of service payment addresses.</li>
+<li>TAB's server builds the transaction and the wallet shows it for approval. It contains, in one signature: the <b>0.20 USDC opening fee</b> to TAB's treasury, creating the tab's token account (owner = the user), moving the limit into it, and approving TAB's delegate for exactly the limit.</li>
+<li>After it confirms on chain, TAB verifies the account on chain and shows the agent key <b>once</b>. The owner gives this key to their agent.</li>
+</ol>
+
+<h3>3.2 An agent paying for something</h3>
+<ol>
+<li>The agent calls a paid service through TAB's SDK (<code>tab.fetch(url)</code>, a drop-in for normal <code>fetch</code>).</li>
+<li>The service answers <b>402 Payment Required</b> with its price, token and payment address in a <code>PAYMENT-REQUIRED</code> header.</li>
+<li>The SDK refuses locally if the price is above the agent's own client-side ceiling (<code>maxPayment</code>). Otherwise it sends the bill to TAB: <code>POST /v1/pay</code> with the agent key and a unique idempotency key.</li>
+<li>TAB runs <b>five checks, in this order</b>. Any failure returns a typed error and <b>nothing is signed</b>:
+  <ol>
+  <li>The tab is open (not revoked, closed or unfunded). Error: <code>TAB_REVOKED</code> / <code>TAB_CLOSED</code> / <code>TAB_NOT_FOUND</code>.</li>
+  <li>It hasn't expired. Error: <code>TAB_EXPIRED</code>.</li>
+  <li>The amount is within the max per payment. Error: <code>PAYMENT_EXCEEDS_TAB_LIMIT</code>.</li>
+  <li>The service is on the allowlist, if one is set. Error: <code>RECIPIENT_NOT_ALLOWED</code>.</li>
+  <li>There is room left: spent + in-flight + this payment ≤ limit. Error: <code>INSUFFICIENT_TAB_BALANCE</code>.</li>
+  </ol></li>
+<li>If all pass, TAB <b>reserves</b> the amount (so concurrent payments cannot share the same balance), signs a USDC transfer from the tab account with its delegate key, and returns the signed payment to the SDK.</li>
+<li>The SDK retries the request with a <code>PAYMENT-SIGNATURE</code> header. The service's facilitator adds its own signature as fee payer, submits it, and the service returns the paid content (HTTP 200).</li>
+<li>TAB marks the payment <b>settled only when it finds the transaction carrying its signature confirmed on chain</b>.</li>
+</ol>
+
+<h3>3.3 Closing out</h3>
+<p>The owner clicks Revoke. TAB stops signing immediately, then the owner's wallet signs one transaction that removes the permission, moves the unspent USDC back to their wallet and closes the account, which also returns the account rent (about 0.002 SOL).</p>
+
+<h2>4. Money safety guarantees (the invariants)</h2>
+<p>These are hard rules in the code, each backed by automated tests.</p>
+<table>
+<tr><th>Guarantee</th><th>How it is enforced</th></tr>
+<tr><td>An agent can never spend more than the tab has left.</td><td>Database transaction with a row lock on the tab (<code>SELECT … FOR UPDATE</code>) plus a database constraint that spent + reserved ≤ limit. Independently, the on-chain allowance is a second ceiling TAB cannot override.</td></tr>
+<tr><td>Two simultaneous payments can't spend the same balance.</td><td>Reserve before signing, settle after. Tested: 50 parallel payments against a tab with room for 5 → exactly 5 succeed. The test was confirmed to fail if the row lock is removed.</td></tr>
+<tr><td>A repeated request never pays twice.</td><td>Every payment carries an idempotency key; a repeat returns the original signed payment, which can only land on chain once.</td></tr>
+<tr><td>A crash mid-payment never loses or double-spends money.</td><td>Tested by killing the process between reserve and settle. On restart, a held payment is settled if its transaction is on chain, and released only after its blockhash has expired (after which it can no longer land).</td></tr>
+<tr><td>Amounts are exact.</td><td>All money is integer base units (bigint). No floating point anywhere.</td></tr>
+<tr><td>Agent keys can't be stolen from the database.</td><td>Random, shown once, stored only as a keyed hash, scoped to one tab, rotatable.</td></tr>
+<tr><td>TAB's signing key is never exposed.</td><td>Loaded only from a server secret, never logged or returned by any endpoint.</td></tr>
+<tr><td>Unsafe tokens are refused.</td><td>Token-2022 mints with permanent delegate, transfer hook, transfer fee, non-transferable, confidential, default-frozen or pausable extensions are rejected. V1 accepts USDC only.</td></tr>
+</table>
+<p><b>Tests:</b> 34 automated tests run against a real Postgres database: concurrency, crash injection, replay, and every error code. A full devnet end-to-end run (sign in, open, agent pays, cap refusal, revoke, reclaim, close) was done through both a script and the real dashboard, with the database matching the chain after every run.</p>
+
+<h2>5. Business model and running costs</h2>
+<table>
+<tr><th>Item</th><th>Amount</th><th>Who pays</th></tr>
+<tr><td>Opening a tab</td><td>0.20 USDC flat, per tab</td><td>Owner, to TAB's treasury, inside the same signature that opens the tab (shown before signing)</td></tr>
+<tr><td>TAB fee per payment</td><td>0</td><td>None</td></tr>
+<tr><td>Solana network fee per payment</td><td>~0.00001 SOL</td><td>The service's x402 facilitator, not TAB and not the owner</td></tr>
+<tr><td>Account rent per tab</td><td>~0.002 SOL</td><td>Owner, refunded in full when the tab is closed</td></tr>
+<tr><td>Network fee to open/close a tab</td><td>A fraction of a cent in SOL</td><td>Owner's wallet</td></tr>
+<tr><td>Hosting (web app + API)</td><td>Free tier</td><td>Vercel Hobby</td></tr>
+<tr><td>Database</td><td>Free tier</td><td>Neon Postgres</td></tr>
+<tr><td>Solana RPC</td><td>Free public endpoint</td><td>None (see risks)</td></tr>
+<tr><td>Live demo on the site</td><td>~0.00001 SOL per demo payment</td><td>TAB's small demo fee-payer wallet; the demo pauses itself when that wallet runs low</td></tr>
+</table>
+<p>TAB therefore has <b>no per-payment cost</b>: revenue is 0.20 USDC per tab opened, and the marginal cost of a tab to TAB is effectively zero. Treasury address (public): <code>3VjaxvebqEA8J6gCLLwU6Vu1jYdNQH4cYKFMiPN8cBmH</code>.</p>
+
+<h2>6. For developers: integrating an agent</h2>
+<pre>npm i @tabpay/sdk
+
+import { Tab } from "@tabpay/sdk";
+
+const tab = new Tab({
+  credential: process.env.TAB_CREDENTIAL,  // the agent key, tab_live_…
+  maxPayment: "500000",                    // client-side ceiling: 0.50 USDC
+});
+
+const res = await tab.fetch("https://api.example.com/forecast");
+// 402 → checked → signed → paid → 200</pre>
+<p>Free requests pass straight through untouched. Paid ones are handled automatically within the tab's rules. Rejections throw an error with one of the codes above.</p>
+
+<h3>HTTP API (summary)</h3>
+<table>
+<tr><th>Endpoint</th><th>Used by</th><th>Purpose</th></tr>
+<tr><td><code>POST /v1/pay</code></td><td>Agent (bearer agent key)</td><td>Check a bill against the tab's rules and return a signed payment</td></tr>
+<tr><td><code>POST /v1/payments/:id/confirm</code></td><td>Agent</td><td>Report the transaction id so TAB settles it immediately (verified on chain)</td></tr>
+<tr><td><code>GET /v1/tab</code></td><td>Agent</td><td>Status, limit, spent, in flight, remaining, cap, expiry</td></tr>
+<tr><td><code>POST /v1/auth/nonce</code>, <code>/verify</code>, <code>/logout</code></td><td>Dashboard</td><td>Sign-In With Solana (message signature) and session cookie</td></tr>
+<tr><td><code>GET/POST /v1/tabs</code>, <code>/v1/tabs/:id</code></td><td>Dashboard (owner)</td><td>List, create (returns the unsigned transaction), view</td></tr>
+<tr><td><code>/v1/tabs/:id/activate | rotate | revoke | close</code></td><td>Dashboard (owner)</td><td>Activate after funding, new agent key, stop signing, return funds and close</td></tr>
+</table>
+
+<h2>7. Architecture</h2>
+<table>
+<tr><th>Layer</th><th>Technology</th></tr>
+<tr><td>Web app (landing, docs, dashboard)</td><td>React + Vite, served by Vercel. Wallets via Wallet Standard. Sign-in is a message signature only.</td></tr>
+<tr><td>API</td><td>TypeScript, Hono framework, running as a Vercel serverless function</td></tr>
+<tr><td>Database</td><td>PostgreSQL on Neon (pooled connections). Tables: users, tabs, allowed recipients, payments, auth nonces.</td></tr>
+<tr><td>Blockchain</td><td>Solana mainnet, SPL Token program, USDC (mint <code>EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v</code>), libraries @solana/web3.js and @solana/spl-token</td></tr>
+<tr><td>Payments protocol</td><td>x402 version 2, "exact" scheme on Solana (official @x402 packages)</td></tr>
+<tr><td>Agent SDK</td><td>TypeScript package <code>@tabpay/sdk</code> (in the repository; not yet published to npm)</td></tr>
+<tr><td>Background jobs</td><td>A reconcile job settles or releases stuck payments from chain evidence. It runs on every read of a tab and once a day by scheduled job.</td></tr>
+<tr><td>Source code</td><td>Private GitHub repository</td></tr>
+</table>
+
+<h3>Payment lifecycle states</h3>
+<p><code>RESERVED</code> (amount held) → <code>DISPATCHING</code> (signed, handed to the agent) → <code>SETTLED</code> (found confirmed on chain) or <code>RELEASED</code> (blockhash expired, never landed; the hold is returned). <code>AMBIGUOUS</code> is used when the chain could not be read; it is retried and never released early.</p>
+<p>The chain is the only source of truth. A service can sometimes land a payment and still answer 402 (if its own facilitator is slow); TAB then counts it as spent, because it was, and the SDK retries once with the same signed payment, which cannot be charged twice.</p>
+
+<h2>8. Current status (8 Oct 2026)</h2>
+<h3>Done</h3>
+<ul>
+<li>Full product built and deployed on <b>Solana mainnet</b>: landing page, docs, dashboard (open, view, revoke, reclaim, rotate key), agent API, SDK.</li>
+<li>Non-custodial design proven on devnet; mainnet tab-opening transaction (all instructions including the fee) simulated successfully against real mainnet state.</li>
+<li>0.20 USDC opening fee wired to the treasury.</li>
+<li>Beta safety cap: a tab can hold at most 1,000 USDC.</li>
+<li>34 automated tests passing, including concurrency and crash recovery.</li>
+<li>Site redesigned with interactive explainers (live simulated agent, five-checks demo, non-custodial demo).</li>
+</ul>
+<h3>Pending (owner actions)</h3>
+<ul>
+<li>One real-money mainnet run: open a ~1.2 USDC tab, let the test agent pay, revoke and reclaim.</li>
+<li>Fund the demo fee-payer wallet with ~0.005 SOL so the live demo can run on mainnet.</li>
+<li>Custom domain and X (Twitter) handle.</li>
+<li>Publish the SDK to npm (package name is a placeholder until then).</li>
+</ul>
+
+<h2>9. Risks and open decisions</h2>
+<div class="box warn">
+<strong>Be aware before scaling</strong>
+<ul>
+<li><b>No third-party security audit yet.</b> Mitigated by the on-chain allowance (TAB cannot exceed it even if its code is wrong), the 1,000 USDC per-tab beta cap, and the test suite, but an audit is the standard next step before large balances.</li>
+<li><b>TAB's delegate signing key lives in the hosting provider's encrypted environment variables, not a hardware key service (KMS).</b> This was a deliberate owner decision for launch. If that key leaked, an attacker could spend from open tabs up to each tab's remaining limit (never more, never from the rest of anyone's wallet). Owners can revoke from their wallets at any time. Moving to KMS is an available upgrade.</li>
+<li><b>Free public Solana RPC.</b> It is rate-limited; under load, confirmations can be slow. Payments are never lost (they settle from chain evidence later), but the dashboard may lag. A paid RPC is a cheap upgrade when volume justifies it.</li>
+<li><b>If TAB is down, agents cannot pay</b> until it is back. Funds are unaffected and owners keep full control from their wallets.</li>
+<li><b>Daily scheduled reconcile</b> (Vercel free tier limit). Stuck payments also reconcile whenever a tab is viewed, so this only matters for tabs nobody looks at.</li>
+<li><b>Ecosystem dependency:</b> TAB works with services that accept x402 V2 payments in USDC on Solana. Its reach grows with x402 adoption.</li>
+</ul>
+</div>
+
+<h2>10. Out of scope for version 1</h2>
+<p>Token swaps, assets other than USDC, other blockchains, payment channels, a marketplace, a TAB token, fiat on-ramps, DAO/governance, staking. These were excluded deliberately to ship a small, safe core.</p>
+
+<h2>11. Frequently asked questions</h2>
+<h3>Can TAB run off with users' money?</h3>
+<p>No. Funds sit in accounts owned by the users' wallets. TAB can only move funds from an open tab, to a service's payment address, through the five checks, and never more than what remains of that tab's limit, which the Solana token program enforces.</p>
+<h3>What stops a buggy or hijacked agent from draining a tab?</h3>
+<p>The max per payment stops one huge charge; the allowlist stops payments to unknown services; the limit caps the total; the expiry ends it automatically; and the owner can revoke instantly. The worst case is losing what remains on that one tab, which the owner chose in advance.</p>
+<h3>Why would a user pay 0.20 USDC?</h3>
+<p>Because the alternative is giving an agent a full wallet key. 0.20 USDC buys a scoped, expiring, revocable allowance with a payment ledger, with no per-payment fees.</p>
+<h3>Does TAB need its own payment network or token?</h3>
+<p>No. It uses USDC, Solana's standard token program and the open x402 protocol. Services don't need to integrate anything TAB-specific; if they accept x402 on Solana, TAB-funded agents can pay them.</p>
+
+</main>
+</body>
+</html>
