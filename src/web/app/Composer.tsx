@@ -35,7 +35,7 @@ export function Composer({ s, onCreated, maxUsd }: { s: Session; onCreated: (id:
   const allowList = useMemo(() => allow.split(/[\s,]+/).map((x) => x.trim()).filter(Boolean), [allow]);
   const badAllow = lock ? allowList.find((a) => !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(a)) : undefined;
   const capTooBig = capU !== null && BigInt(capU) > BigInt(limit);
-  const problem = capTooBig ? "The max per payment can't be above the limit." : badAllow ? `"${badAllow.slice(0, 12)}…" isn't a Solana address.` : lock && !allowList.length ? "Add at least one service address, or turn the lock off." : null;
+  const problem = capTooBig ? "The max per payment can't be above the limit." : badAllow ? `"${badAllow.slice(0, 12)}…" isn't a Solana address.` : lock && !allowList.length ? "Add the payment address of at least one service, or turn the restriction off." : null;
   const total = BigInt(limit) + fee;
 
   function commitTyped() {
@@ -102,15 +102,20 @@ export function Composer({ s, onCreated, maxUsd }: { s: Session; onCreated: (id:
           </div>
         </div>
         <div className="rule">
-          <span className="eyebrow">04 · Who it can pay</span>
+          <span className="eyebrow">04 · Where it can spend</span>
           <label className="switch">
             <input type="checkbox" checked={lock} onChange={(e) => setLock(e.target.checked)} />
             <span className="track" aria-hidden="true"><i /></span>
-            <span>Only specific services</span>
+            <span>Restrict where this agent can spend <span className="muted">(optional)</span></span>
           </label>
-          {lock && (
-            <textarea className="allow" rows={3} value={allow} onChange={(e) => setAllow(e.target.value)} spellCheck={false}
-              placeholder="Service payTo addresses, one per line" aria-label="Allowed service addresses" />
+          {!lock ? (
+            <span className="rule-hint">Off: it can pay any x402 service, still inside your limit and max per payment.</span>
+          ) : (
+            <>
+              <textarea className="allow" rows={3} value={allow} onChange={(e) => setAllow(e.target.value)} spellCheck={false}
+                placeholder="Paste each service's payment address, one per line" aria-label="Payment addresses of the services this agent may pay" />
+              <span className="rule-hint">Every x402 service gets paid at a Solana address. You'll find it in the service's docs, or in the 402 reply your agent receives (the "payTo" field). Payments to any other address are refused.</span>
+            </>
           )}
         </div>
       </div>
@@ -145,7 +150,7 @@ export function Composer({ s, onCreated, maxUsd }: { s: Session; onCreated: (id:
           <div><dt>Limit</dt><dd>{fromUnits(limit, DEC)}</dd></div>
           <div><dt>Max per payment</dt><dd>{cap === "none" ? "none" : cap}</dd></div>
           <div><dt>Ends</dt><dd>{ends}</dd></div>
-          <div><dt>Services</dt><dd>{lock ? `${allowList.length} allowed` : "any x402 service"}</dd></div>
+          <div><dt>Can spend at</dt><dd>{!lock ? "any x402 service" : allowList.length ? `${allowList.length} service${allowList.length === 1 ? "" : "s"} only` : "none added yet"}</dd></div>
           {fee > 0n && <div className="fee"><dt>Opening fee</dt><dd>{fromUnits(fee, DEC)}</dd></div>}
         </dl>
         <div className="terms-total"><span>You sign once</span><b>{fromUnits(total, DEC)}</b><span>USDC</span></div>

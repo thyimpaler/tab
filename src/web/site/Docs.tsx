@@ -35,7 +35,7 @@ export function Docs() {
           <h2 id="quickstart">Quickstart</h2>
           <ol>
             <li><a href="/app" data-nav>Open the dashboard</a>, connect a wallet and sign in. Signing in is a message signature.</li>
-            <li>Open a tab: limit, per-payment cap, expiry and an optional allowlist of service addresses. Approve the one transaction in your wallet.</li>
+            <li>Open a tab: limit, per-payment cap, expiry and, optionally, the services it may spend at (by each service's payment address, the <code>payTo</code> in its 402 reply). Approve the one transaction in your wallet.</li>
             <li>Copy the key it shows you. It's shown once. Lost it? Rotate it from the tab page.</li>
             <li>Give the key to your agent as <code>TAB_CREDENTIAL</code> and use the SDK.</li>
           </ol>

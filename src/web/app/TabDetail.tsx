@@ -78,7 +78,7 @@ export function TabDetail({ s, tabId, credential, rememberKey, onChange }: { s: 
     { h: "The tab is open", v: t.status === "pending" ? "not funded" : t.status, ok: t.status === "active" },
     { h: "It hasn't expired", v: live ? until(t.expiresAt) : "expired", ok: live },
     { h: "Under the cap", v: t.perPaymentCap ? `${fromUnits(t.perPaymentCap, dec)} per bill` : "no cap", ok: null },
-    { h: "The service is allowed", v: d.allowlist.length ? `${d.allowlist.length} allowed` : "any service", ok: null },
+    { h: "It's somewhere it may spend", v: d.allowlist.length ? `${d.allowlist.length} service${d.allowlist.length === 1 ? "" : "s"} only` : "any service", ok: null },
     { h: "There's room left", v: `${fromUnits(t.remaining, dec)} of ${fromUnits(t.limit, dec)}`, ok: BigInt(t.remaining) > 0n },
   ];
   const settled = d.payments.filter((p) => p.state === "SETTLED");

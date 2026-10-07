@@ -76,11 +76,11 @@ export function TryIt() {
           </div>
         </div>
         <div className="rule">
-          <span className="eyebrow">03 · Who it can pay</span>
+          <span className="eyebrow">03 · Where it can spend</span>
           <label className="switch">
             <input type="checkbox" checked={lock} disabled={phase === "run"} onChange={(e) => setLock(e.target.checked)} />
             <span className="track" aria-hidden="true"><i /></span>
-            <span>Only known services</span>
+            <span>Only services I allow</span>
           </label>
         </div>
         <div className="try-go">
@@ -105,7 +105,7 @@ export function TryIt() {
         <div className="rc-head">
           <b>tab</b>
           <span>agent run · simulation</span>
-          <span className="rc-rules">limit {usdc(lim, 2)} · cap {cap ? usdc(cap, 2) : "none"} · {lock ? "known only" : "any service"}</span>
+          <span className="rc-rules">limit {usdc(lim, 2)} · cap {cap ? usdc(cap, 2) : "none"} · {lock ? "allowed services only" : "any service"}</span>
         </div>
         <ol className="rc-lines" ref={tape} aria-live="polite">
           {lines.length === 0 && <li className="rc-empty">{phase === "run" ? "waiting for the first bill…" : "Nothing yet. Set the rules, then run the agent."}</li>}
