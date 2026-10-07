@@ -38,6 +38,15 @@ function nativeProvider(name: string): { connect: () => Promise<unknown> } | nul
   return null;
 }
 
+/** Reconnects a wallet the user already approved for this site, with no popup. Null if it would need one. */
+export async function connectSilently(w: Wallet): Promise<WalletAccount | null> {
+  const already = pickAccount(w.accounts);
+  if (already) return already;
+  const f = w.features["standard:connect"] as any;
+  try { const { accounts } = await f.connect({ silent: true }); return pickAccount(accounts) ?? null; }
+  catch { return null; }
+}
+
 export async function connect(w: Wallet): Promise<WalletAccount> {
   const f = w.features["standard:connect"] as any;
   try {

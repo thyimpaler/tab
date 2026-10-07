@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Wallet, WalletAccount } from "@wallet-standard/base";
 import { api, type PublicConfig } from "../lib/api";
-import { connect, listWallets, signAndSend, signIn, siwsText, waitForConfirmation, type SolWallet } from "../lib/wallet";
+import { connect, connectSilently, listWallets, signAndSend, signIn, siwsText, waitForConfirmation, type SolWallet } from "../lib/wallet";
 
 export type Session = ReturnType<typeof useSession>;
 
@@ -19,6 +19,19 @@ export function useSession() {
     api<PublicConfig>("/v1/config").then(setCfg).catch((e) => setError(e.message));
     api<{ wallet: string }>("/v1/me").then((r) => setMe(r.wallet)).catch(() => setMe(null));
   }, []);
+
+  // Signed in already? Quietly reattach the wallet used last time (no popup), so the user isn't asked
+  // to connect again just to sign. Only if it is the same address the session belongs to.
+  const tried = useRef(false);
+  useEffect(() => {
+    if (tried.current || !me || account || !wallets.length) return;
+    let name: string | null = null;
+    try { name = localStorage.getItem("tab.wallet"); } catch {}
+    const w = wallets.find((x) => x.name === name) ?? null;
+    if (!w) return;
+    tried.current = true;
+    connectSilently(w.wallet).then((acct) => { if (acct && acct.address === me) { setWallet(w.wallet); setAccount(acct); } });
+  }, [me, account, wallets]);
 
   const connectWallet = useCallback(async (w: Wallet) => {
     setError(null); setBusy("connect");

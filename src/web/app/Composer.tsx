@@ -81,12 +81,8 @@ export function Composer({ s, onCreated, maxUsd }: { s: Session; onCreated: (id:
     <section className="composer">
       <div className="composer-rules">
         <div className="rule">
-          <span className="eyebrow">00 · Name</span>
+          <span className="eyebrow">01 · Name</span>
           <input className="title-input" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Untitled tab" maxLength={60} aria-label="Tab name" />
-        </div>
-        <div className="rule">
-          <span className="eyebrow">01 · Limit</span>
-          <span className="rule-hint">Turn the ring, or type the number in its centre.</span>
         </div>
         <div className="rule">
           <span className="eyebrow">02 · Max per payment</span>
@@ -136,7 +132,7 @@ export function Composer({ s, onCreated, maxUsd }: { s: Session; onCreated: (id:
                 onPointerDown={(e) => e.stopPropagation()}
               />
               <span className="dial-note">USDC limit</span>
-              <span className="dial-hint">drag the ring</span>
+              <span className="dial-hint">drag the ring or type</span>
             </>
           )}
         />
@@ -172,7 +168,7 @@ export function Composer({ s, onCreated, maxUsd }: { s: Session; onCreated: (id:
           </button>
         )}
         {err && <p className="terms-err" role="alert">{err}</p>}
-        <p className="terms-fine">The USDC sits in a token account your wallet owns. TAB can spend up to the limit and nothing else. What's left comes back when you close the tab.</p>
+        <p className="terms-fine">Funds stay in a token account you own. What's left comes back when you close the tab.</p>
         {s.cfg?.network === "devnet" && <p className="terms-fine">Devnet: USDC at <a href="https://faucet.circle.com" target="_blank" rel="noreferrer">faucet.circle.com</a>, SOL at <a href="https://faucet.solana.com" target="_blank" rel="noreferrer">faucet.solana.com</a>.</p>}
       </div>
     </section>

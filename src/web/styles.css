@@ -540,35 +540,40 @@ td code{white-space:nowrap}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--paper-3)}
 .dot.active{background:var(--ok)}
 .dot.revoked{background:var(--accent)}
-.stagearea{padding:clamp(24px,3.4vw,48px) var(--edge) 80px;min-width:0}
+.stagearea{padding:clamp(20px,3vh,40px) var(--edge) 32px;min-width:0}
 
 /* composer: rules, the dial, and the terms you sign */
 .composer{display:grid;grid-template-columns:minmax(250px,.82fr) minmax(0,1.15fr) minmax(300px,.88fr);grid-template-areas:"rules dial terms";gap:clamp(24px,3vw,56px);align-items:center}
 .composer-rules{grid-area:rules;border-top:1px solid var(--line);min-width:0}
-.composer-rules .rule{padding:18px 0}
+.composer-rules .rule{padding:14px 0;gap:10px}
+.composer-rules .chips{gap:6px}
+.composer-rules .opt-chip{padding:9px 11px;font-size:13px}
 .title-input{font:400 clamp(1.7rem,2.4vw,2.4rem)/1.1 var(--display);letter-spacing:-.03em;color:var(--paper);background:transparent;border:0;padding:0;width:100%;border-radius:0}
 .title-input::placeholder{color:var(--paper-3)}
 .title-input:focus{outline:none;color:#fff}
 .composer-dial{grid-area:dial;display:grid;place-items:center;min-width:0}
-.composer-dial .dial{width:min(calc(100% - 44px),600px,70vh)}
+.composer-dial .dial{width:min(calc(100% - 44px),600px,calc(100svh - 230px))}
 .terms,.ledger{position:relative;background:#f1efe9;color:var(--ink);font:12.5px/1.5 var(--mono);border-radius:6px 6px 0 0;min-width:0;
   -webkit-mask:linear-gradient(#000 0 0) top/100% calc(100% - 9px) no-repeat,conic-gradient(from -45deg at bottom,#000 90deg,#0000 0) bottom/18px 9px repeat-x;
   mask:linear-gradient(#000 0 0) top/100% calc(100% - 9px) no-repeat,conic-gradient(from -45deg at bottom,#000 90deg,#0000 0) bottom/18px 9px repeat-x}
-.terms{grid-area:terms;display:grid;gap:16px;padding:26px 24px 38px}
+.terms{grid-area:terms;display:grid;gap:12px;padding:20px 22px 32px}
 .terms-lines{margin:0;display:grid}
-.terms-lines>div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:9px 0;border-bottom:1px dotted rgba(10,10,9,.22)}
+.terms-lines>div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:6px 0;border-bottom:1px dotted rgba(10,10,9,.22)}
 .terms-lines dt{color:var(--ink-2);flex:none}
 .terms-lines dd{margin:0;font-weight:600;text-align:right;min-width:0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
-.terms-total{display:grid;grid-template-columns:auto auto;justify-content:space-between;align-items:baseline;gap:4px 10px;border-top:1px dashed rgba(10,10,9,.4);padding-top:14px}
+.terms-total{display:grid;grid-template-columns:auto auto;justify-content:space-between;align-items:baseline;gap:4px 10px;border-top:1px dashed rgba(10,10,9,.4);padding-top:10px}
 .terms-total span:first-child{grid-column:1/-1;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
-.terms-total b{font:600 clamp(2rem,2.8vw,2.7rem)/1 var(--mono);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.terms-total b{font:600 clamp(1.8rem,2.4vw,2.4rem)/1 var(--mono);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
 .terms-total span:last-child{font-size:12px;color:var(--ink-2)}
 .terms-sign{justify-self:stretch;justify-content:space-between}
 .terms-err{margin:0;color:var(--accent-deep);font:600 12px/1.45 var(--mono)}
 .terms-fine{margin:0;font:12px/1.5 var(--body);color:var(--ink-2)}
 .terms-fine a{color:var(--ink)}
-.terms-connect{display:grid;gap:10px;font:600 13.5px/1.4 var(--body)}
-.wallet-chip{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 16px 8px 12px;border-radius:999px;background:var(--ink);color:var(--paper);border:0;cursor:pointer;font:500 13.5px var(--body);transition:transform .5s var(--spring)}
+.terms-connect{display:grid;gap:8px;font:600 13.5px/1.4 var(--body)}
+.terms-connect .row-wrap{gap:6px}
+.terms .rc-head{padding-bottom:10px}
+.terms .rc-head b{font-size:24px}
+.wallet-chip{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:6px 14px 6px 10px;border-radius:999px;background:var(--ink);color:var(--paper);border:0;cursor:pointer;font:500 13.5px var(--body);transition:transform .5s var(--spring)}
 .wallet-chip:hover{transform:translateY(-2px)}
 .wallet-chip img{border-radius:5px}
 .dial{position:relative;width:min(100%,560px,72vh);aspect-ratio:1;container-type:inline-size;touch-action:none;cursor:grab;outline:none;border-radius:50%}
