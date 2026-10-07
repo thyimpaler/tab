@@ -11,7 +11,7 @@ export type TabOptions = {
   credential: string;
   /** Hard client-side ceiling per request, in token base units (USDC: 1 = 0.000001). */
   maxPayment: bigint | number | string;
-  /** Defaults to https://tab.cash/api. */
+  /** Defaults to the hosted TAB API. */
   apiUrl?: string;
   /** Custom fetch (tests, proxies). */
   fetch?: typeof fetch;
@@ -38,7 +38,7 @@ export class TabError extends Error {
   }
 }
 
-const DEFAULT_API = "https://tab.cash/api";
+const DEFAULT_API = "https://tab-agent.vercel.app/api";
 const SOLANA = /^solana:/;
 
 function b64json(s: string): any {

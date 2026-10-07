@@ -27,7 +27,7 @@ const json = async (c: Context) => {
   try { return await c.req.json(); } catch { throw new TabError("BAD_REQUEST", "body must be JSON"); }
 };
 
-app.get("/v1/health", (c) => c.json({ ok: true, network: config().network }));
+app.get("/v1/health", (c) => c.json({ ok: true, network: process.env.SOLANA_NETWORK ?? "devnet" }));
 
 app.get("/v1/config", (c) => c.json({
   network: config().network, caip2: config().caip2, mints: config().acceptedMints, delegate: delegatePubkey().toBase58(),

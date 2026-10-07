@@ -4,3 +4,9 @@ spike/.keys/
 spike/results.json
 .data/
 dist/
+
+.vercel
+.env*
+.env.*
+!env.example
+.vercel/
