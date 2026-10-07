@@ -27,7 +27,7 @@ body{margin:0;background:var(--graphite);color:var(--paper);font-family:var(--bo
 a{color:inherit}
 img,svg{max-width:100%;display:block}
 code,kbd,pre{font-family:var(--mono);font-size:.88em}
-::selection{background:var(--accent);color:var(--ink)}
+::selection{background:#4a4945;color:var(--paper)}
 :focus-visible{outline:2px solid var(--paper);outline-offset:3px;border-radius:6px}
 button{font:inherit;color:inherit}
 html.home,html.home body{background:var(--stone)}
