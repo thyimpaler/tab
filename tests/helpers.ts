@@ -34,7 +34,7 @@ export class FakeChain implements Chain {
     if (this.rpcDown) throw new Error("rpc down");
     return this.height;
   }
-  async getTokenAccount() { return null; }
+  async getTokenAccount(_address: string): Promise<import("../src/server/chain.ts").TokenAccountInfo | null> { return null; }
   async getMint(address: string) { return { address, program: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA", decimals: 6, extensions: [] }; }
   async getTx(signature: string): Promise<TxLookup> {
     if (this.rpcDown) throw new Error("rpc down");

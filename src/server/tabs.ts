@@ -8,7 +8,8 @@ import {
   Keypair, PublicKey, SystemProgram, TransactionMessage, VersionedTransaction,
 } from "@solana/web3.js";
 import {
-  ACCOUNT_SIZE, createApproveCheckedInstruction, createCloseAccountInstruction, createInitializeAccount3Instruction,
+  ACCOUNT_SIZE, createApproveCheckedInstruction, createAssociatedTokenAccountIdempotentInstruction,
+  createCloseAccountInstruction, createInitializeAccount3Instruction,
   createRevokeInstruction, createTransferCheckedInstruction, getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
 import { z } from "zod";
@@ -71,7 +72,23 @@ export async function createTab(wallet: string, body: z.infer<typeof CreateTabBo
   const mintPk = new PublicKey(mint);
   const userAta = getAssociatedTokenAddressSync(mintPk, owner, false, program);
   const ata = await chain().getTokenAccount(userAta.toBase58()).catch(() => null);
-  if (!ata || ata.amount < limit) throw new TabError("BAD_REQUEST", "wallet doesn't hold enough of this token to fund the tab");
+  const fee = cfg.tabFee;
+  if (!ata || ata.amount < limit + fee) {
+    throw new TabError("BAD_REQUEST", fee > 0n
+      ? `wallet doesn't hold enough of this token for the limit plus the ${Number(fee) / 10 ** m.decimals} opening fee`
+      : "wallet doesn't hold enough of this token to fund the tab");
+  }
+  // Opening fee goes in the SAME transaction: the tab account can only be created by this exact
+  // message (its keypair signs only here and is then discarded), so an active tab means the fee was paid.
+  const feeIxs = [];
+  if (fee > 0n && cfg.treasury) {
+    const treasury = new PublicKey(cfg.treasury);
+    const treasuryAta = getAssociatedTokenAddressSync(mintPk, treasury, true, program);
+    feeIxs.push(
+      createAssociatedTokenAccountIdempotentInstruction(owner, treasuryAta, treasury, mintPk, program),
+      createTransferCheckedInstruction(userAta, mintPk, treasuryAta, owner, fee, m.decimals, [], program),
+    );
+  }
 
   const account = Keypair.generate(); // used once to create the account, then discarded
   const rpc = chain() instanceof RpcChain ? (chain() as RpcChain).conn : null;
@@ -87,6 +104,7 @@ export async function createTab(wallet: string, body: z.infer<typeof CreateTabBo
       createInitializeAccount3Instruction(account.publicKey, mintPk, owner, program),
       createTransferCheckedInstruction(userAta, mintPk, account.publicKey, owner, limit, m.decimals, [], program),
       createApproveCheckedInstruction(account.publicKey, mintPk, delegate, owner, limit, m.decimals, [], program),
+      ...feeIxs,
     ],
   }).compileToV0Message();
   const tx = new VersionedTransaction(msg);
@@ -96,16 +114,16 @@ export async function createTab(wallet: string, body: z.infer<typeof CreateTabBo
     const userId = await upsertUser(wallet);
     const r = await q.query(
       `INSERT INTO tabs (owner_id, label, mint, token_account, delegate_pubkey, limit_amount, per_payment_cap,
-                         expires_at, status, network, token_program, decimals)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'pending',$9,$10,$11) RETURNING id`,
+                         expires_at, status, network, token_program, decimals, fee_amount, fee_recipient)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'pending',$9,$10,$11,$12,$13) RETURNING id`,
       [userId, body.label ?? null, mint, account.publicKey.toBase58(), delegate.toBase58(), limit.toString(),
-        cap?.toString() ?? null, expiresAt, cfg.network, m.program, m.decimals],
+        cap?.toString() ?? null, expiresAt, cfg.network, m.program, m.decimals, fee.toString(), feeIxs.length ? cfg.treasury : null],
     );
     for (const a of allow) await q.query(`INSERT INTO allowed_recipients (tab_id, recipient) VALUES ($1,$2)`, [r.rows[0].id, a]);
     return r.rows[0].id as string;
   });
 
-  return { tabId, tokenAccount: account.publicKey.toBase58(), transaction: Buffer.from(tx.serialize()).toString("base64") };
+  return { tabId, tokenAccount: account.publicKey.toBase58(), fee: fee.toString(), transaction: Buffer.from(tx.serialize()).toString("base64") };
 }
 
 async function ownedTab(wallet: string, tabId: string) {

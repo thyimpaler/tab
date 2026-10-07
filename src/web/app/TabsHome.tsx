@@ -100,6 +100,7 @@ function NewTab({ s, onCancel, onCreated }: { s: Session; onCancel?: () => void;
   const [err, setErr] = useState<string | null>(null);
   const [created, setCreated] = useState<{ id: string; key: string } | null>(null);
   const dec = 6;
+  const fee = BigInt(s.cfg?.tabFee ?? "0");
 
   const limitU = toUnits(limit, dec);
   const capU = cap.trim() ? toUnits(cap, dec) : null;
@@ -160,7 +161,7 @@ function NewTab({ s, onCancel, onCreated }: { s: Session; onCancel?: () => void;
       <ConnectInline s={s} why="Connect the wallet that will fund this tab." />
       <div className="newtab-foot">
         <div className="summary mono small">
-          {limitU ? <>You sign once: {fromUnits(limitU, dec)} USDC into a tab account you own, TAB may spend up to that{capU ? <>, {fromUnits(capU, dec)} max per payment</> : null}, for {EXPIRY.find((x) => x.v === exp)!.label}.</> : "Set a limit to continue."}
+          {limitU ? <>You sign once: {fromUnits(limitU, dec)} USDC into a tab account you own, TAB may spend up to that{capU ? <>, {fromUnits(capU, dec)} max per payment</> : null}, for {EXPIRY.find((x) => x.v === exp)!.label}.{fee > 0n ? <> Opening fee: {fromUnits(fee, dec)} USDC, in the same signature. Total from your wallet: {fromUnits(BigInt(limitU) + fee, dec)} USDC.</> : null}</> : "Set a limit to continue."}
         </div>
         <button type="submit" className="btn primary" disabled={!!stage || problems.length > 0 || !s.account}>
           {stage ? <><span className="spinner" /> {stageText[stage]}</> : "Open tab"}

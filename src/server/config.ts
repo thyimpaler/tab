@@ -38,6 +38,10 @@ function load() {
     credentialPepper: req("CREDENTIAL_HASH_SECRET"),
     sessionSecret: req("SESSION_SECRET"),
     appOrigin: process.env.APP_ORIGIN ?? "http://localhost:5173",
+    // Fee charged when a tab is opened, in the tab mint's base units, paid to TREASURY_WALLET.
+    // Off unless both are set.
+    tabFee: process.env.TAB_FEE && process.env.TREASURY_WALLET ? BigInt(process.env.TAB_FEE) : 0n,
+    treasury: process.env.TAB_FEE && process.env.TREASURY_WALLET ? process.env.TREASURY_WALLET : null,
   };
 }
 

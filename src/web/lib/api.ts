@@ -47,4 +47,4 @@ export type PaymentView = {
   tx_signature: string | null; error_code: string | null; created_at: string; settled_at: string | null;
 };
 
-export type PublicConfig = { network: "devnet" | "mainnet"; caip2: string; mints: string[]; delegate: string; rpcUrl: string; demo: boolean };
+export type PublicConfig = { network: "devnet" | "mainnet"; caip2: string; mints: string[]; delegate: string; rpcUrl: string; demo: boolean; tabFee: string };
