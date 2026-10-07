@@ -34,11 +34,14 @@ for (let i = 0; i < 60; i++) {
   await sleep(250);
 }
 await sleep(2000);
+// Optional: PRE="<js>" runs first (A/B a suspect by disabling it); START/END pick the scroll range in px.
+if (process.env.PRE) { await evaluate(process.env.PRE); await sleep(300); }
+const START = Number(process.env.START ?? 0), END = Number(process.env.END ?? 0);
+await evaluate(`scrollTo(0, ${START})`); await sleep(600);
 const m0 = Object.fromEntries((await send("Performance.getMetrics")).result.metrics.map((m) => [m.name, m.value]));
 const res = await evaluate(`new Promise((resolve) => {
-  const st = document.querySelector('.stage');
-  const end = st ? st.offsetHeight : 3000;
-  const step = 24; let y = 0; const times = []; let last = performance.now();
+  const end = ${END} || document.documentElement.scrollHeight - innerHeight;
+  const step = 24; let y = ${START}; const times = []; let last = performance.now();
   function tick(t) {
     times.push(t - last); last = t;
     y += step; scrollTo(0, y);

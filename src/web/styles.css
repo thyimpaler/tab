@@ -219,8 +219,10 @@ pre.code .s{color:var(--paper-2)}
 .manifesto{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,5fr);gap:24px;padding-block:clamp(110px,15vw,220px) clamp(40px,7vw,100px)}
 .manifesto .eyebrow{padding-top:1.1em}
 .manifesto p{margin:0;font:400 clamp(2rem,4.3vw,4.5rem)/1.02 var(--display);letter-spacing:-.035em;text-wrap:pretty}
-.manifesto p span{opacity:clamp(.13,calc((var(--p,0) * 1.18 - var(--i)) * 8 + .13),1)}
-.manifesto p .hot{color:var(--accent)}
+.manifesto p span{color:#3b3b38;transition:color .5s var(--ease)}
+.manifesto p span.lit{color:var(--paper)}
+.manifesto p span.hot{color:#4a2b24}
+.manifesto p span.hot.lit{color:var(--accent)}
 
 /* how it works: pinned story, one ring, four states */
 .story{position:relative;height:calc(100svh + 270svh);overflow-x:clip;scroll-margin-top:-1px}
@@ -233,14 +235,15 @@ pre.code .s{color:var(--paper-2)}
 .story-steps .n{font:400 clamp(1.6rem,2.4vw,2.2rem)/1 var(--display);letter-spacing:-.03em}
 .story-steps .k{display:block;font:500 11.5px var(--mono);color:var(--accent);margin-top:6px}
 .story-steps p{margin:8px 0 0;color:var(--paper-2);font-size:15px;max-width:46ch}
-.story-steps i{position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--paper);transform-origin:left;transform:scaleX(clamp(0,calc(var(--sp,0) * 4 - var(--n)),1))}
+.story-steps i{position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--paper);transform-origin:left;transform:scaleX(0);transition:transform .9s var(--ease)}
+.story-steps li.on i,.story-steps li.done i{transform:scaleX(1)}
 .story-stage{position:relative;aspect-ratio:1;width:min(100%,74svh);justify-self:center}
 .story-ring{position:absolute;inset:13%}
-.story-ring .ring-box .ring{transform:rotate(calc(var(--sp,0) * 240deg));will-change:transform;transition:opacity .6s var(--ease)}
+.story-ring .ring-box .ring{transform:rotate(calc(var(--step,0) * 75deg));will-change:transform;transition:transform 1.4s var(--ease),opacity .6s var(--ease)}
 .story-stage[data-step="3"] .ring-box .ring{opacity:.45}
 .story-ring .ring-box .readout{transition:opacity .4s}
 .sat{position:absolute;font:500 12.5px var(--mono);padding:9px 14px;border-radius:999px;background:var(--paper);color:var(--ink);white-space:nowrap;opacity:0;transform:translateY(16px) scale(.92);
-  transition:opacity .45s var(--ease),transform .7s var(--spring);box-shadow:0 14px 30px -12px rgba(0,0,0,.5)}
+  transition:opacity .45s var(--ease),transform .7s var(--spring)}
 .sat.no{background:var(--accent);color:var(--ink)}
 .story-stage[data-step="0"] .s0,.story-stage[data-step="1"] .s1,.story-stage[data-step="2"] .s2,.story-stage[data-step="3"] .s3{opacity:1;transform:none}
 .sat.b{transition-delay:.08s}.sat.c{transition-delay:.16s}

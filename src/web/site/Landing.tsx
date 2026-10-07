@@ -10,6 +10,7 @@ import { reducedMotion } from "../components/sim";
 import { clamp01, useScrollFrame } from "../components/scroll";
 
 // The statement after the hero. Words light up as you read down (and dim again going back up).
+// Scroll only flips a class on the words whose state changed; the fade itself is a CSS transition.
 const MANIFESTO: [string, boolean?][] = [
   ["Your agent needs to pay for things."], ["APIs, models, data, one request at a time."],
   ["Hand it your wallet and it can spend all of it."], ["Hand it a tab and it spends what you said,"], ["then stops.", true],
@@ -18,9 +19,16 @@ const MANIFESTO: [string, boolean?][] = [
 function Manifesto() {
   const ref = useRef<HTMLElement>(null);
   // 0 when the paragraph's top reaches 85% of the viewport, 1 when its bottom reaches 45%.
+  const lit = useRef(-1);
   useScrollFrame(ref, (_r, vh, el) => {
-    const t = (el.querySelector("p") ?? el).getBoundingClientRect();
-    el.style.setProperty("--p", clamp01((vh * 0.85 - t.top) / (vh * 0.4 + t.height)).toFixed(3));
+    const para = el.querySelector("p"); if (!para) return;
+    const t = para.getBoundingClientRect();
+    const spans = para.children;
+    const n = Math.round(clamp01((vh * 0.85 - t.top) / (vh * 0.4 + t.height)) * spans.length);
+    if (n === lit.current) return;
+    const [from, to] = n > lit.current ? [Math.max(0, lit.current), n] : [n, lit.current];
+    for (let i = from; i < to && i < spans.length; i++) spans[i].classList.toggle("lit", i < n);
+    lit.current = n;
   });
   const words = MANIFESTO.flatMap(([s, hot]) => s.split(" ").map((w) => ({ w, hot })));
   return (
@@ -28,7 +36,7 @@ function Manifesto() {
       <span className="eyebrow">Why a tab</span>
       <p>
         {words.map((x, i) => (
-          <span key={i} className={x.hot ? "hot" : undefined} style={{ "--i": (i / words.length).toFixed(3) } as CSSProperties}>{x.w} </span>
+          <span key={i} className={x.hot ? "hot" : undefined}>{x.w} </span>
         ))}
       </p>
     </section>

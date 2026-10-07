@@ -2,8 +2,9 @@ import { useRef, useState, type CSSProperties } from "react";
 import { Ring } from "./Ring";
 import { clamp01, useScrollFrame } from "./scroll";
 
-// "How it works" as a pinned scroll story: one ring, four states. Scrolling drives the step and the
-// ring's turn (both rewind on the way back up). React renders only when the step changes.
+// "How it works" as a pinned scroll story: one ring, four states. Scrolling picks the step (and rewinds
+// on the way back up); everything else is CSS transitions keyed off the step, so scroll frames do no
+// style writes at all. React renders only when the step changes.
 
 const STEPS = [
   { k: "limit · cap · expiry", h: "Open a tab", p: "Set a limit, a max per payment and an end date. One wallet signature funds a token account you own, with the 0.20 USDC fee in the same signature." },
@@ -23,9 +24,8 @@ export function Story() {
   const [step, setStep] = useState(0);
   const cur = useRef(0);
 
-  useScrollFrame(sec, (r, vh, el) => {
+  useScrollFrame(sec, (r, vh) => {
     const p = clamp01(-r.top / Math.max(1, r.height - vh));
-    el.style.setProperty("--sp", p.toFixed(4));
     const s = Math.min(3, Math.floor(p * 4.0001));
     if (s !== cur.current) { cur.current = s; setStep(s); }
   });
@@ -47,7 +47,7 @@ export function Story() {
             ))}
           </ol>
         </div>
-        <div className="story-stage" data-step={step} aria-hidden="true">
+        <div className="story-stage" data-step={step} style={{ "--step": step } as CSSProperties} aria-hidden="true">
           <div className="story-ring">
             <Ring spent={ring.spent} value={ring.value} sub={ring.sub} void={step === 3} />
           </div>
