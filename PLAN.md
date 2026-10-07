@@ -31,11 +31,11 @@ Launch target: Thu 2026-10-08 (owner). Full build. Non-custodial only.
 - [x] 7. Site: product explainer + agent console demo
 - [x] 8. Dashboard: wallet connect, create TAB, balance, activity, revoke
 - [x] 9. Demo paid endpoint (devnet) so the agent console does real 402 payments
-- [ ] 10. Deploy to Vercel (devnet), verify live at 1440/390, no overflow at 375  (BLOCKED: Neon DATABASE_URL; preview build already green)
+- [x] 10. Deployed: https://tab-agent-one.vercel.app (devnet, Neon us-east-1 pooled). Live sign-in verified; live payment run waits on devnet USDC
 - [ ] 11. Mainnet switch: **owner's explicit go only**
 
 ## Needs from owner
-- Neon pooled `DATABASE_URL` in `TAB/.env`
+- Devnet USDC (faucet.circle.com) to 4jukG76niybZH9UJyxgPGKx4gcCUi5b5eKceviGjnhM7 for the live payment run
 - Mainnet: RPC choice (free tier), delegate key location (env vs KMS, open decision), domain, X handle
 
 ## Verified
