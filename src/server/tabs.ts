@@ -148,6 +148,7 @@ export async function rotateCredential(wallet: string, tabId: string) {
   return { credential };
 }
 
+/** chainState: undefined = not read (or RPC failed), null = account no longer exists. */
 export function publicTab(t: any, chainState?: { amount: string; delegatedAmount: string; delegate: string | null } | null) {
   const remaining = t.limit_amount - t.spent_amount - t.reserved_amount;
   return {
@@ -157,7 +158,7 @@ export function publicTab(t: any, chainState?: { amount: string; delegatedAmount
     remaining: (remaining < 0n ? 0n : remaining).toString(),
     perPaymentCap: t.per_payment_cap?.toString() ?? null,
     expiresAt: t.expires_at, createdAt: t.created_at, revokedAt: t.revoked_at, closedAt: t.closed_at,
-    chain: chainState ?? undefined,
+    chain: chainState,
   };
 }
 
@@ -180,10 +181,10 @@ export async function listTabs(wallet: string) {
 export async function getTab(wallet: string, tabId: string, withChain = true) {
   await reconcile(tabId).catch(() => {});
   const t = await ownedTab(wallet, tabId);
-  let chainState = null;
+  let chainState: Parameters<typeof publicTab>[1] = undefined;
   if (withChain) {
-    const a = await chain().getTokenAccount(t.token_account).catch(() => null);
-    chainState = a ? { amount: a.amount.toString(), delegatedAmount: a.delegatedAmount.toString(), delegate: a.delegate } : null;
+    const a = await chain().getTokenAccount(t.token_account).catch(() => undefined);
+    chainState = a === undefined ? undefined : a === null ? null : { amount: a.amount.toString(), delegatedAmount: a.delegatedAmount.toString(), delegate: a.delegate };
   }
   const payments = (await db().query(
     `SELECT id, amount, recipient, resource, state, tx_signature, error_code, created_at, settled_at
