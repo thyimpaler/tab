@@ -1,0 +1,30 @@
+<!-- @dsCard height=300 -->
+<style>
+body{margin:0;background:var(--paper)}
+.cv{position:relative;width:960px;height:300px;overflow:hidden;background:var(--paper)}
+.ink{fill:var(--ink)}.hi{fill:var(--paper-hi)}.lo{fill:var(--paper-lo)}.st{fill:var(--stamp)}.cb{fill:var(--carbon)}
+.tear{stroke:var(--rule);stroke-width:1;stroke-dasharray:4 4}
+.name{position:absolute;left:40px;bottom:64px;margin:0;font-family:var(--font-display);font-stretch:62%;font-weight:900;font-size:120px;line-height:.9;color:var(--ink)}
+.tag{position:absolute;left:42px;bottom:34px;margin:0;font-family:var(--font-body);font-size:14px;color:var(--ink-2);max-width:420px}
+</style>
+<div class="cv">
+<svg width="960" height="300" viewBox="0 0 960 300" aria-hidden="true">
+<!-- blocks: paper-hi receipt slab 240 x 276 (bleeds off the top), carbon slab 168 x 220, stamp block 80 x 48, paper-lo band 96 x 300, all radius-none
+     arrangement: one tall receipt slab with a carbon satellite and a small tilted stamp, right of x = 480, bleeding off the top like paper off a roll
+     pattern row: literal motif (ticket): the receipt's zig-zag torn edge plus four dashed tear lines, because the receipt is the brand's one object
+     scales: tear lines on space-4 (24px) multiples, teeth on space-2 (12px), radius-none everywhere, stamp tilted -9deg as in the UI -->
+<rect class="lo" x="864" y="0" width="96" height="300"/>
+<rect class="hi" x="520" y="0" width="240" height="276"/>
+<path class="hi" d="M520 276 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 l6 10 l6 -10 V276Z"/>
+<line class="tear" x1="544" y1="72" x2="736" y2="72"/>
+<line class="tear" x1="544" y1="96" x2="736" y2="96"/>
+<line class="tear" x1="544" y1="192" x2="736" y2="192"/>
+<line class="tear" x1="544" y1="216" x2="736" y2="216"/>
+<rect class="ink" x="544" y="240" width="120" height="6"/>
+<rect class="lo" x="664" y="240" width="72" height="6"/>
+<rect class="cb" x="760" y="40" width="168" height="220"/>
+<rect class="st" x="696" y="128" width="80" height="48" transform="rotate(-9 736 152)"/>
+</svg>
+<h1 class="name">TAB</h1>
+<p class="tag">Spending limits for AI agents, printed like a bar tab.</p>
+</div>
