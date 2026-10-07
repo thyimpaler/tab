@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TAB Brand Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&family=Funnel+Sans:wght@300..800&family=Geist+Mono:wght@400;500;600&display=block">
+<style>
+/* TAB brand book v2. Every value here is copied from the live site's stylesheet. */
+:root{
+  --stone:#e8e6e0; --stone-2:#d6d4cd;
+  --graphite:#1b1b1a; --graphite-2:#252523; --graphite-3:#2f2f2c;
+  --ink:#0a0a09; --ink-2:#5b5a55;
+  --paper:#f3f2ee; --paper-2:#a9a8a2; --paper-3:#75746e;
+  --line:rgba(243,242,238,.12); --line-2:rgba(243,242,238,.2);
+  --accent:#ff4d2e; --accent-deep:#b8321a; --ok:#9fd8ad;
+  --receipt:#f1efe9;
+  --display:"Funnel Display",system-ui,sans-serif;
+  --body:"Funnel Sans",system-ui,sans-serif;
+  --mono:"Geist Mono",ui-monospace,Consolas,monospace;
+  --ease:cubic-bezier(.22,1,.36,1); --spring:cubic-bezier(.2,1.35,.4,1);
+}
+@page{size:1440px 900px;margin:0}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+html,body{margin:0;background:#111;font-family:var(--body);-webkit-font-smoothing:antialiased}
+.page{position:relative;width:1440px;height:900px;overflow:hidden;background:var(--graphite);color:var(--paper);padding:72px 80px;page-break-after:always;break-after:page;margin:0 auto 24px}
+@media print{.page{margin:0}}
+.page.stone{background:var(--stone);color:var(--ink)}
+.eyebrow{font:500 12px/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--paper-2)}
+.stone .eyebrow{color:var(--ink-2)}
+.folio{position:absolute;left:80px;right:80px;bottom:40px;display:flex;justify-content:space-between;font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--paper-3)}
+.stone .folio{color:var(--ink-2)}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0}
+.h2{font-size:66px;line-height:.95;letter-spacing:-.04em;margin-top:16px;max-width:18ch}
+.h2 .m{color:var(--paper-2)}
+.stone .h2 .m{color:var(--ink-2)}
+.lede{font-size:19px;line-height:1.45;letter-spacing:-.01em;max-width:42ch;color:var(--paper-2);margin:0}
+.stone .lede{color:var(--ink-2)}
+.mono{font-family:var(--mono)}
+.head{display:grid;grid-template-columns:1.6fr 1fr;gap:48px;align-items:end}
+
+/* the ring (identical to the site) */
+@property --spent{syntax:"<number>";inherits:true;initial-value:0}
+.ring-box{position:relative;aspect-ratio:1;width:100%;--band:22%;--inset:4.6%;--groove:4.2%;container-type:inline-size}
+.ring-box .ring,.ring-box .groove,.ring-box .arc,.ring-box .hold{position:absolute;inset:0;border-radius:50%}
+.ring-box::before{content:"";position:absolute;inset:4%;border-radius:50%;box-shadow:0 30px 60px -12px rgba(0,0,0,.4)}
+.ring-box .ring{background:conic-gradient(from 210deg,#fbfaf7,#8e8c86 12%,#2a2a28 24%,#cfccc5 36%,#fff 46%,#6f6d68 60%,#e8e6e0 72%,#3a3936 84%,#fbfaf7);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - var(--band)),#000 calc(100% - var(--band) + 1px));mask:radial-gradient(farthest-side,transparent calc(100% - var(--band)),#000 calc(100% - var(--band) + 1px))}
+.ring-box .groove,.ring-box .arc,.ring-box .hold{inset:var(--inset);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - var(--groove)),#000 calc(100% - var(--groove) + 1px));mask:radial-gradient(farthest-side,transparent calc(100% - var(--groove)),#000 calc(100% - var(--groove) + 1px))}
+.ring-box .groove{background:rgba(0,0,0,.4)}
+.ring-box .arc{background:conic-gradient(var(--accent) calc(var(--spent,0) * 1turn),transparent 0)}
+.ring-box .hold{background:conic-gradient(transparent calc(var(--spent,0) * 1turn),color-mix(in oklab,var(--accent),transparent 55%) 0 calc((var(--spent,0) + var(--held,0)) * 1turn),transparent 0)}
+.readout{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.readout strong{font:500 15cqi/1 var(--mono);letter-spacing:-.04em;color:var(--paper)}
+.readout span{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--paper-2);margin-top:10px}
+.readout em{font-style:normal;color:var(--accent)}
+
+/* cover */
+.cover{background:radial-gradient(120% 90% at 50% 62%,#efede8 0%,var(--stone) 45%,var(--stone-2) 100%);color:var(--ink)}
+.cover .bigring{position:absolute;left:50%;top:150px;width:1300px;transform:translateX(-50%)}
+.cover .bigring .ring-box{--band:13%;--inset:2.8%;--groove:2.6%;--spent:.27}
+.cover .bigring .ring-box::before{inset:2%;box-shadow:0 60px 90px -30px rgba(10,10,9,.35)}
+.cover .mid{position:absolute;left:50%;top:330px;transform:translateX(-50%);text-align:center;width:900px}
+.cover .word{font:600 230px/.8 var(--display);letter-spacing:-.06em}
+.cover .sub{font:400 34px/1.05 var(--display);letter-spacing:-.03em;margin-top:30px}
+.cover .sub span{color:var(--ink-2);display:block}
+.cover .top{position:absolute;top:56px;left:80px;right:80px;display:flex;justify-content:space-between;font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+
+/* contents */
+.toc{display:grid;grid-template-columns:repeat(2,1fr);column-gap:80px;margin-top:64px;list-style:none;padding:0}
+.toc li{display:grid;grid-template-columns:60px 1fr auto;align-items:baseline;padding:18px 0;border-top:1px solid var(--line)}
+.toc li:nth-last-child(-n+2){border-bottom:1px solid var(--line)}
+.toc b{font:400 30px var(--display);letter-spacing:-.02em}
+.toc span{font:500 12px var(--mono);color:var(--paper-3)}
+
+/* anatomy */
+.anat{display:grid;grid-template-columns:520px 1fr;gap:90px;align-items:center;margin-top:40px}
+.anat .ringwrap{position:relative;width:520px}
+.anat .ring-box{--spent:.38;--held:.08}
+.callouts{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.callouts li{display:grid;grid-template-columns:40px 230px 1fr;gap:16px;padding:18px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.callouts .n{font:500 12px var(--mono);color:var(--paper-3)}
+.callouts b{font:400 26px/1.1 var(--display);letter-spacing:-.02em}
+.callouts p{margin:0;color:var(--paper-2);font-size:16px;line-height:1.45}
+.callouts i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:10px;vertical-align:1px}
+
+/* swatches */
+.sw-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:44px}
+.sw{border-radius:20px;overflow:hidden;background:var(--graphite-2);border:1px solid var(--line)}
+.stone .sw{background:#fff;border-color:rgba(10,10,9,.1)}
+.sw .chip{height:112px;position:relative}
+.sw .chip span{position:absolute;left:16px;bottom:12px;font:500 12px var(--mono)}
+.sw .meta{padding:14px 16px 16px;display:grid;gap:3px}
+.sw .meta b{font:500 17px var(--body)}
+.sw .meta code{font:500 12.5px var(--mono);color:var(--paper-2)}
+.sw .meta small{font:13px/1.4 var(--body);color:var(--paper-3);margin-top:4px}
+.stone .sw .meta code{color:var(--ink-2)}
+.stone .sw .meta small{color:var(--ink-2)}
+.rowlabel{font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--paper-3);margin:34px 0 -30px}
+
+/* contrast table */
+table{border-collapse:collapse;width:100%;margin-top:30px;font-size:15px}
+th,td{text-align:left;padding:7px 14px;border-bottom:1px solid var(--line)}
+th{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--paper-2)}
+td.s{width:220px}
+.pair{display:inline-flex;align-items:center;justify-content:center;width:190px;height:36px;border-radius:10px;font:500 15px var(--body)}
+.pass{font:600 13px var(--mono);color:var(--ok)}
+.warnc{font:600 13px var(--mono);color:var(--accent)}
+
+/* rule blocks */
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:44px}
+.rulecard{border-radius:24px;padding:28px;background:var(--graphite-2);min-height:230px;display:grid;align-content:start;gap:14px}
+.rulecard h3{font-size:30px;letter-spacing:-.02em}
+.rulecard p{margin:0;color:var(--paper-2);font-size:16px;line-height:1.5}
+.tag{display:inline-flex;align-items:center;gap:8px;font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.tag.do{color:var(--ok)}
+.tag.dont{color:var(--accent)}
+
+/* type */
+.fam{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
+.famcard{border-radius:24px;background:var(--graphite-2);padding:30px;min-height:500px;display:grid;grid-template-rows:auto 1fr auto;gap:18px}
+.famcard .big{font-size:150px;line-height:.9;letter-spacing:-.05em;align-self:center}
+.famcard .glyphs{font-size:20px;line-height:1.4;color:var(--paper-2);overflow-wrap:anywhere}
+.famcard dl{margin:0;display:grid;gap:8px;border-top:1px solid var(--line);padding-top:16px}
+.famcard dl div{display:flex;justify-content:space-between;gap:12px;font-size:14px}
+.famcard dt{color:var(--paper-3);font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.famcard dd{margin:0;text-align:right}
+
+.scale{margin-top:34px;border-top:1px solid var(--line)}
+.scale .r{display:grid;grid-template-columns:190px 1fr 330px;gap:24px;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--line)}
+.scale .r .k{font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--paper-2)}
+.scale .r .v{font:500 12px var(--mono);color:var(--paper-3);text-align:right}
+.scale .r .sample{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* voice */
+.voice{display:grid;grid-template-columns:1fr 1fr;gap:70px;margin-top:44px}
+.lines{list-style:none;margin:0;padding:0;border-top:1px solid rgba(10,10,9,.15)}
+.lines li{padding:16px 0;border-bottom:1px solid rgba(10,10,9,.15);font-size:17px;line-height:1.45}
+.lines li b{font-weight:600}
+.quote{font:400 46px/1 var(--display);letter-spacing:-.035em;margin:0 0 26px}
+.quote span{color:var(--ink-2)}
+
+/* components */
+.pill,.btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:48px;border-radius:999px;font:500 15px var(--body);letter-spacing:-.01em;border:1px solid transparent}
+.pill{padding:7px 7px 7px 22px;background:var(--paper);color:var(--ink)}
+.pill b{width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-weight:600}
+.pill.dark{background:var(--ink);color:var(--paper)}
+.pill.dark b{background:var(--paper);color:var(--ink)}
+.btn{padding:12px 22px;background:transparent;color:var(--paper);border-color:var(--line-2)}
+.btn.danger{color:var(--accent);border-color:color-mix(in oklab,var(--accent),transparent 50%)}
+.opt-chip{font:500 14px var(--mono);padding:10px 16px;min-height:44px;border-radius:999px;background:var(--graphite-2);border:1px solid var(--line);color:var(--paper-2);display:inline-flex;align-items:center}
+.opt-chip.on{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.switch{display:inline-flex;align-items:center;gap:12px;font-size:15px}
+.track{width:44px;height:26px;border-radius:999px;background:var(--graphite-3);position:relative;display:inline-block}
+.track i{position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:var(--paper-2)}
+.track.on{background:var(--accent)}
+.track.on i{transform:translateX(18px);background:var(--paper)}
+.status{display:inline-flex;align-items:center;gap:7px;font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:999px;background:var(--graphite-3);color:var(--paper)}
+.status::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.status.rev{color:var(--accent)}
+.status.past{color:var(--paper-2)}
+.comp{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:32px}
+.cell{border-radius:24px;background:var(--graphite-2);padding:24px 26px;display:grid;align-content:start;gap:16px;min-height:236px}
+.cell .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.cell .note{font-size:14px;line-height:1.5;color:var(--paper-2);margin:0}
+
+.receipt{background:var(--receipt);color:var(--ink);font:13px/1.5 var(--mono);padding:24px 22px 34px;border-radius:6px 6px 0 0;
+  -webkit-mask:linear-gradient(#000 0 0) top/100% calc(100% - 9px) no-repeat,conic-gradient(from -45deg at bottom,#000 90deg,#0000 0) bottom/18px 9px repeat-x;
+  mask:linear-gradient(#000 0 0) top/100% calc(100% - 9px) no-repeat,conic-gradient(from -45deg at bottom,#000 90deg,#0000 0) bottom/18px 9px repeat-x}
+.receipt .h{text-align:center;padding-bottom:12px;border-bottom:1px dashed rgba(10,10,9,.35)}
+.receipt .h b{font:600 26px var(--display);letter-spacing:-.04em;display:block}
+.receipt .h span{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.receipt .l{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dotted rgba(10,10,9,.22)}
+.receipt .l.no span{text-decoration:line-through;color:var(--ink-2)}
+.receipt .why{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--accent-deep);font-weight:600;padding:2px 0 8px;border-bottom:1px dotted rgba(10,10,9,.22)}
+.receipt .t{display:flex;justify-content:space-between;align-items:baseline;padding-top:12px;border-top:1px dashed rgba(10,10,9,.35);margin-top:10px}
+.receipt .t b{font:600 30px var(--mono);letter-spacing:-.04em}
+.stamp{display:inline-block;padding:8px 12px;border:2px solid var(--ink);border-radius:8px;font:700 12px/1.15 var(--mono);letter-spacing:.1em;text-transform:uppercase;transform:rotate(-8deg)}
+
+.ticket{position:relative;overflow:hidden;background:var(--receipt);color:var(--ink);border-radius:22px;padding:24px 26px 0;display:grid;gap:12px;transform:rotate(-1.5deg)}
+.ticket .tt{display:flex;justify-content:space-between;align-items:baseline}
+.ticket .tt b{font:600 28px/1 var(--display);letter-spacing:-.04em}
+.ticket .tt span,.ticket .lab{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.ticket .lab{color:var(--accent-deep);font-weight:600}
+.ticket code{font:600 16px/1.45 var(--mono);word-break:break-all}
+.ticket .stub{position:relative;display:flex;justify-content:space-between;align-items:center;margin:8px -26px 0;padding:16px 26px 20px;border-top:2px dashed rgba(10,10,9,.28);font-size:13px;color:var(--ink-2)}
+.ticket .stub::before,.ticket .stub::after{content:"";position:absolute;top:-13px;width:24px;height:24px;border-radius:50%;background:var(--graphite-2)}
+.ticket .stub::before{left:-12px}.ticket .stub::after{right:-12px}
+
+.checks{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.checks li{display:grid;grid-template-columns:34px 1fr auto 22px;gap:10px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px}
+.checks .n{font:500 11px var(--mono);color:var(--paper-3)}
+.checks .v{font:500 12px var(--mono);color:var(--paper-2)}
+.checks i{font:600 12px var(--mono);font-style:normal;color:var(--ok)}
+.checks li.bad .v,.checks li.bad i{color:var(--accent)}
+
+/* motion + layout */
+.curves{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:40px}
+.curve{border-radius:24px;background:var(--graphite-2);padding:28px;display:grid;grid-template-columns:220px 1fr;gap:28px;align-items:center}
+.curve svg{width:220px;height:220px}
+.curve h3{font-size:30px;letter-spacing:-.02em}
+.curve code{font:500 13px var(--mono);color:var(--paper-2);display:block;margin:8px 0 12px}
+.curve p{margin:0;color:var(--paper-2);font-size:15px;line-height:1.5}
+.specs{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:16px}
+.spec{border-radius:20px;background:var(--graphite-2);padding:22px}
+.spec b{display:block;font:400 34px/1 var(--display);letter-spacing:-.03em;margin:10px 0 8px}
+.spec p{margin:0;color:var(--paper-2);font-size:14px;line-height:1.45}
+
+.never{display:grid;grid-template-columns:repeat(2,1fr);gap:0 70px;margin-top:44px;list-style:none;padding:0}
+.never li{display:grid;grid-template-columns:36px 1fr;padding:16px 0;border-bottom:1px solid var(--line);font-size:18px}
+.never li::before{content:"✕";font:600 14px var(--mono);color:var(--accent);padding-top:3px}
+
+pre.tokens{margin:34px 0 0;background:var(--ink);border:1px solid var(--line);border-radius:20px;padding:26px 30px;font:13px/1.65 var(--mono);color:var(--paper);columns:2;column-gap:50px;white-space:pre}
+pre.tokens .c{color:var(--paper-3)}
+</style>
+</head>
+<body>
+
+<!-- 1 cover -->
+<section class="page cover">
+  <div class="top"><span>Brand &amp; design system</span><span>Version 2 · October 2026</span></div>
+  <div class="bigring"><div class="ring-box"><div class="ring"></div><div class="groove"></div><div class="arc"></div></div></div>
+  <div class="mid">
+    <div class="word">tab</div>
+    <div class="sub">Give your agent a tab. <span>Not your wallet.</span></div>
+  </div>
+</section>
+
+<!-- 2 contents -->
+<section class="page">
+  <div class="eyebrow">Contents</div>
+  <h2 class="h2">One object, <span class="m">one accent, three typefaces.</span></h2>
+  <ol class="toc">
+    <li><span>01</span><b>The ring</b><span>03</span></li>
+    <li><span>06</span><b>Voice</b><span>09</span></li>
+    <li><span>02</span><b>Colour</b><span>04</span></li>
+    <li><span>07</span><b>Components</b><span>10</span></li>
+    <li><span>03</span><b>Contrast</b><span>05</span></li>
+    <li><span>08</span><b>Layout &amp; motion</b><span>11</span></li>
+    <li><span>04</span><b>Using coral</b><span>06</span></li>
+    <li><span>09</span><b>Never</b><span>12</span></li>
+    <li><span>05</span><b>Typography</b><span>07</span></li>
+    <li><span>10</span><b>Tokens for developers</b><span>13</span></li>
+  </ol>
+  <div class="folio"><span>TAB brand book</span><span>02</span></div>
+</section>
+
+<!-- 3 the ring -->
+<section class="page">
+  <div class="head">
+    <div><div class="eyebrow">01 · The ring</div><h2 class="h2">The ring is the tab.</h2></div>
+    <p class="lede">TAB has one signature object. A chrome ring stands for a tab's limit, and everything it shows is real data. It appears in the hero, on the dashboard dial, on every tab in the list and on the tab page.</p>
+  </div>
+  <div class="anat">
+    <div class="ringwrap"><div class="ring-box"><div class="ring"></div><div class="groove"></div><div class="hold"></div><div class="arc"></div><div class="readout"><strong>3.10</strong><span>USDC left <em>of 5.00</em></span></div></div></div>
+    <ol class="callouts">
+      <li><span class="n">A</span><b>Chrome band</b><p>The whole limit. Always the full circle. Drawn as a metallic conic gradient, never flat.</p></li>
+      <li><span class="n">B</span><b><i style="background:var(--accent)"></i>Coral arc</b><p>What has been spent, clockwise from 12 o'clock. Coral appears here because spending against a limit is what coral means.</p></li>
+      <li><span class="n">C</span><b><i style="background:color-mix(in oklab,var(--accent),transparent 55%)"></i>Held arc</b><p>Payments signed but not yet confirmed on chain, in translucent coral right after the spent arc.</p></li>
+      <li><span class="n">D</span><b>The number</b><p>What is left, in Geist Mono with tabular figures. The line under it reads "USDC left of 5.00", with the limit in coral.</p></li>
+      <li><span class="n">E</span><b>States</b><p>Limit reached: the arc fills the ring and the copy says so. Revoked or closed: the arc turns grey and the band dims.</p></li>
+    </ol>
+  </div>
+  <div class="folio"><span>TAB brand book</span><span>03</span></div>
+</section>
+
+<!-- 4 colour -->
+<section class="page">
+  <div class="head">
+    <div><div class="eyebrow">02 · Colour</div><h2 class="h2">Near-monochrome. <span class="m">One accent.</span></h2></div>
+    <p class="lede">Two grounds, stone and graphite, carry the whole site. The hero is stone; everything after it is graphite. Text colours are paired to their ground.</p>
+  </div>
+  <div class="rowlabel">Grounds</div>
+  <div class="sw-grid">
+    <div class="sw"><div class="chip" style="background:#e8e6e0"></div><div class="meta"><b>Stone</b><code>#E8E6E0 · 232 230 224</code><small>Hero, light panels</small></div></div>
+    <div class="sw"><div class="chip" style="background:#d6d4cd"></div><div class="meta"><b>Stone 2</b><code>#D6D4CD · 214 212 205</code><small>Cards on stone, hero edge</small></div></div>
+    <div class="sw"><div class="chip" style="background:#1b1b1a;box-shadow:inset 0 0 0 1px rgba(243,242,238,.12)"></div><div class="meta"><b>Graphite</b><code>#1B1B1A · 27 27 26</code><small>Page background</small></div></div>
+    <div class="sw"><div class="chip" style="background:#252523"></div><div class="meta"><b>Graphite 2</b><code>#252523 · 37 37 35</code><small>Panels, chips, inputs</small></div></div>
+    <div class="sw"><div class="chip" style="background:#2f2f2c"></div><div class="meta"><b>Graphite 3</b><code>#2F2F2C · 47 47 44</code><small>Raised elements, switch track</small></div></div>
+  </div>
+  <div class="rowlabel">Text and accent</div>
+  <div class="sw-grid">
+    <div class="sw"><div class="chip" style="background:#f3f2ee"></div><div class="meta"><b>Paper</b><code>#F3F2EE · 243 242 238</code><small>Text on graphite, light pills</small></div></div>
+    <div class="sw"><div class="chip" style="background:#a9a8a2"></div><div class="meta"><b>Paper 2 / 3</b><code>#A9A8A2 · #75746E</code><small>Muted text, then hints and numerals</small></div></div>
+    <div class="sw"><div class="chip" style="background:#0a0a09"></div><div class="meta"><b>Ink / Ink 2</b><code>#0A0A09 · #5B5A55</code><small>Text on stone and on paper</small></div></div>
+    <div class="sw"><div class="chip" style="background:#ff4d2e"><span style="color:var(--ink)">accent</span></div><div class="meta"><b>Coral</b><code>#FF4D2E · 255 77 46</code><small>Limit, refusal, destructive. Only.</small></div></div>
+    <div class="sw"><div class="chip" style="background:#b8321a"><span style="color:var(--paper)">accent-deep</span></div><div class="meta"><b>Deep coral</b><code>#B8321A · 184 50 26</code><small>Coral on stone and paper</small></div></div>
+  </div>
+  <div class="folio"><span>TAB brand book</span><span>04</span></div>
+</section>
+
+<!-- 5 colour 2 + contrast -->
+<section class="page">
+  <div class="head">
+    <div><div class="eyebrow">03 · Supporting colour &amp; contrast</div><h2 class="h2">Every pair is <span class="m">checked.</span></h2></div>
+    <p class="lede">Receipt paper is used for anything printed by the product: the agent receipt, the terms you sign, the ledger and the agent key ticket. Green only ever means "settled".</p>
+  </div>
+  <div class="sw-grid" style="grid-template-columns:repeat(5,1fr);margin-top:30px">
+    <div class="sw"><div class="chip" style="background:#f1efe9;height:64px"></div><div class="meta"><b>Receipt paper</b><code>#F1EFE9</code></div></div>
+    <div class="sw"><div class="chip" style="background:#9fd8ad;height:64px"></div><div class="meta"><b>Settled</b><code>#9FD8AD on dark</code></div></div>
+    <div class="sw"><div class="chip" style="background:#2d6a3c;height:64px"></div><div class="meta"><b>Settled on paper</b><code>#2D6A3C</code></div></div>
+    <div class="sw"><div class="chip" style="background:#4a4945;height:64px"></div><div class="meta"><b>Text selection</b><code>#4A4945 + paper</code></div></div>
+    <div class="sw"><div class="chip" style="background:linear-gradient(90deg,rgba(243,242,238,.12) 0 50%,rgba(243,242,238,.2) 50%);background-color:#1b1b1a;height:64px"></div><div class="meta"><b>Lines</b><code>paper @ 12% · 20%</code></div></div>
+  </div>
+  <table>
+    <tr><th>Pair</th><th>Ratio</th><th>Use</th><th>WCAG</th></tr>
+    <tr><td class="s"><span class="pair" style="background:#1b1b1a;color:#f3f2ee;box-shadow:inset 0 0 0 1px var(--line)">Paper on graphite</span></td><td class="mono">15.4 : 1</td><td>All body and display text on dark</td><td class="pass">AAA</td></tr>
+    <tr><td class="s"><span class="pair" style="background:#1b1b1a;color:#a9a8a2;box-shadow:inset 0 0 0 1px var(--line)">Paper 2 on graphite</span></td><td class="mono">7.2 : 1</td><td>Muted text, second beat of headlines</td><td class="pass">AAA</td></tr>
+    <tr><td class="s"><span class="pair" style="background:#1b1b1a;color:#ff4d2e;box-shadow:inset 0 0 0 1px var(--line)">Coral on graphite</span></td><td class="mono">5.2 : 1</td><td>Refusals, revoke, limits on dark</td><td class="pass">AA</td></tr>
+    <tr><td class="s"><span class="pair" style="background:#e8e6e0;color:#5b5a55">Ink 2 on stone</span></td><td class="mono">5.5 : 1</td><td>Muted text on light</td><td class="pass">AA</td></tr>
+    <tr><td class="s"><span class="pair" style="background:#e8e6e0;color:#b8321a">Deep coral on stone</span></td><td class="mono">4.8 : 1</td><td>Coral meaning on light panels</td><td class="pass">AA</td></tr>
+    <tr><td class="s"><span class="pair" style="background:#e8e6e0;color:#ff4d2e">Coral on stone</span></td><td class="mono">2.6 : 1</td><td>Graphics only (the arc), never text</td><td class="warnc">Text: no</td></tr>
+    <tr><td class="s"><span class="pair" style="background:#1b1b1a;color:#75746e;box-shadow:inset 0 0 0 1px var(--line)">Paper 3 on graphite</span></td><td class="mono">3.7 : 1</td><td>Hints, numerals, large text only</td><td class="warnc">Large only</td></tr>
+  </table>
+  <div class="folio"><span>TAB brand book</span><span>05</span></div>
+</section>
+
+<!-- 6 coral rules -->
+<section class="page">
+  <div class="head">
+    <div><div class="eyebrow">04 · Using coral</div><h2 class="h2">Coral means <span class="m">stop.</span></h2></div>
+    <p class="lede">The single accent carries meaning, so it stays rare. If something is coral, the reader should expect a limit, a refusal or an action that can't be undone.</p>
+  </div>
+  <div class="rules">
+    <div class="rulecard"><span class="tag do">✓ Use for</span><h3>Limits</h3><p>The spent arc on the ring, the limit figure after "of", the dial's fill and knob ring, a tab that has reached its limit.</p></div>
+    <div class="rulecard"><span class="tag do">✓ Use for</span><h3>Refusals</h3><p>Refused payments and their reasons, failed checks with their error code, form errors, the "TAB can't" heading.</p></div>
+    <div class="rulecard"><span class="tag do">✓ Use for</span><h3>Destructive actions</h3><p>"Revoke tab", the revoked status, the "pull the plug" path. Plus the toggle when it is switched on, as the single interactive exception.</p></div>
+    <div class="rulecard"><span class="tag dont">✕ Never for</span><h3>Decoration</h3><p>No coral headlines, backgrounds, gradients, glows or highlights for emphasis. Emphasis comes from size and the muted second beat.</p></div>
+    <div class="rulecard"><span class="tag dont">✕ Never for</span><h3>Success</h3><p>A paid payment is paper or soft green, never coral. Coral on a success state would read as an error.</p></div>
+    <div class="rulecard"><span class="tag dont">✕ Never with</span><h3>A second accent</h3><p>No blue links, no purple, no brand colours from partners. Wallet logos keep their own colours because they are other people's marks.</p></div>
+  </div>
+  <div class="folio"><span>TAB brand book</span><span>06</span></div>
+</section>
+
+<!-- 7 typography -->
+<section class="page">
+  <div class="head">
+    <div><div class="eyebrow">05 · Typography</div><h2 class="h2">Three faces, <span class="m">three jobs.</span></h2></div>
+    <p class="lede">All three are free on Google Fonts. Display sets the voice, Sans carries reading, Mono carries every number the product owes you.</p>
+  </div>
+  <div class="fam">
+    <div class="famcard"><div class="eyebrow">Display · headlines</div><div class="big" style="font-family:var(--display)">Aa</div>
+      <div><div class="glyphs" style="font-family:var(--display)">Give your agent a tab. Not your wallet.</div>
+      <dl><div><dt>Family</dt><dd>Funnel Display</dd></div><div><dt>Weight</dt><dd>400 (600 wordmark)</dd></div><div><dt>Tracking</dt><dd>−0.035 to −0.05em</dd></div><div><dt>Leading</dt><dd>0.88 to 0.95</dd></div></dl></div></div>
+    <div class="famcard"><div class="eyebrow">Sans · body &amp; UI</div><div class="big" style="font-family:var(--body)">Aa</div>
+      <div><div class="glyphs" style="font-family:var(--body)">Revoke in one click. Whatever's left goes back to your wallet.</div>
+      <dl><div><dt>Family</dt><dd>Funnel Sans</dd></div><div><dt>Weight</dt><dd>400, 500 for buttons</dd></div><div><dt>Size</dt><dd>15–19px, 16 base</dd></div><div><dt>Leading</dt><dd>1.42 to 1.5</dd></div></dl></div></div>
+    <div class="famcard"><div class="eyebrow">Mono · numbers &amp; labels</div><div class="big" style="font-family:var(--mono);letter-spacing:-.06em">0.20</div>
+      <div><div class="glyphs" style="font-family:var(--mono);font-size:17px">TAB_CREDENTIAL · 1,000.00 USDC · PAYMENT_EXCEEDS_TAB_LIMIT</div>
+      <dl><div><dt>Family</dt><dd>Geist Mono</dd></div><div><dt>Weight</dt><dd>500 (600 on paper)</dd></div><div><dt>Figures</dt><dd>Always tabular</dd></div><div><dt>Labels</dt><dd>11–12px, +0.12em, caps</dd></div></dl></div></div>
+  </div>
+  <div class="folio"><span>TAB brand book</span><span>07 · fonts.google.com: Funnel Display, Funnel Sans, Geist Mono</span></div>
+</section>
+
+<!-- 8 type scale -->
+<section class="page">
+  <div class="eyebrow">05 · Type scale</div>
+  <div class="scale">
+    <div class="r"><span class="k">Price numeral</span><span class="sample" style="font:400 120px/.8 var(--display);letter-spacing:-.07em">0.20</span><span class="v">Display 400 · 7–19rem · −0.07em</span></div>
+    <div class="r"><span class="k">Headline (H1/H2)</span><span class="sample" style="font:400 58px/.95 var(--display);letter-spacing:-.04em">Five checks. <span style="color:var(--paper-2)">In this order.</span></span><span class="v">Display 400 · 2.4–6.6rem · −0.035em</span></div>
+    <div class="r"><span class="k">Hero title</span><span class="sample" style="font:400 54px/.94 var(--display);letter-spacing:-.045em">Give your agent a tab.</span><span class="v">Display 400 · 2.4–4.8rem · −0.045em</span></div>
+    <div class="r"><span class="k">Statement</span><span class="sample" style="font:400 32px/1.02 var(--display);letter-spacing:-.035em">Hand it a tab and it spends what you said, <span style="color:var(--accent)">then stops.</span></span><span class="v">Display 400 · 2–4.5rem</span></div>
+    <div class="r"><span class="k">H3</span><span class="sample" style="font:500 26px/1.08 var(--display);letter-spacing:-.025em">Give the agent a key</span><span class="v">Display 500 · 1.3–1.6rem · −0.025em</span></div>
+    <div class="r"><span class="k">Lede</span><span class="sample" style="font:400 19px/1.42 var(--body);letter-spacing:-.015em;color:var(--paper-2)">The funds sit in a token account your wallet owns.</span><span class="v">Sans 400 · 1–1.18rem · 34ch wide</span></div>
+    <div class="r"><span class="k">Body</span><span class="sample" style="font:400 16px/1.5 var(--body)">Every x402 bill is checked against your rules, then signed.</span><span class="v">Sans 400 · 15–16px · 1.5</span></div>
+    <div class="r"><span class="k">Balance</span><span class="sample" style="font:500 44px/1 var(--mono);letter-spacing:-.04em">3.10</span><span class="v">Mono 500 · tabular · −0.04em</span></div>
+    <div class="r"><span class="k">Eyebrow / label</span><span class="sample" style="font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--paper-2)">How it works · 02 · Max per payment</span><span class="v">Mono 500 · 11–12px · +0.12em · caps</span></div>
+  </div>
+  <div class="folio"><span>TAB brand book</span><span>08</span></div>
+</section>
+
+<!-- 9 voice -->
+<section class="page stone">
+  <div class="head">
+    <div><div class="eyebrow">06 · Voice</div><h2 class="h2">Say what happens. <span class="m">Nothing more.</span></h2></div>
+    <p class="lede">Short, declarative, specific. A headline is a plain statement followed by a muted second beat.</p>
+  </div>
+  <div class="voice">
+    <div>
+      <p class="quote">Give your agent a tab. <span>Not your wallet.</span></p>
+      <p class="quote">Four steps. <span>One signature.</span></p>
+      <p class="quote">Your money never leaves you.</p>
+    </div>
+    <ul class="lines">
+      <li><b>Plain words first.</b> Tab, limit, key, close it out. Save delegate, allowance and token account for the docs.</li>
+      <li><b>Name the cause and the fix.</b> "Not enough left on this tab for this payment." No apologies.</li>
+      <li><b>True twice over.</b> "It can't spend past the limit" is enforced by TAB's ledger and by the token program. Claims like that, or none.</li>
+      <li><b>Numbers are exact.</b> 0.20 USDC, 1,000 USDC beta cap, about 0.002 SOL rent. Never "low fees" or "lightning fast".</li>
+      <li><b>No em dashes, no exclamation marks, no emoji.</b> Commas and full stops do the work.</li>
+    </ul>
+  </div>
+  <div class="folio"><span>TAB brand book</span><span>09</span></div>
+</section>
+
+<!-- 10 components -->
+<section class="page">
+  <div class="head">
+    <div><div class="eyebrow">07 · Components</div><h2 class="h2">Pills, chips, <span class="m">paper.</span></h2></div>
+    <p class="lede">Buttons are pills. The primary pill carries a chevron disc that nudges right on hover. Anything the product "prints" sits on receipt paper.</p>
+  </div>
+  <div class="comp">
+    <div class="cell"><div class="eyebrow">Buttons</div>
+      <div class="row"><span class="pill">Open a tab <b>›</b></span><span class="btn">Read the docs</span></div>
+      <div class="row"><span class="pill dark" style="box-shadow:inset 0 0 0 1px var(--line-2)">Copy key <b>›</b></span><span class="btn danger">Revoke tab</span></div>
+      <p class="note">Min height 48px (60px for the main action). 44px is the smallest tap target anywhere.</p></div>
+    <div class="cell"><div class="eyebrow">Choices &amp; state</div>
+      <div class="row"><span class="opt-chip">0.10</span><span class="opt-chip on">0.50</span><span class="opt-chip">1.00</span><span class="opt-chip">none</span></div>
+      <div class="row"><span class="switch"><span class="track on"><i></i></span>Only known services</span></div>
+      <div class="row"><span class="status">active</span><span class="status past">expired</span><span class="status rev">revoked</span></div></div>
+    <div class="cell"><div class="eyebrow">The five checks</div>
+      <ol class="checks">
+        <li><span class="n">01</span><span>The tab is open</span><span class="v">active</span><i>✓</i></li>
+        <li><span class="n">02</span><span>It hasn't expired</span><span class="v">5d 23h left</span><i>✓</i></li>
+        <li><span class="n">03</span><span>Under the cap</span><span class="v">0.50 per bill</span><i style="color:var(--paper-3)">·</i></li>
+        <li class="bad"><span class="n">05</span><span>There's room left</span><span class="v">0.00 of 5.00</span><i>✕</i></li>
+      </ol></div>
+    <div class="cell" style="background:transparent;padding:0">
+      <div class="receipt">
+        <div class="h"><b>tab</b><span>agent run · simulation</span></div>
+        <div class="l"><span>llm.gateway/chat</span><b>0.42</b></div>
+        <div class="l no"><span>data.vendor/export</span><span>2.40</span></div>
+        <div class="why">refused · over the cap · nothing signed</div>
+        <div class="l"><span>lens.ai/search</span><b>0.05</b></div>
+        <div class="t"><span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)">You sign once</span><b>5.20</b></div>
+      </div></div>
+    <div class="cell" style="align-content:center"><div class="eyebrow">Agent key</div>
+      <div class="ticket"><div class="tt"><b>tab</b><span>admit one agent</span></div><span class="lab">TAB_CREDENTIAL</span><code>tab_live_9deb53e1…Xq8vK2mP</code><div class="stub"><span>Shown once.</span><span class="pill dark" style="min-height:40px;font-size:13px">Copy key <b style="width:28px;height:28px">›</b></span></div></div></div>
+    <div class="cell" style="align-content:center;justify-items:center"><div class="eyebrow">Stamp</div>
+      <div style="background:var(--receipt);border-radius:16px;padding:40px 50px;color:var(--ink)"><span class="stamp">never past<br>your rules</span></div>
+      <p class="note" style="text-align:center">Lands with a spring when a run finishes. Ink on paper, rotated −8°.</p></div>
+  </div>
+  <div class="folio"><span>TAB brand book</span><span>10</span></div>
+</section>
+
+<!-- 11 layout + motion -->
+<section class="page">
+  <div class="head">
+    <div><div class="eyebrow">08 · Layout &amp; motion</div><h2 class="h2">Calm, then <span class="m">exact.</span></h2></div>
+    <p class="lede">Scroll drives the story and always rewinds. Motion uses transform and opacity only, so it stays smooth on a weak laptop, and parks when it's off screen.</p>
+  </div>
+  <div class="curves">
+    <div class="curve"><svg viewBox="0 0 220 220"><rect x="10" y="10" width="200" height="200" rx="16" fill="#1b1b1a"/><path d="M20 200 C68.4 0, 99.2 0, 200 20" fill="none" stroke="#f3f2ee" stroke-width="3"/><circle cx="20" cy="200" r="5" fill="#ff4d2e"/><circle cx="200" cy="20" r="5" fill="#ff4d2e"/></svg>
+      <div><h3>Ease</h3><code>cubic-bezier(.22, 1, .36, 1)</code><p>Everything: entrances, the ring, panels, receipts printing. Fast start, long soft landing.</p></div></div>
+    <div class="curve"><svg viewBox="0 0 220 220"><rect x="10" y="10" width="200" height="200" rx="16" fill="#1b1b1a"/><path d="M20 200 C56 -70, 92 20, 200 20" fill="none" stroke="#f3f2ee" stroke-width="3"/><circle cx="20" cy="200" r="5" fill="#ff4d2e"/><circle cx="200" cy="20" r="5" fill="#ff4d2e"/></svg>
+      <div><h3>Spring</h3><code>cubic-bezier(.2, 1.35, .4, 1)</code><p>Only for things you touch: pill chevrons, switches, the FAQ chevron, the stamp and the key ticket.</p></div></div>
+  </div>
+  <div class="specs">
+    <div class="spec"><span class="eyebrow">Side gutter</span><b>16–56px</b><p>clamp(16px, 4vw, 56px). 16px on phones.</p></div>
+    <div class="spec"><span class="eyebrow">Panel radius</span><b>20–28px</b><p>clamp(1.25rem, 2vw, 1.75rem). Pills fully round. Receipts 6px with a torn edge.</p></div>
+    <div class="spec"><span class="eyebrow">Lists</span><b>Ruled</b><p>Hairline rules, numbered only when order is real. No uniform card grids.</p></div>
+    <div class="spec"><span class="eyebrow">Reduced motion</span><b>Still</b><p>All transitions off; the hero shows a still frame with real numbers.</p></div>
+  </div>
+  <div class="folio"><span>TAB brand book</span><span>11</span></div>
+</section>
+
+<!-- 12 never -->
+<section class="page">
+  <div class="head">
+    <div><div class="eyebrow">09 · Never</div><h2 class="h2">What TAB <span class="m">doesn't do.</span></h2></div>
+    <p class="lede">These are the common tells of generated, generic product pages. Each one dilutes the single idea the brand rests on.</p>
+  </div>
+  <ul class="never">
+    <li>Gradient or rainbow text</li>
+    <li>Glows, neon edges, floating orbs</li>
+    <li>Pulsing "live" dots and green status pills</li>
+    <li>Emoji as icons or section markers</li>
+    <li>Uniform grids of identical cards</li>
+    <li>A second accent colour, or purple</li>
+    <li>Typing effects and fake terminals that loop forever</li>
+    <li>Buzzwords: "revolutionary", "seamless", "lightning fast"</li>
+    <li>Coral used for decoration or for success</li>
+    <li>Stats, logos or testimonials that aren't real</li>
+  </ul>
+  <div class="folio"><span>TAB brand book</span><span>12</span></div>
+</section>
+
+<!-- 13 tokens -->
+<section class="page">
+  <div class="eyebrow">10 · Tokens for developers</div>
+  <h2 class="h2" style="font-size:64px">Copy these exactly.</h2>
+<pre class="tokens"><span class="c">/* grounds */</span>
+--stone:        #e8e6e0;
+--stone-2:      #d6d4cd;
+--graphite:     #1b1b1a;
+--graphite-2:   #252523;
+--graphite-3:   #2f2f2c;
+
+<span class="c">/* text */</span>
+--paper:        #f3f2ee;
+--paper-2:      #a9a8a2;
+--paper-3:      #75746e;
+--ink:          #0a0a09;
+--ink-2:        #5b5a55;
+
+<span class="c">/* meaning */</span>
+--accent:       #ff4d2e;  <span class="c">/* limit, refusal, destructive */</span>
+--accent-deep:  #b8321a;  <span class="c">/* coral on light */</span>
+--ok:           #9fd8ad;  <span class="c">/* settled, on dark */</span>
+--ok-paper:     #2d6a3c;  <span class="c">/* settled, on paper */</span>
+--receipt:      #f1efe9;
+--selection:    #4a4945;
+
+<span class="c">/* lines */</span>
+--line:   rgba(243,242,238,.12);
+--line-2: rgba(243,242,238,.20);
+
+<span class="c">/* type */</span>
+--display: "Funnel Display";
+--body:    "Funnel Sans";
+--mono:    "Geist Mono";
+
+<span class="c">/* motion */</span>
+--ease:   cubic-bezier(.22,1,.36,1);
+--spring: cubic-bezier(.2,1.35,.4,1);
+
+<span class="c">/* layout */</span>
+--edge:   clamp(16px,4vw,56px);
+--radius: clamp(1.25rem,2vw,1.75rem);</pre>
+  <div class="folio"><span>TAB brand book</span><span>13</span></div>
+</section>
+
+</body>
+</html>
