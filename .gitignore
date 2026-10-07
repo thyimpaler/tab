@@ -1,0 +1,4 @@
+node_modules/
+.env
+spike/.keys/
+spike/results.json
