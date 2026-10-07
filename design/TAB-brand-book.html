@@ -69,9 +69,9 @@ h1,h2,h3{font-family:var(--display);font-weight:400;margin:0}
 .cover .top{position:absolute;top:56px;left:80px;right:80px;display:flex;justify-content:space-between;font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
 
 /* contents */
-.toc{display:grid;grid-template-columns:repeat(2,1fr);column-gap:80px;margin-top:64px;list-style:none;padding:0}
-.toc li{display:grid;grid-template-columns:60px 1fr auto;align-items:baseline;padding:18px 0;border-top:1px solid var(--line)}
-.toc li:nth-last-child(-n+2){border-bottom:1px solid var(--line)}
+.toc{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(6,auto);grid-auto-flow:column;column-gap:80px;margin-top:48px;list-style:none;padding:0}
+.toc li{display:grid;grid-template-columns:60px 1fr auto;align-items:baseline;padding:14px 0;border-top:1px solid var(--line)}
+.toc li:nth-child(6),.toc li:last-child{border-bottom:1px solid var(--line)}
 .toc b{font:400 30px var(--display);letter-spacing:-.02em}
 .toc span{font:500 12px var(--mono);color:var(--paper-3)}
 
@@ -214,6 +214,21 @@ td.s{width:220px}
 
 pre.tokens{margin:34px 0 0;background:var(--ink);border:1px solid var(--line);border-radius:20px;padding:26px 30px;font:13px/1.65 var(--mono);color:var(--paper);columns:2;column-gap:50px;white-space:pre}
 pre.tokens .c{color:var(--paper-3)}
+
+/* mark page */
+.markgrid{display:grid;grid-template-columns:1fr 1fr 1.15fr;gap:16px;margin-top:36px}
+.mk{border-radius:24px;display:grid;place-items:center;min-height:380px}
+.mk.dark{background:var(--graphite-2)}
+.mk.light{background:var(--stone)}
+.mkside{display:grid;gap:16px;grid-template-rows:1fr 1fr}
+.mk.sizes,.mk.lockup{min-height:0;background:var(--graphite-2);display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:22px;padding:22px}
+.mk.sizes span,.mk.lockup span{flex-basis:100%;text-align:center;font:500 12px var(--mono);color:var(--paper-3)}
+.mk.lockup{background:var(--stone);color:var(--ink);gap:12px}
+.mk.lockup b{font:600 52px/1 var(--display);letter-spacing:-.04em}
+.mk.lockup span{color:var(--ink-2)}
+.markrules{list-style:none;margin:26px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.markrules li{border-top:1px solid var(--line);padding-top:12px;font-size:14.5px;line-height:1.45;color:var(--paper-2)}
+.markrules b{display:block;color:var(--paper);font-weight:500;margin-bottom:4px}
 </style>
 </head>
 <body>
@@ -233,18 +248,42 @@ pre.tokens .c{color:var(--paper-3)}
   <div class="eyebrow">Contents</div>
   <h2 class="h2">One object, <span class="m">one accent, three typefaces.</span></h2>
   <ol class="toc">
-    <li><span>01</span><b>The ring</b><span>03</span></li>
-    <li><span>06</span><b>Voice</b><span>09</span></li>
-    <li><span>02</span><b>Colour</b><span>04</span></li>
-    <li><span>07</span><b>Components</b><span>10</span></li>
-    <li><span>03</span><b>Contrast</b><span>05</span></li>
-    <li><span>08</span><b>Layout &amp; motion</b><span>11</span></li>
-    <li><span>04</span><b>Using coral</b><span>06</span></li>
-    <li><span>09</span><b>Never</b><span>12</span></li>
-    <li><span>05</span><b>Typography</b><span>07</span></li>
-    <li><span>10</span><b>Tokens for developers</b><span>13</span></li>
+    <li><span>00</span><b>The mark</b><span>03</span></li>
+    <li><span>01</span><b>The ring</b><span>04</span></li>
+    <li><span>02</span><b>Colour</b><span>05</span></li>
+    <li><span>03</span><b>Contrast</b><span>06</span></li>
+    <li><span>04</span><b>Using coral</b><span>07</span></li>
+    <li><span>05</span><b>Typography</b><span>08</span></li>
+    <li><span>06</span><b>Voice</b><span>10</span></li>
+    <li><span>07</span><b>Components</b><span>11</span></li>
+    <li><span>08</span><b>Layout &amp; motion</b><span>12</span></li>
+    <li><span>09</span><b>Never</b><span>13</span></li>
+    <li><span>10</span><b>Tokens for developers</b><span>14</span></li>
   </ol>
   <div class="folio"><span>TAB brand book</span><span>02</span></div>
+</section>
+
+<!-- mark -->
+<section class="page">
+  <div class="head">
+    <div><div class="eyebrow">00 · The mark</div><h2 class="h2">The tab, <span class="m">as an icon.</span></h2></div>
+    <p class="lede">A graphite tile with the chrome ring and a coral arc from 12 o'clock. It is the app icon, the favicon and the nav mark. Use the supplied file, never a redraw.</p>
+  </div>
+  <div class="markgrid">
+    <div class="mk dark"><img src="tab-logo-icon.png" alt="TAB mark" style="width:300px"></div>
+    <div class="mk light"><img src="tab-logo-icon.png" alt="" style="width:300px"></div>
+    <div class="mkside">
+      <div class="mk sizes"><img src="tab-logo-icon.png" alt="" style="width:96px"><img src="tab-logo-icon.png" alt="" style="width:48px"><img src="tab-logo-icon.png" alt="" style="width:32px"><img src="tab-logo-icon.png" alt="" style="width:16px"><span>96 · 48 · 32 · 16 px. Smallest use: 16 px favicon.</span></div>
+      <div class="mk lockup"><img src="tab-logo-icon.png" alt="" style="width:56px"><b>tab</b><span>Nav lockup: 30px icon beside a 22px wordmark, 10px gap, Funnel Display 600.</span></div>
+    </div>
+  </div>
+  <ul class="markrules">
+    <li><b>Clear space</b> a quarter of the icon's width on every side.</li>
+    <li><b>Keep the arc</b> coral, starting at 12 o'clock. It means "spent", so it never fills the ring.</li>
+    <li><b>Don't</b> recolour, outline, rotate, flatten the chrome or add effects.</li>
+    <li><b>Files</b> favicon.ico, favicon-32, apple-touch-icon (180), icon-192, icon-512, logo-mark.</li>
+  </ul>
+  <div class="folio"><span>TAB brand book</span><span>03</span></div>
 </section>
 
 <!-- 3 the ring -->
@@ -263,7 +302,7 @@ pre.tokens .c{color:var(--paper-3)}
       <li><span class="n">E</span><b>States</b><p>Limit reached: the arc fills the ring and the copy says so. Revoked or closed: the arc turns grey and the band dims.</p></li>
     </ol>
   </div>
-  <div class="folio"><span>TAB brand book</span><span>03</span></div>
+  <div class="folio"><span>TAB brand book</span><span>04</span></div>
 </section>
 
 <!-- 4 colour -->
@@ -288,7 +327,7 @@ pre.tokens .c{color:var(--paper-3)}
     <div class="sw"><div class="chip" style="background:#ff4d2e"><span style="color:var(--ink)">accent</span></div><div class="meta"><b>Coral</b><code>#FF4D2E · 255 77 46</code><small>Limit, refusal, destructive. Only.</small></div></div>
     <div class="sw"><div class="chip" style="background:#b8321a"><span style="color:var(--paper)">accent-deep</span></div><div class="meta"><b>Deep coral</b><code>#B8321A · 184 50 26</code><small>Coral on stone and paper</small></div></div>
   </div>
-  <div class="folio"><span>TAB brand book</span><span>04</span></div>
+  <div class="folio"><span>TAB brand book</span><span>05</span></div>
 </section>
 
 <!-- 5 colour 2 + contrast -->
@@ -314,7 +353,7 @@ pre.tokens .c{color:var(--paper-3)}
     <tr><td class="s"><span class="pair" style="background:#e8e6e0;color:#ff4d2e">Coral on stone</span></td><td class="mono">2.6 : 1</td><td>Graphics only (the arc), never text</td><td class="warnc">Text: no</td></tr>
     <tr><td class="s"><span class="pair" style="background:#1b1b1a;color:#75746e;box-shadow:inset 0 0 0 1px var(--line)">Paper 3 on graphite</span></td><td class="mono">3.7 : 1</td><td>Hints, numerals, large text only</td><td class="warnc">Large only</td></tr>
   </table>
-  <div class="folio"><span>TAB brand book</span><span>05</span></div>
+  <div class="folio"><span>TAB brand book</span><span>06</span></div>
 </section>
 
 <!-- 6 coral rules -->
@@ -331,7 +370,7 @@ pre.tokens .c{color:var(--paper-3)}
     <div class="rulecard"><span class="tag dont">✕ Never for</span><h3>Success</h3><p>A paid payment is paper or soft green, never coral. Coral on a success state would read as an error.</p></div>
     <div class="rulecard"><span class="tag dont">✕ Never with</span><h3>A second accent</h3><p>No blue links, no purple, no brand colours from partners. Wallet logos keep their own colours because they are other people's marks.</p></div>
   </div>
-  <div class="folio"><span>TAB brand book</span><span>06</span></div>
+  <div class="folio"><span>TAB brand book</span><span>07</span></div>
 </section>
 
 <!-- 7 typography -->
@@ -351,7 +390,7 @@ pre.tokens .c{color:var(--paper-3)}
       <div><div class="glyphs" style="font-family:var(--mono);font-size:17px">TAB_CREDENTIAL · 1,000.00 USDC · PAYMENT_EXCEEDS_TAB_LIMIT</div>
       <dl><div><dt>Family</dt><dd>Geist Mono</dd></div><div><dt>Weight</dt><dd>500 (600 on paper)</dd></div><div><dt>Figures</dt><dd>Always tabular</dd></div><div><dt>Labels</dt><dd>11–12px, +0.12em, caps</dd></div></dl></div></div>
   </div>
-  <div class="folio"><span>TAB brand book</span><span>07 · fonts.google.com: Funnel Display, Funnel Sans, Geist Mono</span></div>
+  <div class="folio"><span>TAB brand book</span><span>08 · fonts.google.com: Funnel Display, Funnel Sans, Geist Mono</span></div>
 </section>
 
 <!-- 8 type scale -->
@@ -368,7 +407,7 @@ pre.tokens .c{color:var(--paper-3)}
     <div class="r"><span class="k">Balance</span><span class="sample" style="font:500 44px/1 var(--mono);letter-spacing:-.04em">3.10</span><span class="v">Mono 500 · tabular · −0.04em</span></div>
     <div class="r"><span class="k">Eyebrow / label</span><span class="sample" style="font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--paper-2)">How it works · 02 · Max per payment</span><span class="v">Mono 500 · 11–12px · +0.12em · caps</span></div>
   </div>
-  <div class="folio"><span>TAB brand book</span><span>08</span></div>
+  <div class="folio"><span>TAB brand book</span><span>09</span></div>
 </section>
 
 <!-- 9 voice -->
@@ -391,7 +430,7 @@ pre.tokens .c{color:var(--paper-3)}
       <li><b>No em dashes, no exclamation marks, no emoji.</b> Commas and full stops do the work.</li>
     </ul>
   </div>
-  <div class="folio"><span>TAB brand book</span><span>09</span></div>
+  <div class="folio"><span>TAB brand book</span><span>10</span></div>
 </section>
 
 <!-- 10 components -->
@@ -431,7 +470,7 @@ pre.tokens .c{color:var(--paper-3)}
       <div style="background:var(--receipt);border-radius:16px;padding:40px 50px;color:var(--ink)"><span class="stamp">never past<br>your rules</span></div>
       <p class="note" style="text-align:center">Lands with a spring when a run finishes. Ink on paper, rotated −8°.</p></div>
   </div>
-  <div class="folio"><span>TAB brand book</span><span>10</span></div>
+  <div class="folio"><span>TAB brand book</span><span>11</span></div>
 </section>
 
 <!-- 11 layout + motion -->
@@ -452,7 +491,7 @@ pre.tokens .c{color:var(--paper-3)}
     <div class="spec"><span class="eyebrow">Lists</span><b>Ruled</b><p>Hairline rules, numbered only when order is real. No uniform card grids.</p></div>
     <div class="spec"><span class="eyebrow">Reduced motion</span><b>Still</b><p>All transitions off; the hero shows a still frame with real numbers.</p></div>
   </div>
-  <div class="folio"><span>TAB brand book</span><span>11</span></div>
+  <div class="folio"><span>TAB brand book</span><span>12</span></div>
 </section>
 
 <!-- 12 never -->
@@ -473,7 +512,7 @@ pre.tokens .c{color:var(--paper-3)}
     <li>Coral used for decoration or for success</li>
     <li>Stats, logos or testimonials that aren't real</li>
   </ul>
-  <div class="folio"><span>TAB brand book</span><span>12</span></div>
+  <div class="folio"><span>TAB brand book</span><span>13</span></div>
 </section>
 
 <!-- 13 tokens -->
@@ -518,7 +557,7 @@ pre.tokens .c{color:var(--paper-3)}
 <span class="c">/* layout */</span>
 --edge:   clamp(16px,4vw,56px);
 --radius: clamp(1.25rem,2vw,1.75rem);</pre>
-  <div class="folio"><span>TAB brand book</span><span>13</span></div>
+  <div class="folio"><span>TAB brand book</span><span>14</span></div>
 </section>
 
 </body>

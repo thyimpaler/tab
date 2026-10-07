@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 export function TopBar({ current, right, blend }: { current?: "home" | "docs" | "app"; right?: ReactNode; blend?: boolean }) {
   return (
     <header className={`top ${blend ? "blend" : "solid"}`}>
-      <a className="mark" href="/" data-nav aria-label="TAB home">tab</a>
+      <a className="mark" href="/" data-nav aria-label="TAB home"><img src="/logo-mark.png" alt="" width={30} height={30} />tab</a>
       <nav aria-label="Main">
         <a className="hide-sm" href="/#how" data-nav>How it works</a>
         <a href="/docs" data-nav aria-current={current === "docs" ? "page" : undefined}>Docs</a>
