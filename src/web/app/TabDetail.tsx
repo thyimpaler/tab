@@ -72,17 +72,25 @@ export function TabDetail({ s, tabId, credential, rememberKey, onChange }: { s: 
   const ended = t.status === "revoked" || t.status === "closed";
   const leftWord = t.status === "closed" ? "returned" : t.status === "revoked" || t.status === "expired" ? "unspent" : "left";
   const pct = Math.round(frac(spent) * 100);
+  const live = new Date(t.expiresAt).getTime() > Date.now();
+  // The five checks every payment runs, with this tab's live answer to each.
+  const checks: { h: string; v: string; ok: boolean | null }[] = [
+    { h: "The tab is open", v: t.status === "pending" ? "not funded" : t.status, ok: t.status === "active" },
+    { h: "It hasn't expired", v: live ? until(t.expiresAt) : "expired", ok: live },
+    { h: "Under the cap", v: t.perPaymentCap ? `${fromUnits(t.perPaymentCap, dec)} per bill` : "no cap", ok: null },
+    { h: "The service is allowed", v: d.allowlist.length ? `${d.allowlist.length} allowed` : "any service", ok: null },
+    { h: "There's room left", v: `${fromUnits(t.remaining, dec)} of ${fromUnits(t.limit, dec)}`, ok: BigInt(t.remaining) > 0n },
+  ];
+  const settled = d.payments.filter((p) => p.state === "SETTLED");
 
   return (
     <div className="tabstage">
       <header className="tab-head">
-        <div>
-          <div className="row-wrap" style={{ alignItems: "center" }}>
-            <span className={`chip ${t.status}`}>{t.status === "pending" ? "not funded" : t.status}</span>
-            <span className="mono small muted">#{t.id.slice(0, 4).toUpperCase()} · opened {new Date(t.createdAt).toLocaleDateString()}{t.status === "active" ? ` · ${until(t.expiresAt)}` : ""}</span>
-          </div>
-          <h1 className="h1 tab-title">{t.label || "Untitled tab"}</h1>
+        <div className="tab-meta">
+          <span className={`chip ${t.status}`}>{t.status === "pending" ? "not funded" : t.status}</span>
+          <span className="mono small muted">#{t.id.slice(0, 4).toUpperCase()} · opened {new Date(t.createdAt).toLocaleDateString()}</span>
         </div>
+        <h1 className="tab-title">{t.label || "Untitled tab"}</h1>
         {open && (
           <div className="actions">
             <button type="button" className="btn" onClick={rotate} disabled={!!busy}>{busy === "rotate" ? <span className="spinner" /> : null} New agent key</button>
@@ -124,35 +132,55 @@ export function TabDetail({ s, tabId, credential, rememberKey, onChange }: { s: 
           <Ring spent={frac(spent)} held={frac(res)} void={ended} label={`${fromUnits(t.remaining, dec)} USDC ${leftWord} of ${fromUnits(t.limit, dec)}`}
             value={fromUnits(t.remaining, dec)} sub={<>USDC {leftWord} <em>of {fromUnits(t.limit, dec)}</em></>} />
         </div>
-        <dl className="stats">
-          <div className="stat big"><dt>Spent</dt><dd>{fromUnits(t.spent, dec, 3)}<small>{pct}%</small></dd></div>
-          <div className="stat"><dt>In flight</dt><dd>{fromUnits(t.reserved, dec, 3)}</dd></div>
-          <div className="stat"><dt>Max per payment</dt><dd>{t.perPaymentCap ? fromUnits(t.perPaymentCap, dec) : "none"}</dd></div>
-          <div className="stat"><dt>Services</dt><dd>{d.allowlist.length ? `${d.allowlist.length} allowed` : "any"}</dd></div>
-          <div className="stat"><dt>On chain</dt><dd>{t.chain === null ? "closed" : !t.chain ? "…" : <>{fromUnits(t.chain.delegatedAmount, dec, 3)} {chainOk ? <span className="ok-text">✓</span> : <span className="accent-text">!</span>}</>}</dd></div>
-          <div className="stat"><dt>Tab account</dt><dd><a href={explorerAddr(t.tokenAccount, net)} target="_blank" rel="noreferrer">{short(t.tokenAccount, 5)}</a></dd></div>
-        </dl>
+        <div className="tab-side">
+          <div className="tab-spent">
+            <span className="eyebrow">Spent</span>
+            <strong>{fromUnits(t.spent, dec)}</strong>
+            <span className="mono small muted">{pct}% of the limit{BigInt(t.reserved) > 0n ? ` · ${fromUnits(t.reserved, dec, 3)} in flight` : ""}</span>
+          </div>
+          <div>
+            <span className="eyebrow">The next payment is checked against</span>
+            <ol className="tab-checks">
+              {checks.map((c, i) => (
+                <li key={c.h} className={c.ok === false ? "bad" : c.ok ? "ok" : ""}>
+                  <span className="n">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="h">{c.h}</span>
+                  <span className="v">{c.v}</span>
+                  <i aria-label={c.ok === false ? "fails" : c.ok ? "passes" : "rule"}>{c.ok === false ? "✕" : c.ok ? "✓" : "·"}</i>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div className="tab-chain">
+            <span>On-chain allowance <b>{t.chain === null ? "closed" : !t.chain ? "…" : <>{fromUnits(t.chain.delegatedAmount, dec, 3)} {chainOk ? <span className="ok-text">✓</span> : <span className="accent-text">!</span>}</>}</b></span>
+            <span>Tab account <a href={explorerAddr(t.tokenAccount, net)} target="_blank" rel="noreferrer">{short(t.tokenAccount, 5)}</a></span>
+          </div>
+        </div>
       </div>
 
       <div className="tab-lower">
         <section className="ledger" aria-label="Payments">
-          <div className="row-between"><span className="eyebrow">Payments</span><span className="mono small muted">{d.payments.length}</span></div>
-          {d.payments.length === 0 ? <p className="muted" style={{ margin: "14px 0 0" }}>No payments yet. They stream in here as the agent pays.</p> : (
+          <div className="rc-head"><b>tab</b><span>{t.label || "Untitled tab"} · ledger</span></div>
+          {d.payments.length === 0 ? <p className="ledger-empty">No payments yet. They print here as the agent pays.</p> : (
             <ul>
               {d.payments.map((p) => (
-                <li key={p.id} className={p.state === "RELEASED" ? "rel" : p.state === "SETTLED" ? "ok" : ""}>
+                <li key={p.id} className={p.state === "RELEASED" ? "rel" : p.state === "SETTLED" ? "ok" : "wait"}>
                   <span className="what" title={p.resource ?? p.recipient}>{p.resource ? hostOf(p.resource) : short(p.recipient)}</span>
                   <span className="amt">{p.tx_signature && p.state === "SETTLED" ? <a href={explorerTx(p.tx_signature, net)} target="_blank" rel="noreferrer">{fromUnits(p.amount, dec, 3)}</a> : fromUnits(p.amount, dec, 3)}</span>
-                  <span className="state">{STATE_LABEL[p.state]}</span>
-                  <span className="state" style={{ textAlign: "right" }}>{new Date(p.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                  <span className="state">{STATE_LABEL[p.state]} · {new Date(p.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                 </li>
               ))}
             </ul>
           )}
+          <div className="ledger-foot">
+            <div><span>Paid</span><b>{settled.length}</b></div>
+            <div><span>Spent</span><b>{fromUnits(t.spent, dec)}</b></div>
+            <div><span>{leftWord}</span><b>{fromUnits(t.remaining, dec)}</b></div>
+          </div>
         </section>
         {open && s.cfg?.demo
           ? <TestAgent tabId={tabId} credential={credential} onKey={rememberKey} onPaid={refresh} decimals={dec} net={net} />
-          : open && <div className="ledger"><span className="eyebrow">Connect your agent</span><p className="muted" style={{ margin: "12px 0 0" }}>Give the agent its key and point the SDK at <code>{location.origin}/api</code>. Payments stream in on the left as they settle.</p></div>}
+          : open && <div className="testagent"><span className="eyebrow">Connect your agent</span><p className="muted" style={{ margin: "12px 0 0" }}>Give the agent its key and point the SDK at <code>{location.origin}/api</code>. Payments print on the ledger as they settle.</p></div>}
       </div>
     </div>
   );

@@ -4,7 +4,6 @@ import { fromUnits, toUnits } from "../lib/format";
 import { navigate } from "../main";
 import { walletMessage, type Session } from "./session";
 import { KeyReveal } from "./KeyReveal";
-import { ConnectInline } from "./ConnectInline";
 import { Dial } from "../components/Dial";
 
 const EXPIRY = [
@@ -54,7 +53,6 @@ export function Composer({ s, onCreated, maxUsd }: { s: Session; onCreated: (id:
     setErr(null);
     try {
       setStage("build");
-      const ms = EXPIRY.find((x) => x.v === exp)!.ms;
       const r = await api<{ tabId: string; transaction: string }>("/v1/tabs", {
         label: label.trim() || undefined, limit, perPaymentCap: capU ?? undefined,
         expiresAt: new Date(Date.now() + ms).toISOString(), allowlist: lock && allowList.length ? allowList : undefined,
@@ -77,8 +75,50 @@ export function Composer({ s, onCreated, maxUsd }: { s: Session; onCreated: (id:
   if (created) return <KeyReveal credential={created.key} title="Your tab is open." onDone={() => navigate(`/app/tab/${created.id}`)} doneLabel="Go to the tab" />;
 
   const busy = !!stage;
+  const ms = EXPIRY.find((x) => x.v === exp)!.ms;
+  const ends = new Date(Date.now() + ms).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
   return (
     <section className="composer">
+      <div className="composer-rules">
+        <div className="rule">
+          <span className="eyebrow">00 · Name</span>
+          <input className="title-input" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Untitled tab" maxLength={60} aria-label="Tab name" />
+        </div>
+        <div className="rule">
+          <span className="eyebrow">01 · Limit</span>
+          <span className="rule-hint">Turn the ring, or type the number in its centre.</span>
+        </div>
+        <div className="rule">
+          <span className="eyebrow">02 · Max per payment</span>
+          <div className="chips" role="radiogroup" aria-label="Max per payment">
+            {CAPS.filter((c) => Number(c) * 1e6 <= Number(limit)).map((c) => (
+              <button key={c} type="button" role="radio" aria-checked={cap === c} className={`opt-chip${cap === c ? " on" : ""}`} onClick={() => setCap(c)}>{c}</button>
+            ))}
+            <button type="button" role="radio" aria-checked={cap === "none"} className={`opt-chip${cap === "none" ? " on" : ""}`} onClick={() => setCap("none")}>none</button>
+          </div>
+        </div>
+        <div className="rule">
+          <span className="eyebrow">03 · Ends after</span>
+          <div className="chips" role="radiogroup" aria-label="Ends after">
+            {EXPIRY.map((x) => (
+              <button key={x.v} type="button" role="radio" aria-checked={exp === x.v} className={`opt-chip${exp === x.v ? " on" : ""}`} onClick={() => setExp(x.v)}>{x.label}</button>
+            ))}
+          </div>
+        </div>
+        <div className="rule">
+          <span className="eyebrow">04 · Who it can pay</span>
+          <label className="switch">
+            <input type="checkbox" checked={lock} onChange={(e) => setLock(e.target.checked)} />
+            <span className="track" aria-hidden="true"><i /></span>
+            <span>Only specific services</span>
+          </label>
+          {lock && (
+            <textarea className="allow" rows={3} value={allow} onChange={(e) => setAllow(e.target.value)} spellCheck={false}
+              placeholder="Service payTo addresses, one per line" aria-label="Allowed service addresses" />
+          )}
+        </div>
+      </div>
+
       <div className="composer-dial">
         <Dial
           units={limit} onChange={(u) => { setLimit(u); setTyped(null); }} maxUsd={maxUsd} disabled={busy}
@@ -102,55 +142,38 @@ export function Composer({ s, onCreated, maxUsd }: { s: Session; onCreated: (id:
         />
       </div>
 
-      <div className="composer-side">
-        <div className="eyebrow">New tab</div>
-        <input className="title-input" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Name this tab" maxLength={60} aria-label="Tab name" />
-
-        <div className="opt">
-          <div className="opt-head"><span className="eyebrow">Max per payment</span><span className="mono small muted">any single bill above is refused</span></div>
-          <div className="chips" role="radiogroup" aria-label="Max per payment">
-            {CAPS.filter((c) => Number(c) * 1e6 <= Number(limit)).map((c) => (
-              <button key={c} type="button" role="radio" aria-checked={cap === c} className={`opt-chip${cap === c ? " on" : ""}`} onClick={() => setCap(c)}>{c}</button>
-            ))}
-            <button type="button" role="radio" aria-checked={cap === "none"} className={`opt-chip${cap === "none" ? " on" : ""}`} onClick={() => setCap("none")}>no cap</button>
+      <div className="terms" aria-label="What you're signing">
+        <div className="rc-head"><b>tab</b><span>terms · {s.cfg?.network ?? ""}</span></div>
+        <dl className="terms-lines" aria-live="polite">
+          <div><dt>Name</dt><dd>{label.trim() || "Untitled tab"}</dd></div>
+          <div><dt>Limit</dt><dd>{fromUnits(limit, DEC)}</dd></div>
+          <div><dt>Max per payment</dt><dd>{cap === "none" ? "none" : cap}</dd></div>
+          <div><dt>Ends</dt><dd>{ends}</dd></div>
+          <div><dt>Services</dt><dd>{lock ? `${allowList.length} allowed` : "any x402 service"}</dd></div>
+          {fee > 0n && <div className="fee"><dt>Opening fee</dt><dd>{fromUnits(fee, DEC)}</dd></div>}
+        </dl>
+        <div className="terms-total"><span>You sign once</span><b>{fromUnits(total, DEC)}</b><span>USDC</span></div>
+        {problem && <p className="terms-err">{problem}</p>}
+        {!s.account ? (
+          <div className="terms-connect">
+            <span>Connect the wallet that will fund this tab.</span>
+            <div className="row-wrap">
+              {s.wallets.length ? s.wallets.map((w) => (
+                <button key={w.name} type="button" className="wallet-chip" onClick={() => s.connectWallet(w.wallet)} disabled={!!s.busy}>
+                  <img src={w.icon} alt="" width={18} height={18} /> {w.name}
+                </button>
+              )) : <span>No Solana wallet found in this browser.</span>}
+            </div>
+            {s.error && <p className="terms-err" role="alert">{s.error}</p>}
           </div>
-        </div>
-
-        <div className="opt">
-          <div className="opt-head"><span className="eyebrow">Expires after</span><span className="mono small muted">then nothing more is signed</span></div>
-          <div className="chips" role="radiogroup" aria-label="Expires after">
-            {EXPIRY.map((x) => (
-              <button key={x.v} type="button" role="radio" aria-checked={exp === x.v} className={`opt-chip${exp === x.v ? " on" : ""}`} onClick={() => setExp(x.v)}>{x.label}</button>
-            ))}
-          </div>
-        </div>
-
-        <div className="opt">
-          <label className="switch">
-            <input type="checkbox" checked={lock} onChange={(e) => setLock(e.target.checked)} />
-            <span className="track" aria-hidden="true"><i /></span>
-            <span>Only pay specific services</span>
-          </label>
-          {lock && (
-            <textarea className="allow" rows={3} value={allow} onChange={(e) => setAllow(e.target.value)} spellCheck={false}
-              placeholder="Service payTo addresses, one per line" aria-label="Allowed service addresses" />
-          )}
-        </div>
-
-        <div className="receipt-line" aria-live="polite">
-          <div><span className="eyebrow">Into your tab</span><b>{fromUnits(limit, DEC)}</b></div>
-          {fee > 0n && <div><span className="eyebrow">Opening fee</span><b>{fromUnits(fee, DEC)}</b></div>}
-          <div><span className="eyebrow">You sign once</span><b className="total">{fromUnits(total, DEC)} <small>USDC</small></b></div>
-        </div>
-
-        {problem && <p className="err-line">{problem}</p>}
-        {s.cfg?.network === "devnet" && <p className="hint-line">Devnet: get USDC at <a href="https://faucet.circle.com" target="_blank" rel="noreferrer">faucet.circle.com</a> and SOL at <a href="https://faucet.solana.com" target="_blank" rel="noreferrer">faucet.solana.com</a>.</p>}
-        <ConnectInline s={s} why="Connect the wallet that will fund this tab." />
-        <button type="button" className="pill big" onClick={submit} disabled={busy || !!problem || !s.account}>
-          {busy ? <>{STAGE_TEXT[stage!]} <span className="spinner" /></> : <>Open tab · {fromUnits(total, DEC)} USDC <b aria-hidden="true">›</b></>}
-        </button>
-        {err && <p className="err-line" role="alert">{err}</p>}
-        <p className="fine">The USDC sits in a token account your wallet owns. TAB can spend up to the limit and nothing else. Unspent funds come back when you close the tab.</p>
+        ) : (
+          <button type="button" className="pill dark big terms-sign" onClick={submit} disabled={busy || !!problem}>
+            {busy ? <>{STAGE_TEXT[stage!]} <span className="spinner" /></> : <>Sign &amp; open · {fromUnits(total, DEC)} <b aria-hidden="true">›</b></>}
+          </button>
+        )}
+        {err && <p className="terms-err" role="alert">{err}</p>}
+        <p className="terms-fine">The USDC sits in a token account your wallet owns. TAB can spend up to the limit and nothing else. What's left comes back when you close the tab.</p>
+        {s.cfg?.network === "devnet" && <p className="terms-fine">Devnet: USDC at <a href="https://faucet.circle.com" target="_blank" rel="noreferrer">faucet.circle.com</a>, SOL at <a href="https://faucet.solana.com" target="_blank" rel="noreferrer">faucet.solana.com</a>.</p>}
       </div>
     </section>
   );

@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
-import { Ring } from "../components/Ring";
 
-/** Shows an agent key once. Copy falls back to selecting the text (clipboard can fail after wallet popups). */
+/** Shows an agent key once, as a ticket stub. Copy falls back to selecting the text (clipboard can fail after wallet popups). */
 export function KeyReveal({ credential, title, onDone, doneLabel }: { credential: string; title: string; onDone: () => void; doneLabel: string }) {
   const [copied, setCopied] = useState<"yes" | "manual" | null>(null);
   const [saved, setSaved] = useState(false);
@@ -17,21 +16,28 @@ export function KeyReveal({ credential, title, onDone, doneLabel }: { credential
 
   return (
     <section className="reveal" aria-labelledby="reveal-h">
-      <div className="reveal-ring" aria-hidden="true"><Ring spent={1} value="✓" sub="tab open" /></div>
       <div className="reveal-copy">
         <div className="eyebrow">Agent key · shown once</div>
         <h2 className="h2" id="reveal-h">{title}</h2>
-        <p className="lede muted">Give this key to your agent as <code>TAB_CREDENTIAL</code>. TAB only keeps a hash, so it can't show it again. Lose it and you can rotate it from the tab.</p>
-        <div className="keycard">
-          <code ref={ref as any}>{credential}</code>
-          <button type="button" className="pill" onClick={copy}>{copied === "yes" ? "Copied" : copied === "manual" ? "Press Ctrl+C" : "Copy key"} <b aria-hidden="true">{copied === "yes" ? "✓" : "›"}</b></button>
-        </div>
-        <label className="switch" style={{ marginTop: 22 }}>
+        <p className="lede muted">Give this key to your agent as <code>TAB_CREDENTIAL</code>. TAB only keeps a hash, so it can't show it again. Lose it and you can make a new one from the tab.</p>
+        <label className="switch">
           <input type="checkbox" checked={saved} onChange={(e) => setSaved(e.target.checked)} />
           <span className="track" aria-hidden="true"><i /></span>
           <span>I've saved the key somewhere safe</span>
         </label>
-        <div style={{ marginTop: 22 }}><button type="button" className="btn" onClick={onDone} disabled={!saved}>{doneLabel}</button></div>
+        <div><button type="button" className="pill" onClick={onDone} disabled={!saved}>{doneLabel} <b aria-hidden="true">›</b></button></div>
+      </div>
+      <div className="ticket">
+        <div className="ticket-top">
+          <b>tab</b>
+          <span>admit one agent</span>
+        </div>
+        <span className="ticket-label">TAB_CREDENTIAL</span>
+        <code ref={ref as any}>{credential}</code>
+        <div className="ticket-stub">
+          <span>Shown once. Stored only as a hash.</span>
+          <button type="button" className="pill dark" onClick={copy}>{copied === "yes" ? "Copied" : copied === "manual" ? "Press Ctrl+C" : "Copy key"} <b aria-hidden="true">{copied === "yes" ? "✓" : "›"}</b></button>
+        </div>
       </div>
     </section>
   );
