@@ -30,7 +30,7 @@ await send("Page.enable");
 await send("Page.navigate", { url });
 // Wait until the hero exists and its entrance finished, so we time scrolling, not first render.
 for (let i = 0; i < 60; i++) {
-  if (await evaluate(`!!document.querySelector('.stage') && !!document.querySelector('.landing.ready')`)) break;
+  if (await evaluate(`!!document.querySelector('.landing.ready')`)) break;
   await sleep(250);
 }
 await sleep(2000);

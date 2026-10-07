@@ -1,105 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { TopBar, Footer } from "../components/Chrome";
-import { Ring } from "../components/Ring";
+import { HeroOrbit } from "../components/HeroOrbit";
 import { TryIt } from "../components/TryIt";
-import { SIM_LIMIT, reducedMotion, usdc } from "../components/sim";
-
-// Hero timeline: a scripted agent session that scrolling plays forward and backward.
-// Integers in micro-USDC; refused calls never move the ring.
-const HERO_CALLS: [string, number, string?][] = [
-  ["api.pricefeed.dev/quote", 10_000], ["search.lens.ai/query", 50_000], ["scrape.page/run", 250_000],
-  ["llm.gateway/chat · 12k tok", 420_000], ["data.vendor/bulk-export", 2_400_000, "over the 0.50 cap"],
-  ["llm.gateway/chat · 40k tok", 480_000], ["unknown-host.xyz/drain", 100_000, "not on allowlist"],
-  ["render.cloud/job", 1_150_000, "over the 0.50 cap"], ["llm.gateway/chat · 90k tok", 500_000],
-  ["vision.api/describe", 490_000], ["search.lens.ai/query", 50_000], ["llm.gateway/chat · 80k tok", 500_000],
-  ["tts.voice/render", 500_000], ["llm.gateway/chat · 60k tok", 500_000], ["scrape.page/run", 300_000],
-  ["llm.gateway/chat · 99k tok", 500_000],
-];
-const TIMELINE = (() => {
-  let s = 0;
-  return HERO_CALLS.map(([u, a, why]) => {
-    let r = why;
-    if (!r && s + a > SIM_LIMIT) r = "over the limit";
-    if (!r) s += a;
-    return { u, a, r, spent: s };
-  });
-})();
-
-function Hero() {
-  const stage = useRef<HTMLElement>(null);
-  const [idx, setIdx] = useState(-1);
-  const idxRef = useRef(-1);
-
-  useEffect(() => {
-    const root = document.querySelector(".landing") as HTMLElement | null;
-    const el = stage.current;
-    if (!root || !el) return;
-    const nav = root.querySelector(".top") as HTMLElement | null;
-    let raf = 0, dark = false, past = false;
-    // Scroll writes CSS variables on the stage only (transform/opacity work for the compositor).
-    // React re-renders only when the scripted session moves to the next payment.
-    const frame = () => {
-      raf = 0;
-      const r = el.getBoundingClientRect();
-      const prog = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - innerHeight)));
-      const t = Math.min(1, Math.max(0, (prog - 0.3) / 0.25)), bg = t * t * (3 - 2 * t);
-      const exit = Math.min(1, Math.max(0, (innerHeight - r.bottom) / (innerHeight * 0.3)));
-      el.style.setProperty("--p", prog.toFixed(4));
-      el.style.setProperty("--bg", bg.toFixed(3));
-      el.style.setProperty("--exit", exit.toFixed(3));
-      // Class flips are scoped (hero stage / nav) so they never restyle the panels below.
-      if (bg > 0.5 !== dark) { dark = bg > 0.5; el.classList.toggle("dark", dark); }
-      if (exit >= 1 !== past) { past = exit >= 1; nav?.classList.toggle("past", past); }
-      const next = Math.min(TIMELINE.length - 1, Math.floor(prog * 1.12 * TIMELINE.length) - 1);
-      if (next !== idxRef.current) { idxRef.current = next; setIdx(next); }
-    };
-    const on = () => { if (!raf) raf = requestAnimationFrame(frame); };
-    frame();
-    addEventListener("scroll", on, { passive: true });
-    addEventListener("resize", on);
-
-    // Entrance: wait for the display face (no headline jump), at most ~0.9s, then one staggered rise.
-    let done = false;
-    const reveal = () => { if (!done) { done = true; root.classList.add("ready"); } };
-    if (reducedMotion()) reveal();
-    else {
-      Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => setTimeout(r, 900))])
-        .then(() => requestAnimationFrame(() => requestAnimationFrame(reveal)));
-    }
-    return () => { removeEventListener("scroll", on); removeEventListener("resize", on); cancelAnimationFrame(raf); };
-  }, []);
-
-  const spent = idx < 0 ? 0 : TIMELINE[idx].spent;
-  const from = Math.max(0, idx - 4);
-  const recent = TIMELINE.slice(from, idx + 1);
-
-  return (
-    <section className="stage" ref={stage} aria-label="TAB: give your agent a capped USDC allowance">
-      <div className="sticky">
-        <div className="shade" aria-hidden="true" />
-        <div className="noise" aria-hidden="true" />
-        <div className="hero-copy">
-          <div>
-            <h1 className="h1">Give your agent<br />a tab. <span className="mute">Not<br />your wallet.</span></h1>
-            <div className="cta">
-              <a className="pill dark" href="/app" data-nav>Open a tab <b aria-hidden="true">›</b></a>
-            </div>
-          </div>
-          <p className="lede">TAB lets an AI agent pay for APIs in USDC on Solana, up to a limit you set. <span className="mute">It stops at the cap, it expires on its own, and the money stays in an account your wallet owns.</span></p>
-        </div>
-        <div className="hero-ring" aria-hidden="true">
-          <Ring spent={spent / SIM_LIMIT} value={usdc(SIM_LIMIT - spent, 2)} sub={<>USDC left <em>of {usdc(SIM_LIMIT, 2)}</em></>} />
-        </div>
-        <div className="feed" aria-hidden="true">
-          {recent.map((t, i) => (
-            <div key={from + i} className={t.r ? "no" : ""}>{t.r ? "refused" : "paid   "}  {usdc(t.a)}  {t.u}{t.r ? `  · ${t.r}` : ""}</div>
-          ))}
-        </div>
-        <div className="lock" aria-hidden="true"><i />limit reached · nothing more signed</div>
-      </div>
-    </section>
-  );
-}
+import { reducedMotion } from "../components/sim";
 
 const CHECKS = [
   { k: "status", h: "The tab is open", p: "Revoked, closed or not yet funded means no. Revoking takes effect on the next request." },
@@ -110,6 +13,15 @@ const CHECKS = [
 ];
 
 export function Landing() {
+  // Entrance: wait for the display face (no headline jump), at most ~0.9s, then reveal once.
+  useEffect(() => {
+    const root = document.querySelector(".landing");
+    let done = false;
+    const reveal = () => { if (!done) { done = true; root?.classList.add("ready"); } };
+    if (reducedMotion()) return reveal();
+    Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => setTimeout(r, 900))])
+      .then(() => requestAnimationFrame(() => requestAnimationFrame(reveal)));
+  }, []);
   // Arriving at /#how from another page: the section only exists after render, so jump to it then.
   useEffect(() => {
     const id = location.hash.slice(1);
@@ -119,7 +31,7 @@ export function Landing() {
   return (
     <div className="landing">
       <TopBar current="home" blend />
-      <Hero />
+      <HeroOrbit />
       <main>
         <section className="panel" id="how">
           <div className="panel-head">
