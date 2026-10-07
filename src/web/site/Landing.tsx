@@ -45,6 +45,7 @@ function Hero() {
       // Once the stage starts scrolling away, fade its bottom-edge text so it never slides under the nav.
       const exit = Math.min(1, Math.max(0, (innerHeight - r.bottom) / (innerHeight * 0.3)));
       root.style.setProperty("--exit", exit.toFixed(4));
+      root.classList.toggle("past", exit >= 1);
       root.classList.toggle("dark", bg > 0.5);
       setP(prog);
       setIdx(Math.min(TIMELINE.length - 1, Math.floor(prog * 1.12 * TIMELINE.length) - 1));

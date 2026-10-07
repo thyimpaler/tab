@@ -72,6 +72,8 @@ button{font:inherit;color:inherit}
 /* ---------- nav / footer ---------- */
 .top{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px var(--edge)}
 .top.blend{mix-blend-mode:difference;color:#fff}
+.landing.past .top.blend{mix-blend-mode:normal;color:var(--paper);background:color-mix(in oklab,var(--graphite),transparent 12%);backdrop-filter:blur(12px)}
+.top.blend{transition:background .4s var(--ease)}
 .top.solid{position:sticky;background:color-mix(in oklab,var(--graphite),transparent 12%);backdrop-filter:blur(12px)}
 .mark{font:600 22px var(--display);letter-spacing:-.04em;text-decoration:none;min-height:44px;display:inline-flex;align-items:center;gap:10px}
 .mark .net{font:500 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--paper-2);padding:3px 8px;border:1px solid var(--line-2);border-radius:999px}
