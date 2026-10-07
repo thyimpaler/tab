@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-07. **Network:** devnet. **Facilitator:** public `https://x402.org/facilitator` (x402 V2, `exact` SVM).
 **Packages:** `@x402/core` / `@x402/hono` / `@x402/svm` 2.28.0, `@solana/web3.js` 1.99, `@solana/spl-token` 0.4.15.
-**Code:** `spike/` (`setup.ts`, `server.ts`, `pay.ts`, `run-cases.ts`, `rerun-c.ts`).
+**Code:** `spike/` (`setup.ts`, `server.ts`, `pay.ts`, `run-cases.ts`; the case C rerun was a one-off script).
 
 ## Verdict: PASS
 An SPL-token **delegate** can sign an x402 V2 `exact` payment on Solana. The facilitator verifies,
