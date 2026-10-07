@@ -32,7 +32,7 @@ Launch target: Thu 2026-10-08 (owner). Full build. Non-custodial only.
 - [x] 8. Dashboard: wallet connect, create TAB, balance, activity, revoke
 - [x] 9. Demo paid endpoint (devnet) so the agent console does real 402 payments
 - [x] 10. Deployed: https://tab-agent-one.vercel.app (devnet, Neon us-east-1 pooled). Live sign-in verified; live payment run waits on devnet USDC
-- [ ] 11. Mainnet switch: **owner's explicit go only**
+- [x] 11. Mainnet: switched 2026-10-07 on owner's go (public RPC, delegate key in env, new key 5MEzFaP2…). Beta cap MAX_TAB_LIMIT = 1000 USDC. Devnet env backup: .env.vercel.devnet
 
 ## Needs from owner
 - Devnet USDC (faucet.circle.com) to 4jukG76niybZH9UJyxgPGKx4gcCUi5b5eKceviGjnhM7 for the live payment run
