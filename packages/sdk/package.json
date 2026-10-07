@@ -5,9 +5,36 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
-  "files": ["dist"],
-  "scripts": { "build": "tsc -p tsconfig.json" },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "tsc -p tsconfig.json"
+  },
   "license": "MIT",
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "x402",
+    "solana",
+    "usdc",
+    "ai-agent",
+    "agent-payments",
+    "spending-limit",
+    "allowance"
+  ],
+  "homepage": "https://tab-agent-one.vercel.app/docs#sdk",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  }
 }
