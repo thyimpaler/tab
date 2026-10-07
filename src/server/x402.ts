@@ -7,8 +7,8 @@ import {
 import { createTransferCheckedInstruction, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { randomBytes } from "node:crypto";
 import bs58 from "bs58";
-import { TabError } from "./errors.ts";
-import { isBase58Pubkey } from "./chain.ts";
+import { TabError } from "./errors.js";
+import { isBase58Pubkey } from "./chain.js";
 
 export const MEMO_PROGRAM = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
 const CU_LIMIT = 20_000;

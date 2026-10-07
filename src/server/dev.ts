@@ -6,9 +6,9 @@ import { join } from "node:path";
 const envFile = join(import.meta.dirname, "..", "..", ".env");
 if (existsSync(envFile)) process.loadEnvFile(envFile);
 
-const { app } = await import("./app.ts");
-const { db } = await import("./db.ts");
-const { migrate } = await import("./migrate.ts");
+const { app } = await import("./app.js");
+const { db } = await import("./db.js");
+const { migrate } = await import("./migrate.js");
 await migrate(db());
 
 const port = Number(process.env.PORT ?? 8787);

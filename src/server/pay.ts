@@ -1,12 +1,12 @@
 // /v1/pay engine. Reserve under a row lock, sign outside it, record what we signed.
 // Invariants (CLAUDE.md): check order, FOR UPDATE, idempotency, bigint only, sign nothing on reject.
 import { createHash } from "node:crypto";
-import { config, delegateKeypair } from "./config.ts";
-import { chain } from "./chain.ts";
-import { credentialMatches, parseCredential } from "./credential.ts";
-import { db, withTx, type Tx } from "./db.ts";
-import { TabError } from "./errors.ts";
-import { buildDelegatePayment, decodePaymentRequired, selectRequirement } from "./x402.ts";
+import { config, delegateKeypair } from "./config.js";
+import { chain } from "./chain.js";
+import { credentialMatches, parseCredential } from "./credential.js";
+import { db, withTx, type Tx } from "./db.js";
+import { TabError } from "./errors.js";
+import { buildDelegatePayment, decodePaymentRequired, selectRequirement } from "./x402.js";
 
 export type TabRow = {
   id: string; owner_id: string; label: string | null; mint: string; token_account: string;

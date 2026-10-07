@@ -12,5 +12,5 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["node"]
   },
-  "include": ["src", "api", "tests", "packages/sdk/src"]
+  "include": ["src", "api", "tests", "packages/sdk/src", "vite.config.ts"]
 }

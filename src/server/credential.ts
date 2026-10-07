@@ -1,6 +1,6 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import bs58 from "bs58";
-import { config } from "./config.ts";
+import { config } from "./config.js";
 
 // Format: tab_live_<tabId without dashes>_<32 random bytes, base58>.
 // The tab id lets us find the row; only the HMAC of the whole credential is stored.

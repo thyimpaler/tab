@@ -1,5 +1,5 @@
 import pg from "pg";
-import { config } from "./config.ts";
+import { config } from "./config.js";
 
 // bigint columns come back as strings by default; parse to native bigint (no floats for money).
 pg.types.setTypeParser(20, (v) => BigInt(v));

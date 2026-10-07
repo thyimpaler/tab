@@ -2,10 +2,10 @@
 // A signed payment can only land on chain until its blockhash expires (last_valid_block_height).
 // So a DISPATCHING payment is never released before that height has passed; after it, the chain
 // is the source of truth: our delegate signature on a successful tx -> SETTLED, otherwise RELEASED.
-import { chain } from "./chain.ts";
-import { db, withTx } from "./db.ts";
-import { TabError } from "./errors.ts";
-import { lockTab } from "./pay.ts";
+import { chain } from "./chain.js";
+import { db, withTx } from "./db.js";
+import { TabError } from "./errors.js";
+import { lockTab } from "./pay.js";
 
 // Unsigned reservations older than this were orphaned by a crash between reserve and sign.
 const UNSIGNED_GRACE_MS = 60_000;

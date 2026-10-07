@@ -6,7 +6,7 @@ import {
 } from "@solana/spl-token";
 
 import bs58 from "bs58";
-import { config } from "./config.ts";
+import { config } from "./config.js";
 
 export type TokenAccountInfo = {
   address: string;

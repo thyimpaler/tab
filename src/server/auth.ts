@@ -2,10 +2,10 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import bs58 from "bs58";
 import nacl from "tweetnacl";
-import { config } from "./config.ts";
-import { db } from "./db.ts";
-import { TabError } from "./errors.ts";
-import { isBase58Pubkey } from "./chain.ts";
+import { config } from "./config.js";
+import { db } from "./db.js";
+import { TabError } from "./errors.js";
+import { isBase58Pubkey } from "./chain.js";
 
 const NONCE_TTL_MS = 10 * 60_000;
 export const SESSION_TTL_S = 7 * 86_400;

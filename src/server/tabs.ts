@@ -12,14 +12,14 @@ import {
   createRevokeInstruction, createTransferCheckedInstruction, getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
 import { z } from "zod";
-import { config, delegatePubkey } from "./config.ts";
-import { BANNED_EXTENSIONS, chain, isBase58Pubkey } from "./chain.ts";
-import { hashCredential, newCredential } from "./credential.ts";
-import { db, withTx } from "./db.ts";
-import { TabError } from "./errors.ts";
-import { lockTab } from "./pay.ts";
-import { reconcile } from "./settle.ts";
-import { RpcChain } from "./chain.ts";
+import { config, delegatePubkey } from "./config.js";
+import { BANNED_EXTENSIONS, chain, isBase58Pubkey } from "./chain.js";
+import { hashCredential, newCredential } from "./credential.js";
+import { db, withTx } from "./db.js";
+import { TabError } from "./errors.js";
+import { lockTab } from "./pay.js";
+import { reconcile } from "./settle.js";
+import { RpcChain } from "./chain.js";
 
 const MAX_DAYS = 90;
 

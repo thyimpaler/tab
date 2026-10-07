@@ -27,7 +27,7 @@ export async function migrate(pool: pg.Pool, log = console.log) {
 }
 
 if (process.argv[1]?.endsWith("migrate.ts")) {
-  const { db, closeDb } = await import("./db.ts");
+  const { db, closeDb } = await import("./db.js");
   await migrate(db());
   await closeDb();
   console.log("migrations up to date");

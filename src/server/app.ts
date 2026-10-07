@@ -1,15 +1,16 @@
 import { Hono, type Context } from "hono";
 import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 import { z } from "zod";
-import { config, delegatePubkey } from "./config.ts";
-import { TabError } from "./errors.ts";
-import { issueNonce, makeSession, readSession, signInInput, verifySignIn, SESSION_COOKIE, SESSION_TTL_S } from "./auth.ts";
-import { authTab, pay } from "./pay.ts";
-import { confirmPayment, reconcile } from "./settle.ts";
+import { config, delegatePubkey } from "./config.js";
+import { TabError } from "./errors.js";
+import { issueNonce, makeSession, readSession, signInInput, verifySignIn, SESSION_COOKIE, SESSION_TTL_S } from "./auth.js";
+import { authTab, pay } from "./pay.js";
+import { confirmPayment, reconcile } from "./settle.js";
 import {
   CreateTabBody, activateTab, closeTab, createTab, getTab, listTabs, publicTab, revokeTab, rotateCredential,
-} from "./tabs.ts";
-import { db } from "./db.ts";
+} from "./tabs.js";
+import { db } from "./db.js";
+import { demoApp } from "./demo.js";
 
 type Env = { Variables: { wallet: string; tabId: string } };
 
@@ -30,6 +31,8 @@ app.get("/v1/health", (c) => c.json({ ok: true, network: config().network }));
 
 app.get("/v1/config", (c) => c.json({
   network: config().network, caip2: config().caip2, mints: config().acceptedMints, delegate: delegatePubkey().toBase58(),
+  // Public endpoint only: never expose a keyed RPC URL.
+  rpcUrl: process.env.PUBLIC_RPC_URL ?? (config().network === "devnet" ? "https://api.devnet.solana.com" : "https://api.mainnet-beta.solana.com"),
 }));
 
 // ---------- wallet session (dashboard) ----------
@@ -125,3 +128,7 @@ app.get("/v1/internal/reconcile", async (c) => {
   if (!secret || c.req.header("authorization") !== `Bearer ${secret}`) throw new TabError("UNAUTHORIZED");
   return c.json(await reconcile());
 });
+
+// ---------- demo paid API (devnet) ----------
+let demo: ReturnType<typeof demoApp> | undefined;
+app.all("/demo/*", (c) => (demo ??= demoApp()).fetch(c.req.raw));
