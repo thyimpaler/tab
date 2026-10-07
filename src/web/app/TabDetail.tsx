@@ -151,8 +151,8 @@ export function TabDetail({ s, tabId, credential, rememberKey }: { s: Session; t
 
           {err && <p className="err-line" role="alert">{err}</p>}
 
-          {open && net === "devnet" && <TestAgent tabId={tabId} credential={credential} onKey={rememberKey} onPaid={load} decimals={dec} />}
-          {open && net !== "devnet" && (
+          {open && s.cfg?.demo && <TestAgent tabId={tabId} credential={credential} onKey={rememberKey} onPaid={load} decimals={dec} net={net} />}
+          {open && !s.cfg?.demo && (
             <div className="hint-line">Give the agent its key and point the SDK at this site's <code>/api</code>. Payments show up here as they settle.</div>
           )}
         </div>
@@ -170,8 +170,9 @@ const DEMO = [
 ];
 
 /** A real agent, in this browser: pays TAB's devnet demo API through the SDK. */
-function TestAgent({ tabId, credential, onKey, onPaid, decimals }: { tabId: string; credential?: string; onKey: (k: string) => void; onPaid: () => void; decimals: number }) {
-  const [lines, setLines] = useState<LogLine[]>([{ kind: "dim", text: "$ test agent ready. It pays TAB's demo API on devnet with this tab." }]);
+function TestAgent({ tabId, credential, onKey, onPaid, decimals, net }: { tabId: string; credential?: string; onKey: (k: string) => void; onPaid: () => void; decimals: number; net: string }) {
+  const real = net === "mainnet";
+  const [lines, setLines] = useState<LogLine[]>([{ kind: "dim", text: real ? "$ test agent ready. It pays TAB's demo API in real USDC from this tab." : "$ test agent ready. It pays TAB's demo API on devnet with this tab." }]);
   const [left, setLeft] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const [paste, setPaste] = useState("");
@@ -213,7 +214,7 @@ function TestAgent({ tabId, credential, onKey, onPaid, decimals }: { tabId: stri
   if (!client) {
     return (
       <div className="testagent">
-        <div className="label">Test agent · devnet</div>
+        <div className="label">Test agent · {net}</div>
         <p className="muted" style={{ margin: "10px 0 14px" }}>Paste this tab's key to run a real agent from this browser. The key stays in this page and is never stored.</p>
         <form className="copybox" onSubmit={(e) => { e.preventDefault(); if (paste.trim()) onKey(paste.trim()); }}>
           <input aria-label="Agent key" className="keyinput" value={paste} onChange={(e) => setPaste(e.target.value)} placeholder="tab_test_…" spellCheck={false} autoComplete="off" />
@@ -226,10 +227,10 @@ function TestAgent({ tabId, credential, onKey, onPaid, decimals }: { tabId: stri
 
   return (
     <Console
-      title="test agent · devnet"
+      title={`test agent · ${net}`}
       status={running ? "running" : "idle"}
       balance={left !== null ? fromUnits(left, decimals, 3) : "…"}
-      balanceNote={<>USDC left<br />real devnet payments</>}
+      balanceNote={<>USDC left<br />{real ? "real USDC payments" : "devnet payments"}</>}
       lines={lines}
       actions={<>
         {DEMO.map((x) => <button key={x.path} type="button" disabled={running} onClick={async () => { setRunning(true); await call(x.path); setRunning(false); }}>{x.label} · {x.price}</button>)}

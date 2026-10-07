@@ -10,7 +10,7 @@ import {
   CreateTabBody, activateTab, closeTab, createTab, getTab, listTabs, publicTab, revokeTab, rotateCredential,
 } from "./tabs.js";
 import { db } from "./db.js";
-import { demoApp } from "./demo.js";
+import { demoApp, demoEnabled } from "./demo.js";
 
 type Env = { Variables: { wallet: string; tabId: string } };
 
@@ -32,6 +32,7 @@ app.get("/v1/health", (c) => c.json({ ok: true, network: process.env.SOLANA_NETW
 app.get("/v1/config", (c) => c.json({
   network: config().network, caip2: config().caip2, mints: config().acceptedMints, delegate: delegatePubkey().toBase58(),
   // Public endpoint only: never expose a keyed RPC URL.
+  demo: demoEnabled(),
   rpcUrl: process.env.PUBLIC_RPC_URL ?? (config().network === "devnet" ? "https://api.devnet.solana.com" : "https://api.mainnet-beta.solana.com"),
 }));
 
