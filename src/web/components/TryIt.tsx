@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Dial } from "./Dial";
 import { Ring } from "./Ring";
 import { reducedMotion, usdc } from "./sim";
@@ -93,7 +93,7 @@ export function TryIt() {
       <div className="try-dial">
         {phase === "set" ? (
           <Dial units={limit} onChange={setLimit} maxUsd={50} label="Try-it limit in USDC"
-            center={<><span className="dial-value as-text">{usdc(lim, 2)}</span><span className="dial-note">USDC limit</span><span className="dial-hint">drag the ring</span></>} />
+            center={<><span className="dial-value as-text" style={{ "--len": usdc(lim, 2).length } as CSSProperties}>{usdc(lim, 2)}</span><span className="dial-note">USDC limit</span><span className="dial-hint">drag the ring</span></>} />
         ) : (
           <div className="tryit-ring">
             <Ring spent={spent / lim} value={usdc(lim - spent, 2)} sub={<>USDC left <em>of {usdc(lim, 2)}</em></>} />

@@ -50,14 +50,16 @@ function Closing() {
   });
   return (
     <section className="end" ref={ref}>
-      <div className="end-ring" aria-hidden="true">
-        <div className="ring-box" style={{ "--spent": 0.18 } as CSSProperties}><div className="ring" /><div className="groove" /><div className="arc" /></div>
-      </div>
       <div className="end-copy">
         <h2 className="end-title">Put your agent <span>on a tab.</span></h2>
         <div className="row-wrap">
           <a className="pill" href="/app" data-nav>Open a tab <b aria-hidden="true">›</b></a>
           <a className="btn" href="/docs" data-nav>Read the docs</a>
+        </div>
+      </div>
+      <div className="end-horizon" aria-hidden="true">
+        <div className="end-ring">
+          <div className="ring-box" style={{ "--spent": 0.18 } as CSSProperties}><div className="ring" /><div className="groove" /><div className="arc" /></div>
         </div>
       </div>
     </section>

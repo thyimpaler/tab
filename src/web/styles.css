@@ -402,9 +402,12 @@ pre.code .s{color:var(--paper-2)}
 .faq details p{margin:0 0 24px 56px;max-width:62ch;color:var(--paper-2)}
 
 /* closing: the ring comes back up like a horizon */
-.end{position:relative;height:min(92svh,900px);min-height:560px;overflow:hidden;margin-top:clamp(110px,14vw,200px);border-radius:var(--radius);background:var(--graphite-2)}
-.end-ring{position:absolute;left:50%;top:56%;width:max(118%,860px);aspect-ratio:1;transform:translateX(-50%) rotate(calc(-50deg + var(--p,0) * 80deg));will-change:transform}
+.end{position:relative;display:flex;flex-direction:column;min-height:max(560px,min(92svh,900px));overflow:hidden;margin-top:clamp(110px,14vw,200px);border-radius:var(--radius);background:var(--graphite-2)}
+/* the ring lives in the space under the copy, so it can never run behind the buttons */
+.end-horizon{position:relative;flex:1;min-height:clamp(220px,32vh,380px)}
+.end-ring{position:absolute;left:50%;top:clamp(36px,6vh,72px);width:max(118%,860px);aspect-ratio:1;transform:translateX(-50%) rotate(calc(-50deg + var(--p,0) * 80deg));will-change:transform}
 .end-ring .ring-box{position:absolute;inset:0;--band:9%;--inset:2%;--groove:1.8%}
+.end .btn{background:var(--graphite-2)}
 .end-copy{position:relative;z-index:1;display:grid;justify-items:center;gap:30px;text-align:center;padding:clamp(72px,13vh,150px) 20px 0}
 .end-title{font:400 clamp(3rem,8vw,8.2rem)/.9 var(--display);letter-spacing:-.05em;margin:0;text-wrap:balance}
 .end-title span{display:block;color:var(--paper-2)}
@@ -460,7 +463,7 @@ pre.code .s{color:var(--paper-2)}
   .wire .d{grid-column:2/-1}
   .faq summary{grid-template-columns:34px minmax(0,1fr) 36px}
   .faq details p{margin-left:46px}
-  .end-ring{top:60%;width:max(150%,640px)}
+  .end-ring{width:max(150%,640px)}
 }
 
 /* ================= docs ================= */
@@ -528,7 +531,7 @@ td code{white-space:nowrap}
 /* composer */
 .composer{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(28px,4vw,72px);align-items:center;min-height:calc(100svh - 72px - 96px)}
 .composer-dial{display:grid;place-items:center}
-.dial{position:relative;width:min(100%,560px,72vh);aspect-ratio:1;touch-action:none;cursor:grab;outline:none;border-radius:50%}
+.dial{position:relative;width:min(100%,560px,72vh);aspect-ratio:1;container-type:inline-size;touch-action:none;cursor:grab;outline:none;border-radius:50%}
 .dial.dragging{cursor:grabbing}
 .dial:focus-visible{box-shadow:0 0 0 2px var(--paper)}
 .dial .ring-box{position:absolute;inset:7%;width:auto}
@@ -542,7 +545,8 @@ td code{white-space:nowrap}
   background:radial-gradient(circle at 35% 30%,#fff,#d6d4cd 45%,#8e8c86);box-shadow:0 8px 18px rgba(0,0,0,.45),0 0 0 3px var(--accent);transition:transform .5s var(--spring)}
 .dial.dragging .dial-knob i,.dial:hover .dial-knob i{transform:translate(-50%,-6%) scale(1.12)}
 .dial-center{position:absolute;inset:24%;display:grid;place-content:center;justify-items:center;gap:6px;text-align:center}
-.dial-value{font:500 clamp(2.6rem,7.5vw,5.4rem)/1 var(--mono);letter-spacing:-.05em;font-variant-numeric:tabular-nums;color:var(--paper);background:transparent;border:0;text-align:center;width:6.2ch;padding:0;border-radius:12px;cursor:text}
+/* sized to the dial, and shrinks for long values (1,000.00) so it never leaves the ring */
+.dial-value{font:500 min(5.4rem,15cqi,calc(48cqi / (var(--len,5) * .62)))/1 var(--mono);letter-spacing:-.05em;font-variant-numeric:tabular-nums;color:var(--paper);background:transparent;border:0;text-align:center;width:calc(var(--len,5) * .62em + .5em);max-width:52cqi;padding:0;border-radius:12px;cursor:text}
 .dial-value:focus{outline:none;background:var(--graphite-3)}
 .dial-note{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--paper-2)}
 .dial-hint{font:400 12px var(--body);color:var(--paper-3);margin-top:6px}

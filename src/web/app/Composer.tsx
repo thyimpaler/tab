@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { api, ApiError } from "../lib/api";
 import { fromUnits, toUnits } from "../lib/format";
 import { navigate } from "../main";
@@ -90,6 +90,7 @@ export function Composer({ s, onCreated, maxUsd }: { s: Session; onCreated: (id:
               <input
                 className="dial-value" aria-label="Limit in USDC" inputMode="decimal"
                 value={typed ?? fromUnits(limit, DEC)}
+                style={{ "--len": Math.max(4, (typed ?? fromUnits(limit, DEC)).length) } as CSSProperties}
                 onChange={(e) => setTyped(e.target.value)} onBlur={commitTyped}
                 onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
                 onPointerDown={(e) => e.stopPropagation()}
