@@ -56,6 +56,9 @@ export async function createTab(wallet: string, body: z.infer<typeof CreateTabBo
   const limit = BigInt(body.limit);
   const cap = body.perPaymentCap ? BigInt(body.perPaymentCap) : null;
   if (cap !== null && cap > limit) throw new TabError("BAD_REQUEST", "per-payment cap is above the limit");
+  // Beta safety rail: a ceiling per tab while TAB is new. MAX_TAB_LIMIT is in base units.
+  const maxLimit = process.env.MAX_TAB_LIMIT ? BigInt(process.env.MAX_TAB_LIMIT) : null;
+  if (maxLimit !== null && limit > maxLimit) throw new TabError("BAD_REQUEST", `during the beta a tab can hold at most ${maxLimit / 1_000_000n} USDC`);
   const expiresAt = new Date(body.expiresAt);
   const ms = expiresAt.getTime() - Date.now();
   if (ms < 5 * 60_000 || ms > MAX_DAYS * 86_400_000) throw new TabError("BAD_REQUEST", `expiry must be 5 minutes to ${MAX_DAYS} days out`);
@@ -107,7 +110,8 @@ export async function createTab(wallet: string, body: z.infer<typeof CreateTabBo
 
 async function ownedTab(wallet: string, tabId: string) {
   const r = await db().query(
-    `SELECT t.* FROM tabs t JOIN users u ON u.id = t.owner_id WHERE t.id = $1 AND u.wallet_address = $2`, [tabId, wallet],
+    `SELECT t.* FROM tabs t JOIN users u ON u.id = t.owner_id WHERE t.id = $1 AND u.wallet_address = $2 AND t.network = $3`,
+    [tabId, wallet, config().network],
   );
   if (!r.rowCount) throw new TabError("TAB_NOT_FOUND");
   return r.rows[0];
@@ -164,8 +168,8 @@ export function publicTab(t: any, chainState?: { amount: string; delegatedAmount
 
 export async function listTabs(wallet: string) {
   const r = await db().query(
-    `SELECT t.* FROM tabs t JOIN users u ON u.id = t.owner_id WHERE u.wallet_address = $1 ORDER BY t.created_at DESC LIMIT 100`,
-    [wallet],
+    `SELECT t.* FROM tabs t JOIN users u ON u.id = t.owner_id WHERE u.wallet_address = $1 AND t.network = $2 ORDER BY t.created_at DESC LIMIT 100`,
+    [wallet, config().network],
   );
   // Lazily expire.
   const now = Date.now();

@@ -27,15 +27,15 @@ beforeEach(() => {
 });
 
 let n = 0;
-async function makeTab(o: Partial<{ limit: bigint; cap: bigint | null; status: string; expiresAt: Date; allow: string[]; mint: string }> = {}) {
+async function makeTab(o: Partial<{ limit: bigint; cap: bigint | null; status: string; expiresAt: Date; allow: string[]; mint: string; network: string }> = {}) {
   const u = await db().query(`INSERT INTO users (wallet_address) VALUES ($1) RETURNING id`, [`wallet-${Date.now()}-${n++}`]);
   const t = await db().query(
     `INSERT INTO tabs (owner_id, mint, token_account, delegate_pubkey, limit_amount, per_payment_cap, expires_at, status,
                        credential_hash, network, token_program, decimals)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'placeholder-'||gen_random_uuid(),'devnet',$9,6) RETURNING id`,
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'placeholder-'||gen_random_uuid(),$10,$9,6) RETURNING id`,
     [u.rows[0].id, o.mint ?? MINT, TOKEN_ACCOUNT, DELEGATE.publicKey.toBase58(), (o.limit ?? 50_000n).toString(),
       o.cap === undefined ? null : o.cap?.toString() ?? null, o.expiresAt ?? new Date(Date.now() + 3_600_000),
-      o.status ?? "active", TOKEN_PROGRAM_ID.toBase58()],
+      o.status ?? "active", TOKEN_PROGRAM_ID.toBase58(), o.network ?? "devnet"],
   );
   const id = t.rows[0].id as string;
   const credential = newCredential(id);
@@ -136,6 +136,12 @@ describe("rejections sign nothing", () => {
     expect(await codeOf(pay({ credential: "nope", idempotencyKey: key(), paymentRequired: paymentRequired() }))).toBe("INVALID_CREDENTIAL");
     const forged = newCredential(id); // right tab id, wrong secret
     expect(await codeOf(pay({ credential: forged, idempotencyKey: key(), paymentRequired: paymentRequired() }))).toBe("INVALID_CREDENTIAL");
+  });
+
+  it("a tab from the other network can't be used (devnet deployment, mainnet tab)", async () => {
+    const { id, credential } = await makeTab({ network: "mainnet" });
+    expect(await codeOf(pay({ credential, idempotencyKey: key(), paymentRequired: paymentRequired() }))).toBe("INVALID_CREDENTIAL");
+    expect(await signedCount(id)).toBe(0);
   });
 
   it("check order: revoked beats over-cap and bad recipient", async () => {

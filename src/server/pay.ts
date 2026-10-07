@@ -42,7 +42,8 @@ export const hooks: {
 export async function authTab(credential: string): Promise<string> {
   const parsed = typeof credential === "string" ? parseCredential(credential) : null;
   if (!parsed) throw new TabError("INVALID_CREDENTIAL");
-  const r = await db().query(`SELECT credential_hash FROM tabs WHERE id = $1`, [parsed.tabId]);
+  // Scoped to this deployment's network: a devnet key never works against mainnet and vice versa.
+  const r = await db().query(`SELECT credential_hash FROM tabs WHERE id = $1 AND network = $2`, [parsed.tabId, config().network]);
   // Same error for unknown tab and wrong secret: don't leak which tab ids exist.
   if (!r.rowCount || !credentialMatches(credential, r.rows[0].credential_hash)) throw new TabError("INVALID_CREDENTIAL");
   return parsed.tabId;

@@ -3,6 +3,7 @@
 // So a DISPATCHING payment is never released before that height has passed; after it, the chain
 // is the source of truth: our delegate signature on a successful tx -> SETTLED, otherwise RELEASED.
 import { chain } from "./chain.js";
+import { config } from "./config.js";
 import { db, withTx } from "./db.js";
 import { TabError } from "./errors.js";
 import { lockTab } from "./pay.js";
@@ -75,13 +76,13 @@ export async function confirmPayment(tabId: string, paymentId: string, txSignatu
 
 /** Resolves every stuck payment that can be resolved now. Safe to run concurrently and repeatedly. */
 export async function reconcile(tabId?: string) {
-  const where = tabId ? `AND p.tab_id = $1` : "";
+  const where = tabId ? `AND p.tab_id = $2` : "";
   const rows = (await db().query(
     `SELECT p.id, p.state, p.delegate_signature, p.last_valid_block_height, p.tx_signature, p.updated_at, t.token_account
        FROM payments p JOIN tabs t ON t.id = p.tab_id
-      WHERE p.state IN ('RESERVED','DISPATCHING','AMBIGUOUS') ${where}
+      WHERE p.state IN ('RESERVED','DISPATCHING','AMBIGUOUS') AND t.network = $1 ${where}
       ORDER BY p.created_at LIMIT 200`,
-    tabId ? [tabId] : [],
+    tabId ? [config().network, tabId] : [config().network],
   )).rows;
   if (!rows.length) return { checked: 0, settled: 0, released: 0 };
 
