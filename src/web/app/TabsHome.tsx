@@ -4,6 +4,7 @@ import { fromUnits, toUnits, until } from "../lib/format";
 import { navigate } from "../main";
 import { walletMessage, type Session } from "./session";
 import { KeyReveal } from "./KeyReveal";
+import { Ring } from "../components/Ring";
 
 export function ConnectInline({ s, why }: { s: Session; why: string }) {
   if (s.account) return null;
@@ -36,7 +37,7 @@ export function TabsHome({ s, onKey }: { s: Session; onKey: (id: string, k: stri
       <div className="home-head">
         <div>
           <div className="label">Your tabs</div>
-          <h1 className="d2" style={{ marginTop: 14 }}>{tabs === null ? "Tabs" : live.length ? `${live.length} open` : "No open tabs"}</h1>
+          <h1 className="h1" style={{ marginTop: 14 }}>{tabs === null ? "Tabs" : live.length ? `${live.length} open` : "No open tabs"}</h1>
         </div>
         {!showNew && <button type="button" className="btn primary" onClick={() => setShowNew(true)}>Open a tab</button>}
       </div>
@@ -57,28 +58,28 @@ export function TabsHome({ s, onKey }: { s: Session; onKey: (id: string, k: stri
 function TabRows({ tabs, title }: { tabs: TabView[]; title: string }) {
   if (!tabs.length) return null;
   return (
-    <section style={{ marginTop: 64 }}>
-      <div className="label" style={{ marginBottom: 12 }}>{title}</div>
-      <ul className="tabrows">
+    <section style={{ marginTop: 40 }}>
+      <div className="eyebrow">{title}</div>
+      <div className="tabgrid">
         {tabs.map((t) => {
           const lim = BigInt(t.limit), spent = BigInt(t.spent), res = BigInt(t.reserved);
+          const frac = (x: bigint) => (lim > 0n ? Number((x * 10000n) / lim) / 10000 : 0);
+          const ended = t.status === "revoked" || t.status === "closed";
           return (
-            <li key={t.id}>
-              <a href={`/app/tab/${t.id}`} data-nav>
-                <span className="tr-name">
-                  <strong>{t.label || "Untitled tab"}</strong>
+            <a key={t.id} className="tabcard" href={`/app/tab/${t.id}`} data-nav>
+              <Ring spent={frac(spent)} held={frac(res)} void={ended} />
+              <span className="meta">
+                <strong>{t.label || "Untitled tab"}</strong>
+                <span className="mono num small">{t.status === "closed" ? <>{fromUnits(t.spent, t.decimals)} spent · {fromUnits(t.remaining, t.decimals)} returned</> : <>{fromUnits(t.remaining, t.decimals)} left of {fromUnits(t.limit, t.decimals)}</>}</span>
+                <span className="row-wrap" style={{ alignItems: "center", gap: 8 }}>
                   <span className={`chip ${t.status}`}>{t.status === "pending" ? "not funded" : t.status}</span>
+                  <span className="mono small muted">{t.status === "active" ? until(t.expiresAt) : new Date(t.closedAt ?? t.revokedAt ?? t.expiresAt).toLocaleDateString()}</span>
                 </span>
-                <span className="tr-meter">
-                  <span className="meter"><i style={{ width: `${Number((spent * 1000n) / lim) / 10}%` }} /><i className="res" style={{ left: `${Number((spent * 1000n) / lim) / 10}%`, width: `${Number((res * 1000n) / lim) / 10}%` }} /></span>
-                  <span className="mono num small">{t.status === "closed" ? <>{fromUnits(t.spent, t.decimals)} spent · {fromUnits(t.remaining, t.decimals)} returned</> : <>{fromUnits(t.remaining, t.decimals)} left of {fromUnits(t.limit, t.decimals)} USDC</>}</span>
-                </span>
-                <span className="mono small muted tr-when">{t.status === "active" ? until(t.expiresAt) : new Date(t.closedAt ?? t.revokedAt ?? t.expiresAt).toLocaleDateString()}</span>
-              </a>
-            </li>
+              </span>
+            </a>
           );
         })}
-      </ul>
+      </div>
     </section>
   );
 }
@@ -144,9 +145,9 @@ function NewTab({ s, onCancel, onCreated }: { s: Session; onCancel?: () => void;
   const stageText = { build: "Preparing the transaction…", sign: "Approve it in your wallet…", confirm: "Waiting for Solana…", activate: "Checking it on chain…" } as const;
 
   return (
-    <form className="newtab" onSubmit={submit} noValidate>
+    <form className="newtab panel" onSubmit={submit} noValidate>
       <div className="newtab-head">
-        <h2 className="d3">Open a tab</h2>
+        <h2 className="h3" style={{ fontSize: "clamp(1.6rem,2.4vw,2.2rem)" }}>Open a tab</h2>
         {onCancel && <button type="button" className="linkish" onClick={onCancel}>Cancel</button>}
       </div>
       <div className="form-grid">

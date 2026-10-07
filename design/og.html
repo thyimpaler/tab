@@ -1,27 +1,24 @@
 <!doctype html><html><head><meta charset="utf-8">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,700..900&family=Martian+Mono:wght@400;700&family=Schibsted+Grotesk:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@400;600&family=Geist+Mono:wght@500&display=swap">
 <style>
-html,body{margin:0;width:1200px;height:630px;background:#eef0ec;color:#14161a;overflow:hidden}
-.h{position:absolute;left:72px;top:118px;font-family:Anybody;font-stretch:62%;font-weight:800;font-size:124px;line-height:.86;text-transform:uppercase;word-spacing:.06em;margin:0}
-.h em{font-style:normal;color:#c8321f}
-.l{position:absolute;left:72px;top:64px;font-family:"Martian Mono";font-size:16px;letter-spacing:.08em;text-transform:uppercase;color:#5b616b}
-.s{position:absolute;left:76px;bottom:52px;font-family:"Schibsted Grotesk";font-size:24px;color:#14161a;max-width:640px;line-height:1.35}
-.r{position:absolute;right:72px;top:70px;width:300px;background:#fbfcfa;font-family:"Martian Mono";font-size:15px;line-height:1.7;padding:22px 22px 26px;transform:rotate(1.5deg);box-shadow:0 1px 0 #c9cdc6,0 30px 60px -30px rgba(20,22,26,.4)}
-.r b{display:block;text-align:center;font-family:Anybody;font-stretch:60%;font-weight:900;font-size:34px;line-height:1;margin-bottom:12px}
-.row{display:flex;justify-content:space-between}.m{color:#5b616b}.x{color:#5b616b;text-decoration:line-through}
-.sep{border-bottom:1px dashed #c9cdc6;margin:10px 0}.lim{color:#c8321f;font-weight:700}
+html,body{margin:0;width:1200px;height:630px;overflow:hidden}
+body{background:linear-gradient(180deg,#e8e6e0 0%,#cfccc5 100%);color:#0a0a09;font-family:"Funnel Display",sans-serif;position:relative}
+.wm{position:absolute;left:64px;top:52px;font:600 30px "Funnel Display";letter-spacing:-.04em}
+h1{position:absolute;left:64px;top:168px;margin:0;font-weight:400;font-size:80px;line-height:.92;letter-spacing:-.035em}
+h1 span{color:#5b5a55}
+p{position:absolute;left:68px;bottom:56px;margin:0;font:500 16px "Geist Mono";letter-spacing:.08em;text-transform:uppercase;color:#5b5a55}
+.ring{position:absolute;right:56px;top:105px;width:420px;height:420px;border-radius:50%;
+  background:conic-gradient(from 250deg,#fbfaf7,#8e8c86 12%,#2a2a28 24%,#cfccc5 36%,#fff 46%,#6f6d68 60%,#e8e6e0 72%,#3a3936 84%,#fbfaf7);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 22%),#000 calc(100% - 22% + 1px));filter:drop-shadow(0 30px 50px rgba(0,0,0,.3))}
+.arc{position:absolute;right:calc(56px + 19px);top:124px;width:382px;height:382px;border-radius:50%;
+  background:conic-gradient(#ff4d2e 0 .62turn,rgba(0,0,0,.35) 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4.4%),#000 calc(100% - 4.4% + 1px))}
+.num{position:absolute;right:56px;top:105px;width:420px;height:420px;display:grid;place-content:center;text-align:center}
+.num b{font:500 64px "Geist Mono";letter-spacing:-.04em}
+.num i{font:500 13px "Geist Mono";font-style:normal;letter-spacing:.12em;text-transform:uppercase;color:#5b5a55;margin-top:8px}
 </style></head><body>
-<div class="l">Spending limits for AI agents · USDC on Solana</div>
-<h1 class="h">Put your<br>agent on<br>a <em>tab.</em></h1>
-<p class="s">Capped, expiring, revocable. The money stays in an account your wallet owns.</p>
-<div class="r"><b>TAB</b>
-<div class="row"><span>pricefeed.dev</span><span>0.010</span></div>
-<div class="row"><span>search.lens.ai</span><span>0.050</span></div>
-<div class="row"><span>scrape.page</span><span>0.250</span></div>
-<div class="row x"><span>drain.xyz</span><span>REFUSED</span></div>
-<div class="row"><span>llm.gateway</span><span>0.420</span></div>
-<div class="sep"></div>
-<div class="row"><b style="all:unset;font-weight:700">SPENT</b><span>0.730</span></div>
-<div class="row lim"><span>LIMIT</span><span>5.000</span></div>
-</div>
+<div class="wm">tab</div>
+<h1>Give your agent<br>a tab. <span>Not<br>your wallet.</span></h1>
+<p>Spending limits for AI agents · USDC on Solana</p>
+<div class="ring"></div><div class="arc"></div>
+<div class="num"><b>1.90</b><i>USDC left of 5.00</i></div>
 </body></html>

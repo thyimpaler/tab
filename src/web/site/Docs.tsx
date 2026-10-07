@@ -29,8 +29,8 @@ export function Docs() {
           <a href="#security">Security model</a>
         </aside>
         <article className="prose">
-          <h1 className="d2">Docs</h1>
-          <p className="lede">TAB gives an AI agent a capped, expiring, revocable USDC allowance on Solana. The agent pays x402 V2 services through TAB and never holds a wallet key.</p>
+          <h1 className="h1">Docs</h1>
+          <p className="lede" style={{ marginTop: 24, maxWidth: "56ch" }}>TAB gives an AI agent a capped, expiring, revocable USDC allowance on Solana. The agent pays x402 V2 services through TAB and never holds a wallet key.</p>
 
           <h2 id="quickstart">Quickstart</h2>
           <ol>

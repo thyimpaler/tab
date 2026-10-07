@@ -17,7 +17,7 @@ export function KeyReveal({ credential, title, onDone, doneLabel }: { credential
   return (
     <section className="reveal" aria-labelledby="reveal-h">
       <div className="label">Agent key · shown once</div>
-      <h2 className="d2" id="reveal-h" style={{ marginTop: 14 }}>{title}</h2>
+      <h2 className="h2" id="reveal-h" style={{ marginTop: 14 }}>{title}</h2>
       <p className="lede muted" style={{ marginTop: 18 }}>Give this key to your agent as <code>TAB_CREDENTIAL</code>. TAB only stores a hash of it, so it can't be shown again. If you lose it, rotate it from the tab page.</p>
       <div className="copybox" style={{ marginTop: 28 }}>
         <code ref={ref as any}>{credential}</code>

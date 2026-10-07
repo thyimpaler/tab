@@ -41,7 +41,7 @@ function Gate({ s }: { s: Session }) {
     <section className="gate">
       <div>
         <div className="label">Dashboard</div>
-        <h1 className="d2" style={{ marginTop: 18 }}>{connected ? "Sign in" : "Connect a wallet"}</h1>
+        <h1 className="h1" style={{ marginTop: 18 }}>{connected ? "Sign in" : "Connect a wallet"}</h1>
         <p className="lede muted" style={{ marginTop: 24 }}>
           {connected
             ? "Sign a message to prove the wallet is yours. It's not a transaction and costs nothing."

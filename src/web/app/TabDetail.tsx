@@ -5,6 +5,7 @@ import { walletMessage, type Session } from "./session";
 import { ConnectInline } from "./TabsHome";
 import { KeyReveal } from "./KeyReveal";
 import { Console, type LogLine } from "../components/Console";
+import { Ring } from "../components/Ring";
 import { Tab, TabError } from "../../../packages/sdk/src/index";
 
 type Detail = { tab: TabView; payments: PaymentView[]; allowlist: string[] };
@@ -65,56 +66,36 @@ export function TabDetail({ s, tabId, credential, rememberKey }: { s: Session; t
   }
 
   const lim = BigInt(t.limit), spent = BigInt(t.spent), res = BigInt(t.reserved);
-  const pct = (x: bigint) => `${Number((x * 1000n) / lim) / 10}%`;
+  const frac = (x: bigint) => (lim > 0n ? Number((x * 10000n) / lim) / 10000 : 0);
   const chainOk = t.chain ? BigInt(t.chain.delegatedAmount) >= BigInt(t.remaining) && t.chain.delegate === t.delegate : null;
+  const ended = t.status === "revoked" || t.status === "closed";
+  const leftWord = t.status === "closed" ? "returned" : t.status === "revoked" || t.status === "expired" ? "unspent" : "left";
 
   return (
     <div className="detail">
       <a className="back" href="/app" data-nav>← All tabs</a>
       <div className="detail-grid">
-        <div className="receipt ledger">
-          {(t.status === "revoked" || t.status === "closed") && <div className="stamp">{t.status === "closed" ? "Closed" : "Void"}</div>}
-          <div className="r-head"><strong>TAB</strong><span className="muted">{t.label || "Untitled tab"} · #{t.id.slice(0, 4).toUpperCase()}</span></div>
-          <div className="row muted"><span>opened</span><span>{new Date(t.createdAt).toLocaleString()}</span></div>
-          <div className="row muted"><span>expires</span><span>{new Date(t.expiresAt).toLocaleString()}</span></div>
-          <div className="row muted"><span>max per payment</span><span>{t.perPaymentCap ? fromUnits(t.perPaymentCap, dec) : "none"}</span></div>
-          <div className="row muted"><span>services</span><span>{d.allowlist.length ? `${d.allowlist.length} allowed` : "any"}</span></div>
-          <div className="sep" />
-          {d.payments.length === 0 ? <div className="muted" style={{ paddingBlock: 12, textAlign: "center" }}>No payments yet</div> : (
-            <div className="ledger-lines">
-              {d.payments.slice().reverse().map((p) => (
-                <div key={p.id} className={"row line" + (p.state === "RELEASED" ? " rej" : "")} title={`${p.resource ?? p.recipient} · ${STATE_LABEL[p.state]}`}>
-                  <span>{p.resource ? hostOf(p.resource) : short(p.recipient)}</span>
-                  <span>
-                    {p.tx_signature && p.state === "SETTLED" ? <a href={explorerTx(p.tx_signature, net)} target="_blank" rel="noreferrer">{fromUnits(p.amount, dec, 3)}</a> : fromUnits(p.amount, dec, 3)}
-                    {p.state !== "SETTLED" && <span className="state"> {STATE_LABEL[p.state]}</span>}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-          <div className="sep" />
-          <div className="row total"><span>SPENT</span><span>{fromUnits(t.spent, dec, 3)}</span></div>
-          {res > 0n && <div className="row muted"><span>in flight</span><span>{fromUnits(t.reserved, dec, 3)}</span></div>}
-          <div className="row total limit"><span>LIMIT</span><span>{fromUnits(t.limit, dec, 3)} USDC</span></div>
-          <div className="meter" style={{ margin: "12px 0 4px" }}><i style={{ width: pct(spent) }} /><i className="res" style={{ left: pct(spent), width: pct(res) }} /></div>
-          <div className="row"><span>left</span><span className="total">{fromUnits(t.remaining, dec, 3)}</span></div>
-          <div className="sep" />
-          <div className="row muted small"><span>account</span><a href={explorerAddr(t.tokenAccount, net)} target="_blank" rel="noreferrer">{short(t.tokenAccount, 5)}</a></div>
-          <div className="row muted small">
-            <span>on chain</span>
-            <span>{t.chain === null ? "account closed" : !t.chain ? "not checked" : <>{fromUnits(t.chain.delegatedAmount, dec, 3)} allowed {chainOk ? "✓" : <span className="stamp-text">mismatch</span>}</>}</span>
+        <aside className="detail-ring" aria-label="Tab balance">
+          <Ring spent={frac(spent)} held={frac(res)} void={ended} label={`${fromUnits(t.remaining, dec)} USDC ${leftWord} of ${fromUnits(t.limit, dec)}`}
+            value={fromUnits(t.remaining, dec)} sub={<>USDC {leftWord} <em>of {fromUnits(t.limit, dec)}</em></>} />
+          <div className="terms">
+            <div><span className="label">Spent</span><b>{fromUnits(t.spent, dec, 3)}</b></div>
+            <div><span className="label">In flight</span><b>{fromUnits(t.reserved, dec, 3)}</b></div>
+            <div><span className="label">Max per payment</span><b>{t.perPaymentCap ? fromUnits(t.perPaymentCap, dec) : "none"}</b></div>
+            <div><span className="label">Services</span><b>{d.allowlist.length ? `${d.allowlist.length} allowed` : "any"}</b></div>
+            <div><span className="label">Expires</span><b>{t.status === "active" ? until(t.expiresAt) : new Date(t.expiresAt).toLocaleDateString()}</b></div>
+            <div><span className="label">On chain</span><b>{t.chain === null ? "account closed" : !t.chain ? "not checked" : <>{fromUnits(t.chain.delegatedAmount, dec, 3)} {chainOk ? "✓" : <span className="accent-text">mismatch</span>}</>}</b></div>
+            <div style={{ gridColumn: "1 / -1" }}><span className="label">Tab account</span><b><a href={explorerAddr(t.tokenAccount, net)} target="_blank" rel="noreferrer">{short(t.tokenAccount, 6)}</a></b></div>
           </div>
-        </div>
+        </aside>
 
         <div className="detail-side">
           <div>
             <div className="row-wrap" style={{ alignItems: "center" }}>
               <span className={`chip ${t.status}`}>{t.status === "pending" ? "not funded" : t.status}</span>
-              {t.status === "active" && <span className="mono small muted">{until(t.expiresAt)}</span>}
+              <span className="mono small muted">#{t.id.slice(0, 4).toUpperCase()} · opened {new Date(t.createdAt).toLocaleDateString()}</span>
             </div>
-            <h1 className="d2" style={{ marginTop: 16 }}>{fromUnits(t.remaining, dec)}<span className="unit"> USDC {t.status === "closed" ? "returned" : t.status === "revoked" || t.status === "expired" ? "unspent" : "left"}</span></h1>
-            <p className="muted" style={{ marginTop: 12 }}>of {fromUnits(t.limit, dec)} · {fromUnits(t.spent, dec)} spent{res > 0n ? ` · ${fromUnits(t.reserved, dec, 3)} in flight` : ""}</p>
+            <h1 className="h1" style={{ marginTop: 16, fontSize: "clamp(2.4rem,4.6vw,4.4rem)" }}>{t.label || "Untitled tab"}</h1>
           </div>
 
           {t.status === "pending" && (
@@ -150,6 +131,22 @@ export function TabDetail({ s, tabId, credential, rememberKey }: { s: Session; t
           )}
 
           {err && <p className="err-line" role="alert">{err}</p>}
+
+          <section className="ledger" aria-label="Payments">
+            <div className="row-between"><span className="eyebrow">Payments</span><span className="mono small muted">{d.payments.length}</span></div>
+            {d.payments.length === 0 ? <p className="muted" style={{ margin: "14px 0 0" }}>No payments yet. They show up here as the agent pays.</p> : (
+              <ul>
+                {d.payments.map((p) => (
+                  <li key={p.id} className={p.state === "RELEASED" ? "rel" : p.state === "SETTLED" ? "ok" : ""}>
+                    <span className="what" title={p.resource ?? p.recipient}>{p.resource ? hostOf(p.resource) : short(p.recipient)}</span>
+                    <span className="amt">{p.tx_signature && p.state === "SETTLED" ? <a href={explorerTx(p.tx_signature, net)} target="_blank" rel="noreferrer">{fromUnits(p.amount, dec, 3)}</a> : fromUnits(p.amount, dec, 3)}</span>
+                    <span className="state">{STATE_LABEL[p.state]}</span>
+                    <span className="state" style={{ textAlign: "right" }}>{new Date(p.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
 
           {open && s.cfg?.demo && <TestAgent tabId={tabId} credential={credential} onKey={rememberKey} onPaid={load} decimals={dec} net={net} />}
           {open && !s.cfg?.demo && (
