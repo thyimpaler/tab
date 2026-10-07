@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { TopBar, Footer } from "../components/Chrome";
 import { Ring } from "../components/Ring";
-import { Console, type LogLine } from "../components/Console";
-import { SIM_CALLS, SIM_LIMIT, fakeSig, reducedMotion, usdc } from "../components/sim";
+import { TryIt } from "../components/TryIt";
+import { SIM_LIMIT, reducedMotion, usdc } from "../components/sim";
 
 // Hero timeline: a scripted agent session that scrolling plays forward and backward.
 // Integers in micro-USDC; refused calls never move the ring.
@@ -109,63 +109,6 @@ const CHECKS = [
   { k: "limit", h: "There's room left", p: "Spent plus in-flight can never pass the limit, even with fifty requests at once. The chain enforces the same ceiling." },
 ];
 
-function ChecksConsole() {
-  const [lines, setLines] = useState<LogLine[]>([{ kind: "dim", text: '$ agent run --task "compare SOL fee data, 6 sources"' }]);
-  const [left, setLeft] = useState(SIM_LIMIT);
-  const [running, setRunning] = useState(false);
-  const [revoked, setRevoked] = useState(false);
-  const runId = useRef(0);
-  const started = useRef(false);
-  const box = useRef<HTMLDivElement>(null);
-
-  async function run() {
-    if (running) return;
-    const me = ++runId.current; setRunning(true);
-    let rem = revoked ? SIM_LIMIT : left;
-    if (revoked) { setRevoked(false); setLeft(SIM_LIMIT); setLines([{ kind: "dim", text: "$ tab open --limit 5.00 --cap 0.50 --expires 7d" }]); }
-    for (const c of SIM_CALLS) {
-      await new Promise((r) => setTimeout(r, reducedMotion() ? 0 : 900));
-      if (runId.current !== me) return;
-      let refuse = c.refuse;
-      if (!refuse && c.amount > rem) refuse = "over the limit";
-      const head: LogLine = { kind: "ok", text: <><span className="dim">GET </span>{c.url}<span className="dim"> → 402 </span>{usdc(c.amount)}</> };
-      const tail: LogLine = refuse
-        ? { kind: "no", text: `  refused: ${refuse}. nothing signed.` }
-        : { kind: "dim", text: `  open ✓ in date ✓ cap ✓ allowed ✓ room ✓  signed · settled ${fakeSig()}…` };
-      if (!refuse) rem -= c.amount;
-      setLeft(rem);
-      setLines((l) => [...l, head, tail].slice(-40));
-    }
-    setRunning(false);
-  }
-  function revoke() {
-    runId.current++; setRunning(false); setRevoked(true);
-    setLines((l) => [...l, { kind: "no", text: "tab revoked by owner. every request from here is refused." }]);
-  }
-  useEffect(() => {
-    const el = box.current; if (!el) return;
-    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting) && !started.current) { started.current = true; run(); } }, { threshold: 0.3 });
-    io.observe(el);
-    return () => { io.disconnect(); runId.current++; started.current = false; };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  return (
-    <div ref={box}>
-      <Console
-        title="research-agent · simulation"
-        status={revoked ? "revoked" : running ? "agent running" : "tab open · 6d 23h left"}
-        balance={usdc(left)}
-        balanceNote={<>USDC left<br />of {usdc(SIM_LIMIT)}</>}
-        lines={lines}
-        actions={<>
-          <button type="button" onClick={run} disabled={running}>{revoked ? "Open a new tab" : "Run agent"}</button>
-          <button type="button" onClick={revoke} disabled={revoked}>Revoke</button>
-        </>}
-      />
-    </div>
-  );
-}
-
 export function Landing() {
   // Arriving at /#how from another page: the section only exists after render, so jump to it then.
   useEffect(() => {
@@ -191,19 +134,24 @@ export function Landing() {
           </div>
         </section>
 
+        <section className="panel" id="try">
+          <div className="panel-head">
+            <div><div className="eyebrow">Try it</div><h2 className="h2">Turn the ring. <span className="mute">Then let it spend.</span></h2></div>
+            <p className="lede muted">Set a limit and a cap, then run a pretend agent against them. Watch what gets paid and what gets refused.</p>
+          </div>
+          <TryIt />
+        </section>
+
         <section className="panel">
           <div className="panel-head">
             <div><div className="eyebrow">Every payment</div><h2 className="h2">Five checks. <span className="mute">In this order.</span></h2></div>
             <p className="lede muted">Before anything is signed. A failed check returns a typed error to the agent and signs nothing.</p>
           </div>
-          <div className="checks-grid">
-            <ol className="checks">
+          <ol className="checks wide">
               {CHECKS.map((c, i) => (
                 <li key={c.k}><span className="n">{String(i + 1).padStart(2, "0")}</span><h3 className="h3">{c.h}</h3><span className="k">{c.k}</span><p>{c.p}</p></li>
               ))}
-            </ol>
-            <ChecksConsole />
-          </div>
+          </ol>
         </section>
 
         <section className="panel light">

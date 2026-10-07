@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Ring } from "../components/Ring";
 
 /** Shows an agent key once. Copy falls back to selecting the text (clipboard can fail after wallet popups). */
 export function KeyReveal({ credential, title, onDone, doneLabel }: { credential: string; title: string; onDone: () => void; doneLabel: string }) {
@@ -16,18 +17,22 @@ export function KeyReveal({ credential, title, onDone, doneLabel }: { credential
 
   return (
     <section className="reveal" aria-labelledby="reveal-h">
-      <div className="label">Agent key · shown once</div>
-      <h2 className="h2" id="reveal-h" style={{ marginTop: 14 }}>{title}</h2>
-      <p className="lede muted" style={{ marginTop: 18 }}>Give this key to your agent as <code>TAB_CREDENTIAL</code>. TAB only stores a hash of it, so it can't be shown again. If you lose it, rotate it from the tab page.</p>
-      <div className="copybox" style={{ marginTop: 28 }}>
-        <code ref={ref as any}>{credential}</code>
-        <button type="button" className="btn primary" onClick={copy}>{copied === "yes" ? "Copied" : copied === "manual" ? "Press Ctrl+C" : "Copy key"}</button>
+      <div className="reveal-ring" aria-hidden="true"><Ring spent={1} value="✓" sub="tab open" /></div>
+      <div className="reveal-copy">
+        <div className="eyebrow">Agent key · shown once</div>
+        <h2 className="h2" id="reveal-h">{title}</h2>
+        <p className="lede muted">Give this key to your agent as <code>TAB_CREDENTIAL</code>. TAB only keeps a hash, so it can't show it again. Lose it and you can rotate it from the tab.</p>
+        <div className="keycard">
+          <code ref={ref as any}>{credential}</code>
+          <button type="button" className="pill" onClick={copy}>{copied === "yes" ? "Copied" : copied === "manual" ? "Press Ctrl+C" : "Copy key"} <b aria-hidden="true">{copied === "yes" ? "✓" : "›"}</b></button>
+        </div>
+        <label className="switch" style={{ marginTop: 22 }}>
+          <input type="checkbox" checked={saved} onChange={(e) => setSaved(e.target.checked)} />
+          <span className="track" aria-hidden="true"><i /></span>
+          <span>I've saved the key somewhere safe</span>
+        </label>
+        <div style={{ marginTop: 22 }}><button type="button" className="btn" onClick={onDone} disabled={!saved}>{doneLabel}</button></div>
       </div>
-      <label className="check" style={{ marginTop: 20 }}>
-        <input type="checkbox" checked={saved} onChange={(e) => setSaved(e.target.checked)} />
-        <span>I've saved the key somewhere safe</span>
-      </label>
-      <div className="cta-row"><button type="button" className="btn" onClick={onDone} disabled={!saved}>{doneLabel}</button></div>
     </section>
   );
 }

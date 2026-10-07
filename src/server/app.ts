@@ -34,6 +34,7 @@ app.get("/v1/config", (c) => c.json({
   // Public endpoint only: never expose a keyed RPC URL.
   demo: demoEnabled(),
   tabFee: config().tabFee.toString(),
+  maxTabLimit: process.env.MAX_TAB_LIMIT ?? null,
   rpcUrl: process.env.PUBLIC_RPC_URL ?? (config().network === "devnet" ? "https://api.devnet.solana.com" : "https://api.mainnet-beta.solana.com"),
 }));
 

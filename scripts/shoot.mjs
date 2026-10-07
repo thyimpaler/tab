@@ -41,6 +41,19 @@ if (process.env.SESSION_WALLET) {
 await send("Page.enable");
 await send("Page.navigate", { url });
 await sleep(3500);
+// Optional real mouse drag before shooting: DRAG="x1,y1;x2,y2;..." (viewport px).
+if (process.env.DRAG) {
+  const pts = process.env.DRAG.split(";").map((p) => p.split(",").map(Number));
+  const ev = (type, [x, y], buttons) => send("Input.dispatchMouseEvent", { type, x, y, button: "left", buttons, clickCount: 1 });
+  await ev("mouseMoved", pts[0], 0);
+  await ev("mousePressed", pts[0], 1);
+  for (const p of pts.slice(1)) { await ev("mouseMoved", p, 1); await sleep(40); }
+  await ev("mouseReleased", pts[pts.length - 1], 0);
+  await sleep(400);
+  console.log("after drag:", await evaluate(`JSON.stringify({value: document.querySelector('.dial-value')?.value, aria: document.querySelector('.dial')?.getAttribute('aria-valuetext'), total: document.querySelector('.receipt-line .total')?.textContent})`));
+}
+// Optional page script before shooting (local dev checks), e.g. EVAL="document.querySelector('#try button')?.click()".
+if (process.env.EVAL) { await evaluate(process.env.EVAL); await sleep(Number(process.env.EVAL_WAIT ?? 1000)); }
 const out = [];
 for (const s of scrolls.split(",")) {
   const js = s.startsWith("#") ? `document.querySelector(${JSON.stringify(s)})?.scrollIntoView()`
