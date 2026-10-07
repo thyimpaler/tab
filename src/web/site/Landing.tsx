@@ -102,7 +102,7 @@ export function Landing() {
         <section className="sec try-sec" id="try">
           <header className="sec-head split">
             <div><span className="eyebrow">Try it</span><h2 className="h2">Run an agent <span className="mute">on a tab.</span></h2></div>
-            <p className="lede muted">Turn the ring to set a limit, pick the rules, then let a pretend agent spend. Every bill prints on the receipt, paid or refused.</p>
+            <p className="lede muted">Give a pretend agent a real task, set its limit and rules, then watch it work: what it pays for, what it finds, and what TAB refuses.</p>
           </header>
           <TryIt />
         </section>

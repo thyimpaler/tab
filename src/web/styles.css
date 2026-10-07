@@ -268,6 +268,28 @@ pre.code .s{color:var(--paper-2)}
 .tryit-ring{position:relative;width:min(100%,540px);aspect-ratio:1}
 .tryit-ring .ring-box{position:absolute;inset:7%;width:auto}
 .dial-value.as-text{display:block;width:auto}
+/* the agent at work: what it does, what it pays, what it finds */
+.agent{align-self:stretch;width:100%;height:min(600px,76svh);display:grid;grid-template-rows:auto minmax(0,1fr) auto;background:var(--graphite-2);border-radius:var(--radius);padding:20px 22px;min-width:0}
+.agent-head{display:grid;grid-template-columns:92px minmax(0,1fr);gap:16px;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.agent-ring .ring-box::before{display:none}
+.agent-ring .readout{padding:12%}
+.agent-ring .readout strong{font-size:17px}
+.agent-task{display:grid;gap:5px;min-width:0}
+.agent-task b{font:400 clamp(1.05rem,1.4vw,1.3rem)/1.15 var(--display);letter-spacing:-.015em}
+.agent-state{font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--paper-2)}
+.agent-state.out{color:var(--accent)}
+.agent-log{list-style:none;margin:0;padding:4px 0;overflow:auto;min-height:0;scrollbar-width:none;-webkit-mask:linear-gradient(transparent,#000 18px);mask:linear-gradient(transparent,#000 18px)}
+.agent-log::-webkit-scrollbar{display:none}
+.agent-log li{display:grid;gap:5px;padding:13px 0;border-bottom:1px solid var(--line)}
+.agent-log .say{margin:0;font-size:15px;line-height:1.35;color:var(--paper);animation:print .45s var(--ease) both}
+.agent-log .call{font:12px/1.4 var(--mono);color:var(--paper-3);overflow-wrap:anywhere;animation:print .45s var(--ease) .3s both}
+.agent-log .call .r{color:var(--paper-2)}
+.agent-log .got{margin:0;font-size:14px;line-height:1.4;color:var(--paper-2);padding-left:16px;position:relative;animation:print .45s var(--ease) .6s both}
+.agent-log .got::before{content:"↳";position:absolute;left:0;color:var(--paper-3)}
+.agent-log li.skip .call .r,.agent-log li.stop .call .r,.agent-log li.stop .got{color:var(--accent)}
+.agent-answer{padding-top:14px;border-top:1px solid var(--line-2);display:grid;gap:8px;animation:print .5s var(--ease) both}
+.agent-answer p,.agent-answer ul{margin:0;font-size:15px;line-height:1.45}
+.agent-answer ul{padding-left:18px;color:var(--paper-2)}
 .receipt{position:relative;display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:min(600px,76svh);min-width:0;padding:24px 22px 34px;background:#f1efe9;color:var(--ink);font:12.5px/1.5 var(--mono);border-radius:6px 6px 0 0;transform:rotate(1deg);
   -webkit-mask:linear-gradient(#000 0 0) top/100% calc(100% - 9px) no-repeat,conic-gradient(from -45deg at bottom,#000 90deg,#0000 0) bottom/18px 9px repeat-x;
   mask:linear-gradient(#000 0 0) top/100% calc(100% - 9px) no-repeat,conic-gradient(from -45deg at bottom,#000 90deg,#0000 0) bottom/18px 9px repeat-x}
@@ -434,6 +456,7 @@ pre.code .s{color:var(--paper-2)}
   .sat{font-size:11px;padding:7px 11px}
   .try-dial{order:-1}
   .receipt{transform:none;height:470px}
+  .agent{height:540px;padding:16px}
   .gate-track{display:none}
   .gate-pick{flex-wrap:nowrap;overflow-x:auto;margin-inline:calc(var(--edge) * -1);padding:2px var(--edge);scrollbar-width:none}
   .gate-pick::-webkit-scrollbar{display:none}
