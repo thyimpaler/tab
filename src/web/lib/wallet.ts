@@ -24,12 +24,56 @@ export function listWallets(onChange: (ws: SolWallet[]) => void): () => void {
   return () => { a(); b(); };
 }
 
+const pickAccount = (accounts: readonly WalletAccount[]) =>
+  accounts.find((a) => a.chains.some((c) => c.startsWith("solana:"))) ?? accounts[0];
+
+// The wallet's own namespaced provider, used only as a fallback when Wallet Standard connect fails.
+// Never the shared window.solana, which other extensions hijack.
+function nativeProvider(name: string): { connect: () => Promise<unknown> } | null {
+  const g = window as any;
+  const n = name.toLowerCase();
+  if (n.includes("phantom")) return g.phantom?.solana ?? null;
+  if (n.includes("solflare")) return g.solflare ?? null;
+  if (n.includes("backpack")) return g.backpack?.solana ?? g.backpack ?? null;
+  return null;
+}
+
 export async function connect(w: Wallet): Promise<WalletAccount> {
   const f = w.features["standard:connect"] as any;
-  const { accounts } = await f.connect();
-  const acct = accounts.find((a: WalletAccount) => a.chains.some((c) => c.startsWith("solana:"))) ?? accounts[0];
-  if (!acct) throw new Error("The wallet didn't share an account.");
-  return acct;
+  try {
+    const { accounts } = await f.connect();
+    const acct = pickAccount(accounts) ?? pickAccount(w.accounts);
+    if (acct) return acct;
+  } catch (e) {
+    console.warn(`[tab] ${w.name} standard:connect failed`, e);
+    if (isRejection(e)) throw e;
+    // Some wallets connect but still throw ("Unexpected error"); others need their native provider.
+    const already = pickAccount(w.accounts);
+    if (already) return already;
+    const native = nativeProvider(w.name);
+    if (!native) throw new Error(`${w.name} couldn't connect. Unlock it, then try again. If you have several wallet extensions, try one of the others.`);
+    try {
+      await native.connect();
+      // Give the Wallet Standard adapter a moment to see the account the native connect just authorised.
+      for (let i = 0; i < 10; i++) {
+        const acct = pickAccount(w.accounts);
+        if (acct) return acct;
+        const retry = await f.connect().catch(() => null);
+        if (retry?.accounts?.length) return pickAccount(retry.accounts)!;
+        await new Promise((r) => setTimeout(r, 200));
+      }
+    } catch (e2) {
+      console.warn(`[tab] ${w.name} native connect failed`, e2);
+      if (isRejection(e2)) throw e2;
+    }
+    throw new Error(`${w.name} couldn't connect. Unlock it, then try again. If you have several wallet extensions, try one of the others.`);
+  }
+  throw new Error(`${w.name} didn't share an account. Open the wallet, pick an account, then try again.`);
+}
+
+function isRejection(e: unknown) {
+  const err = e as any;
+  return err?.code === 4001 || /reject|denied|cancel/i.test(String(err?.message ?? ""));
 }
 
 export async function disconnect(w: Wallet) {

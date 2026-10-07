@@ -1,9 +1,5 @@
 import type { ReactNode } from "react";
 
-export function Grain() {
-  return <div className="grain" aria-hidden="true" />;
-}
-
 export function TopBar({ current, right, blend }: { current?: "home" | "docs" | "app"; right?: ReactNode; blend?: boolean }) {
   return (
     <header className={`top ${blend ? "blend" : "solid"}`}>

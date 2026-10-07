@@ -28,41 +28,56 @@ const TIMELINE = (() => {
 function Hero() {
   const stage = useRef<HTMLElement>(null);
   const [idx, setIdx] = useState(-1);
-  const [p, setP] = useState(0);
+  const idxRef = useRef(-1);
 
   useEffect(() => {
     const root = document.querySelector(".landing") as HTMLElement | null;
-    let raf = 0;
+    const el = stage.current;
+    if (!root || !el) return;
+    const nav = root.querySelector(".top") as HTMLElement | null;
+    let raf = 0, dark = false, past = false;
+    // Scroll writes CSS variables on the stage only (transform/opacity work for the compositor).
+    // React re-renders only when the scripted session moves to the next payment.
     const frame = () => {
       raf = 0;
-      const el = stage.current; if (!el || !root) return;
       const r = el.getBoundingClientRect();
       const prog = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - innerHeight)));
-      // Background crosses mid-grey fast so text never sits on it for long.
       const t = Math.min(1, Math.max(0, (prog - 0.3) / 0.25)), bg = t * t * (3 - 2 * t);
-      root.style.setProperty("--p", prog.toFixed(4));
-      root.style.setProperty("--bg", bg.toFixed(4));
-      // Once the stage starts scrolling away, fade its bottom-edge text so it never slides under the nav.
       const exit = Math.min(1, Math.max(0, (innerHeight - r.bottom) / (innerHeight * 0.3)));
-      root.style.setProperty("--exit", exit.toFixed(4));
-      root.classList.toggle("past", exit >= 1);
-      root.classList.toggle("dark", bg > 0.5);
-      setP(prog);
-      setIdx(Math.min(TIMELINE.length - 1, Math.floor(prog * 1.12 * TIMELINE.length) - 1));
+      el.style.setProperty("--p", prog.toFixed(4));
+      el.style.setProperty("--bg", bg.toFixed(3));
+      el.style.setProperty("--exit", exit.toFixed(3));
+      // Class flips are scoped (hero stage / nav) so they never restyle the panels below.
+      if (bg > 0.5 !== dark) { dark = bg > 0.5; el.classList.toggle("dark", dark); }
+      if (exit >= 1 !== past) { past = exit >= 1; nav?.classList.toggle("past", past); }
+      const next = Math.min(TIMELINE.length - 1, Math.floor(prog * 1.12 * TIMELINE.length) - 1);
+      if (next !== idxRef.current) { idxRef.current = next; setIdx(next); }
     };
     const on = () => { if (!raf) raf = requestAnimationFrame(frame); };
     frame();
     addEventListener("scroll", on, { passive: true });
     addEventListener("resize", on);
+
+    // Entrance: wait for the display face (no headline jump), at most ~0.9s, then one staggered rise.
+    let done = false;
+    const reveal = () => { if (!done) { done = true; root.classList.add("ready"); } };
+    if (reducedMotion()) reveal();
+    else {
+      Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => setTimeout(r, 900))])
+        .then(() => requestAnimationFrame(() => requestAnimationFrame(reveal)));
+    }
     return () => { removeEventListener("scroll", on); removeEventListener("resize", on); cancelAnimationFrame(raf); };
   }, []);
 
   const spent = idx < 0 ? 0 : TIMELINE[idx].spent;
-  const recent = TIMELINE.slice(Math.max(0, idx - 4), idx + 1);
+  const from = Math.max(0, idx - 4);
+  const recent = TIMELINE.slice(from, idx + 1);
 
   return (
     <section className="stage" ref={stage} aria-label="TAB: give your agent a capped USDC allowance">
       <div className="sticky">
+        <div className="shade" aria-hidden="true" />
+        <div className="noise" aria-hidden="true" />
         <div className="hero-copy">
           <div>
             <h1 className="h1">Give your agent<br />a tab. <span className="mute">Not<br />your wallet.</span></h1>
@@ -73,11 +88,11 @@ function Hero() {
           <p className="lede">TAB lets an AI agent pay for APIs in USDC on Solana, up to a limit you set. <span className="mute">It stops at the cap, it expires on its own, and the money stays in an account your wallet owns.</span></p>
         </div>
         <div className="hero-ring" aria-hidden="true">
-          <Ring spent={spent / SIM_LIMIT} turn={p * 140} value={usdc(SIM_LIMIT - spent, 2)} sub={<>USDC left <em>of {usdc(SIM_LIMIT, 2)}</em></>} />
+          <Ring spent={spent / SIM_LIMIT} value={usdc(SIM_LIMIT - spent, 2)} sub={<>USDC left <em>of {usdc(SIM_LIMIT, 2)}</em></>} />
         </div>
         <div className="feed" aria-hidden="true">
           {recent.map((t, i) => (
-            <div key={`${idx}-${i}`} className={t.r ? "no" : ""}>{t.r ? "refused" : "paid   "}  {usdc(t.a)}  {t.u}{t.r ? `  · ${t.r}` : ""}</div>
+            <div key={from + i} className={t.r ? "no" : ""}>{t.r ? "refused" : "paid   "}  {usdc(t.a)}  {t.u}{t.r ? `  · ${t.r}` : ""}</div>
           ))}
         </div>
         <div className="lock" aria-hidden="true"><i />limit reached · nothing more signed</div>
