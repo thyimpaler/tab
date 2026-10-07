@@ -53,10 +53,12 @@ if (process.env.DRAG) {
   console.log("after drag:", await evaluate(`JSON.stringify({value: document.querySelector('.dial-value')?.value, aria: document.querySelector('.dial')?.getAttribute('aria-valuetext'), total: document.querySelector('.receipt-line .total')?.textContent})`));
 }
 // Optional page script before shooting (local dev checks), e.g. EVAL="document.querySelector('#try button')?.click()".
-if (process.env.EVAL) { await evaluate(process.env.EVAL); await sleep(Number(process.env.EVAL_WAIT ?? 1000)); }
+if (process.env.EVAL) { const v = await evaluate(process.env.EVAL); if (v !== undefined) console.log("eval:", v); await sleep(Number(process.env.EVAL_WAIT ?? 1000)); }
 const out = [];
 for (const s of scrolls.split(",")) {
-  const js = s.startsWith("#") ? `document.querySelector(${JSON.stringify(s)})?.scrollIntoView()`
+  // "#id" or "#id+600": scroll the element to the top, then N more pixels.
+  const [sel, extra = "0"] = s.split("+");
+  const js = s.startsWith("#") ? `(()=>{const e=document.querySelector(${JSON.stringify(sel)});if(e)scrollTo(0,e.getBoundingClientRect().top+scrollY+${Number(extra)});})()`
     : s.startsWith("p") ? `(()=>{const st=document.querySelector('.stage');scrollTo(0, ${Number(s.slice(1))} * (st.offsetHeight - innerHeight));})()`
     : `scrollTo(0, ${Number(s)})`;
   await evaluate(js);

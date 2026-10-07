@@ -1,15 +1,68 @@
-import { useEffect } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { TopBar, Footer } from "../components/Chrome";
 import { HeroOrbit } from "../components/HeroOrbit";
+import { Story } from "../components/Story";
 import { TryIt } from "../components/TryIt";
+import { Gates } from "../components/Gates";
+import { Custody } from "../components/Custody";
+import { Wire } from "../components/Wire";
 import { reducedMotion } from "../components/sim";
+import { clamp01, useScrollFrame } from "../components/scroll";
 
-const CHECKS = [
-  { k: "status", h: "The tab is open", p: "Revoked, closed or not yet funded means no. Revoking takes effect on the next request." },
-  { k: "expires_at", h: "It hasn't expired", p: "Every tab has an end date. Past it, nothing is signed and the tab marks itself expired." },
-  { k: "per_payment_cap", h: "The bill is under the cap", p: "A runaway loop can't empty the tab in one call. Anything above the cap is refused before signing." },
-  { k: "allowlist", h: "The service is allowed", p: "Lock a tab to the services you trust. Leave it empty and any x402 service can be paid." },
-  { k: "limit", h: "There's room left", p: "Spent plus in-flight can never pass the limit, even with fifty requests at once. The chain enforces the same ceiling." },
+// The statement after the hero. Words light up as you read down (and dim again going back up).
+const MANIFESTO: [string, boolean?][] = [
+  ["Your agent needs to pay for things."], ["APIs, models, data, one request at a time."],
+  ["Hand it your wallet and it can spend all of it."], ["Hand it a tab and it spends what you said,"], ["then stops.", true],
+];
+
+function Manifesto() {
+  const ref = useRef<HTMLElement>(null);
+  // 0 when the paragraph's top reaches 85% of the viewport, 1 when its bottom reaches 45%.
+  useScrollFrame(ref, (_r, vh, el) => {
+    const t = (el.querySelector("p") ?? el).getBoundingClientRect();
+    el.style.setProperty("--p", clamp01((vh * 0.85 - t.top) / (vh * 0.4 + t.height)).toFixed(3));
+  });
+  const words = MANIFESTO.flatMap(([s, hot]) => s.split(" ").map((w) => ({ w, hot })));
+  return (
+    <section className="manifesto" ref={ref} aria-label="Why TAB">
+      <span className="eyebrow">Why a tab</span>
+      <p>
+        {words.map((x, i) => (
+          <span key={i} className={x.hot ? "hot" : undefined} style={{ "--i": (i / words.length).toFixed(3) } as CSSProperties}>{x.w} </span>
+        ))}
+      </p>
+    </section>
+  );
+}
+
+function Closing() {
+  const ref = useRef<HTMLElement>(null);
+  useScrollFrame(ref, (r, vh, el) => {
+    el.style.setProperty("--p", clamp01((vh - r.top) / (vh + r.height * 0.5)).toFixed(3));
+  });
+  return (
+    <section className="end" ref={ref}>
+      <div className="end-ring" aria-hidden="true">
+        <div className="ring-box" style={{ "--spent": 0.18 } as CSSProperties}><div className="ring" /><div className="groove" /><div className="arc" /></div>
+      </div>
+      <div className="end-copy">
+        <h2 className="end-title">Put your agent <span>on a tab.</span></h2>
+        <div className="row-wrap">
+          <a className="pill" href="/app" data-nav>Open a tab <b aria-hidden="true">›</b></a>
+          <a className="btn" href="/docs" data-nav>Read the docs</a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const FAQ = [
+  ["What happens if TAB goes down?", "Your agent can't pay until it's back. Your funds don't move: they're in your own token account, and you can revoke TAB's permission or close the account from your wallet without us."],
+  ["What does it cost?", "0.20 USDC each time you open a tab, taken in the same signature, so you see it before you sign. Payments carry no TAB fee, and their network fees are paid by the service's x402 facilitator. The tab account also holds about 0.002 SOL of rent, which comes back when you close it."],
+  ["Which tokens and wallets?", "USDC on Solana. Any Wallet Standard wallet works, including Phantom, Solflare and Backpack. Signing in is a message signature, never a transaction."],
+  ["Can a payment go through twice?", "No. Every request carries an idempotency key. Repeating a key returns the original signed payment, which can only land on chain once."],
+  ["How does TAB know a payment really settled?", "It reads the chain. A payment counts as spent only when a transaction with TAB's signature is confirmed. If a signed payment never lands, its hold is released once its blockhash expires."],
+  ["Has TAB been audited?", "Not yet by a third party. The limit is enforced twice: by TAB's ledger, tested under fifty concurrent payments, and by the SPL Token program's allowance on chain, which TAB can't override."],
 ];
 
 export function Landing() {
@@ -33,102 +86,94 @@ export function Landing() {
       <TopBar current="home" blend />
       <HeroOrbit />
       <main>
-        <section className="panel" id="how">
-          <div className="panel-head">
-            <div><div className="eyebrow">How it works</div><h2 className="h2">Four steps. <span className="mute">One signature.</span></h2></div>
-            <p className="lede muted">Open it once, hand the agent a key, and let it pay as it goes. Close it whenever you like.</p>
-          </div>
-          <div className="steps">
-            <div className="step"><span className="n">01</span><span className="k">limit · cap · expiry</span><h3 className="h3">Open a tab</h3><p>Set a limit, a max per payment and an end date. One wallet signature funds an account you own.</p></div>
-            <div className="step"><span className="n">02</span><span className="k">tab_live_…</span><h3 className="h3">Give the agent a key</h3><p>It can ask TAB to pay. It never holds a wallet key and can't move funds itself.</p></div>
-            <div className="step"><span className="n">03</span><span className="k">HTTP 402 → paid</span><h3 className="h3">It pays as it goes</h3><p>Every x402 bill is checked against your rules, then signed. Anything over the line is refused.</p></div>
-            <div className="step"><span className="n">04</span><span className="k">revoke · reclaim</span><h3 className="h3">Close it out</h3><p>Revoke in one click. Whatever's left goes back to your wallet, rent included.</p></div>
-          </div>
-        </section>
+        <Manifesto />
+        <Story />
 
-        <section className="panel" id="try">
-          <div className="panel-head">
-            <div><div className="eyebrow">Try it</div><h2 className="h2">Turn the ring. <span className="mute">Then let it spend.</span></h2></div>
-            <p className="lede muted">Set a limit and a cap, then run a pretend agent against them. Watch what gets paid and what gets refused.</p>
-          </div>
+        <section className="sec try-sec" id="try">
+          <header className="sec-head split">
+            <div><span className="eyebrow">Try it</span><h2 className="h2">Run an agent <span className="mute">on a tab.</span></h2></div>
+            <p className="lede muted">Turn the ring to set a limit, pick the rules, then let a pretend agent spend. Every bill prints on the receipt, paid or refused.</p>
+          </header>
           <TryIt />
         </section>
 
-        <section className="panel">
-          <div className="panel-head">
-            <div><div className="eyebrow">Every payment</div><h2 className="h2">Five checks. <span className="mute">In this order.</span></h2></div>
-            <p className="lede muted">Before anything is signed. A failed check returns a typed error to the agent and signs nothing.</p>
-          </div>
-          <ol className="checks wide">
-              {CHECKS.map((c, i) => (
-                <li key={c.k}><span className="n">{String(i + 1).padStart(2, "0")}</span><h3 className="h3">{c.h}</h3><span className="k">{c.k}</span><p>{c.p}</p></li>
-              ))}
-          </ol>
+        <section className="sec checks-sec" id="checks">
+          <header className="sec-head split">
+            <div><span className="eyebrow">Every payment</span><h2 className="h2">Five checks. <span className="mute">In this order.</span></h2></div>
+            <p className="lede muted">Pick a payment and watch where it stops. A failed check returns a typed error to the agent and signs nothing.</p>
+          </header>
+          <Gates />
         </section>
 
-        <section className="panel light">
-          <div className="panel-head">
-            <div><div className="eyebrow">Non-custodial</div><h2 className="h2">Your money never leaves you.</h2></div>
+        <section className="sec custody-sec" id="custody">
+          <header className="sec-head split">
+            <div><span className="eyebrow">Non-custodial</span><h2 className="h2">Your money never leaves you.</h2></div>
             <p className="lede">The funds sit in a token account your wallet owns. <span className="mute">TAB holds a capped permission to spend from it, nothing more.</span></p>
-          </div>
-          <div className="custody" role="img" aria-label="Your wallet funds a tab account you own; TAB may spend up to the limit from it to x402 services.">
-            <div className="node"><span className="tag">You own</span><strong>Your wallet</strong><span className="small">USDC</span><span className="edge">→ funds the tab once</span></div>
-            <div className="node mid"><span className="tag">You own</span><strong>The tab</strong><span className="small">limit 5.00 · owner: you</span><span className="edge">→ TAB may spend ≤ limit</span></div>
-            <div className="node"><span className="tag">Paid per request</span><strong>x402 services</strong><span className="small">APIs, models, data</span></div>
-          </div>
+          </header>
+          <Custody />
           <div className="cando">
-            <div><div className="eyebrow">TAB can</div><ul>
+            <div><h3 className="h3">TAB can</h3><ul>
               <li>Sign payments from the tab, up to what's left of the limit</li>
-              <li>Refuse any payment that breaks one of the five checks</li>
+              <li>Refuse any payment that fails one of the five checks</li>
               <li>Stop signing the moment you revoke</li>
             </ul></div>
-            <div><div className="eyebrow accent-text">TAB can't</div><ul>
+            <div><h3 className="h3 accent-text">TAB can't</h3><ul>
               <li>Touch anything else in your wallet</li>
               <li>Spend past the limit. The SPL Token program blocks it on chain</li>
-              <li>Stop you revoking or closing straight from your wallet, even if TAB is down</li>
+              <li>Stop you revoking or closing from your wallet, even if TAB is down</li>
             </ul></div>
           </div>
         </section>
 
-        <section className="panel sdk">
-          <div>
-            <div className="eyebrow">For builders</div>
-            <h2 className="h2" style={{ marginTop: 16 }}>Three lines <span className="mute">in your agent.</span></h2>
-            <p className="lede muted" style={{ marginTop: 24 }}>Swap <code>fetch</code> for <code>tab.fetch</code>. Free requests pass straight through. Paid ones are handled, inside the rules.</p>
-            <div style={{ marginTop: 28 }}><a className="pill" href="/docs#sdk" data-nav>SDK reference <b aria-hidden="true">›</b></a></div>
+        <section className="price" aria-label="Pricing">
+          <div className="price-big">
+            <span className="eyebrow">Pricing</span>
+            <strong>0.20</strong>
+            <span className="price-unit">USDC per tab you open. <span className="mute">That's the whole price.</span></span>
           </div>
-          <pre className="code" aria-label="SDK example"><code>
+          <ul className="price-rows">
+            <li><span>TAB fee per payment</span><b>0</b></li>
+            <li><span>Network fee per payment</span><b>paid by the service</b></li>
+            <li><span>Account rent</span><b>≈0.002 SOL, back on close</b></li>
+            <li><span>Largest tab in beta</span><b>1,000 USDC</b></li>
+          </ul>
+        </section>
+
+        <section className="sec sdk-sec" id="sdk">
+          <div className="sdk-copy">
+            <span className="eyebrow">For builders</span>
+            <h2 className="h2">Three lines <span className="mute">in your agent.</span></h2>
+            <p className="lede muted">Swap <code>fetch</code> for <code>tab.fetch</code>. Free requests pass straight through. Paid ones are handled, inside the rules.</p>
+            <a className="pill" href="/docs#sdk" data-nav>SDK reference <b aria-hidden="true">›</b></a>
+          </div>
+          <div className="sdk-side">
+            <pre className="code" aria-label="SDK example"><code>
 <span className="c">// npm i @tabpay/sdk</span>{"\n"}
 <span className="k">import</span> {"{ Tab }"} <span className="k">from</span> <span className="s">"@tabpay/sdk"</span>;{"\n\n"}
 <span className="k">const</span> tab = <span className="k">new</span> Tab({"{"}{"\n"}
 {"  "}credential: process.env.TAB_CREDENTIAL,{"\n"}
-{"  "}maxPayment: <span className="s">"500000"</span>, <span className="c">// 0.50 USDC, client-side ceiling</span>{"\n"}
+{"  "}maxPayment: <span className="s">"500000"</span>, <span className="c">// 0.50 USDC</span>{"\n"}
 {"}"});{"\n\n"}
-<span className="k">const</span> res = <span className="k">await</span> tab.fetch(<span className="s">"https://api.example.com/forecast"</span>);{"\n"}
-<span className="c">// 402 → checked → signed → paid → 200</span>
-          </code></pre>
+<span className="k">const</span> res = <span className="k">await</span> tab.fetch(<span className="s">"https://api.example.com/forecast"</span>);
+            </code></pre>
+            <Wire />
+          </div>
         </section>
 
-        <section className="panel">
-          <div className="panel-head"><div><div className="eyebrow">Questions</div><h2 className="h2">Before you open one.</h2></div></div>
+        <section className="faq-sec" aria-labelledby="faq-h">
+          <div className="faq-side">
+            <span className="eyebrow">Questions</span>
+            <h2 className="h2" id="faq-h">Before you open one.</h2>
+            <a className="linkish" href="/docs" data-nav>Everything else is in the docs</a>
+          </div>
           <div className="faq">
-            {[
-              ["What happens if TAB goes down?", "Your agent can't pay until it's back. Your funds don't move: they're in your own token account, and you can revoke TAB's permission or close the account from your wallet without us."],
-              ["What does it cost?", "0.20 USDC each time you open a tab, taken in the same signature, so you see it before you sign. Payments carry no TAB fee, and their network fees are paid by the service's x402 facilitator. The tab account also holds about 0.002 SOL of rent, which comes back when you close it."],
-              ["Which tokens and wallets?", "USDC on Solana. Any Wallet Standard wallet works, including Phantom, Solflare and Backpack. Signing in is a message signature, never a transaction."],
-              ["Can a payment go through twice?", "No. Every request carries an idempotency key. Repeating a key returns the original signed payment, which can only land on chain once."],
-              ["How does TAB know a payment really settled?", "It reads the chain. A payment counts as spent only when a transaction with TAB's signature is confirmed. If a signed payment never lands, its hold is released once its blockhash expires."],
-              ["Has TAB been audited?", "Not yet by a third party. The limit is enforced twice: by TAB's ledger, tested under fifty concurrent payments, and by the SPL Token program's allowance on chain, which TAB can't override."],
-            ].map(([q, a]) => (
-              <details key={q}><summary><span>{q}</span><i aria-hidden="true" /></summary><p>{a}</p></details>
+            {FAQ.map(([q, a], i) => (
+              <details key={q}><summary><span className="qn">{String(i + 1).padStart(2, "0")}</span><span className="qt">{q}</span><i aria-hidden="true" /></summary><p>{a}</p></details>
             ))}
           </div>
         </section>
 
-        <section className="panel closing">
-          <h2 className="h2">Put your agent <span className="mute">on a tab.</span></h2>
-          <div className="row-wrap"><a className="pill" href="/app" data-nav>Open a tab <b aria-hidden="true">›</b></a><a className="btn" href="/docs" data-nav>Read the docs</a></div>
-        </section>
+        <Closing />
       </main>
       <Footer />
     </div>
