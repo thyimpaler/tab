@@ -41,3 +41,11 @@ Launch target: Thu 2026-10-08 (owner). Full build. Non-custodial only.
 ## Verified
 - 31 tests (50-parallel admission fails without the row lock, crash injection, replay, every error code, SDK)
 - Devnet e2e via script and via the real dashboard UI: sign in, open, agent pays the demo API through x402.org, cap refusal, revoke, reclaim, close. DB = chain after every run.
+
+## 2026-10-07 later (owner requests)
+- [x] Tab opening fee: 0.20 USDC per tab to treasury 3Vjaxv…cBmH, in the same signature (owner decision). Simulated on mainnet: all 6 instructions pass.
+- [x] Mainnet self-funding demo: in-process x402 facilitator, separate fee payer 9ZuZF2…FiD4o, pauses when low. **Waiting on owner: fund fee payer ~0.005 SOL.**
+- [x] Redesign (kaos-studio as reference, not copied): chrome ring = limit, scroll-driven hero, graphite panels, ring-centric dashboard. Live on prod.
+- [x] Design system artifact rebuilt to v2.
+- [ ] Owner's real-money mainnet test (open ~1.2 USDC tab in Phantom, run test agent, revoke). I can't move real funds.
+- [ ] Domain, X handle, npm publish of the SDK (owner accounts).

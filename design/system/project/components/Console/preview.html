@@ -1,13 +1,13 @@
-<!-- @dsCard group="Data" height=330 -->
-<div style="padding:24px;background:var(--paper)">
-<div class="console" style="max-width:520px">
+<!-- @dsCard group="Data" height=340 -->
+<div style="padding:24px;background:var(--graphite)">
+<div class="console" style="max-width:540px">
   <div class="bar"><span>research-agent</span><span>tab open · 6d 23h left</span></div>
   <div class="bal"><strong>3.720</strong><span class="dim" style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;text-align:right">USDC left<br>of 5.000</span></div>
   <div class="log" style="height:110px">
-    <div><span class="dim">GET </span>api.pricefeed.dev/v1/quote<span class="dim"> → 402 </span>0.010</div>
-    <div class="dim">  tab  open ✓ in date ✓ cap ✓ allowlist ✓ room ✓  signed  settled 3dgB…</div>
-    <div><span class="dim">GET </span>data.vendor/bulk-export<span class="dim"> → 402 </span>2.400</div>
-    <div class="no">  tab  refused: over the 0.50 per-payment cap. nothing signed.</div>
+    <div class="ok"><span class="dim">GET </span>api.pricefeed.dev/quote<span class="dim"> → 402 </span>0.010</div>
+    <div class="dim">  open ✓ in date ✓ cap ✓ allowed ✓ room ✓  signed · settled 3dgB…</div>
+    <div class="ok"><span class="dim">GET </span>data.vendor/bulk-export<span class="dim"> → 402 </span>2.400</div>
+    <div class="no">  refused: over the 0.50 cap. nothing signed.</div>
   </div>
   <div class="foot"><button type="button">Run agent</button><button type="button">Revoke</button></div>
 </div></div>

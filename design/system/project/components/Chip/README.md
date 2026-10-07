@@ -1,3 +1,3 @@
 # Chip
 
-A tab's status as a small outlined mono label. Ink for active; ink-2 for pending (shown as "not funded"), expired, empty and closed; stamp for revoked. Never filled, never a dot.
+A tab's status: a small mono pill with a dot. Paper for active; paper-2 for pending (shown as "not funded"), expired, empty and closed; coral for revoked.
