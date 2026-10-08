@@ -241,7 +241,12 @@ function TestAgent({ tabId, credential, onKey, onPaid, decimals, net }: { tabId:
       const b = await tab.current.balance();
       setLeft(b.remaining);
       if (res.ok) add({ kind: "dim", text: `  ${res.status} paid · ${fromUnits(b.remaining, decimals, 3)} left · ${body.slice(0, 70)}` });
-      else add({ kind: "no", text: `  service answered ${res.status}. If TAB signed, the payment still settles from the chain.` });
+      else {
+        // Show the service's own reason when it gives one (e.g. the demo pausing to top up its fee payer).
+        let msg: string | undefined;
+        try { msg = JSON.parse(body)?.error?.message; } catch {}
+        add({ kind: "no", text: msg ? `  service answered ${res.status}: ${msg}` : `  service answered ${res.status}. If TAB signed, the payment still settles from the chain.` });
+      }
     } catch (e) {
       add({ kind: "no", text: `  refused · ${e instanceof TabError ? `${e.code}: ${e.message}` : (e as Error).message} Nothing was signed.` });
     }
