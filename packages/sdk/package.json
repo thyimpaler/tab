@@ -1,5 +1,5 @@
 {
-  "name": "@tabpay/sdk",
+  "name": "@tabpaysi/sdk",
   "version": "0.1.0",
   "description": "Give an AI agent a capped, expiring, revocable USDC allowance on Solana. Pays x402 V2 automatically.",
   "type": "module",

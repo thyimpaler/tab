@@ -159,8 +159,8 @@ export function Landing() {
           </div>
           <div className="sdk-side">
             <pre className="code" aria-label="SDK example"><code>
-<span className="c">// npm i @tabpay/sdk</span>{"\n"}
-<span className="k">import</span> {"{ Tab }"} <span className="k">from</span> <span className="s">"@tabpay/sdk"</span>;{"\n\n"}
+<span className="c">// npm i @tabpaysi/sdk</span>{"\n"}
+<span className="k">import</span> {"{ Tab }"} <span className="k">from</span> <span className="s">"@tabpaysi/sdk"</span>;{"\n\n"}
 <span className="k">const</span> tab = <span className="k">new</span> Tab({"{"}{"\n"}
 {"  "}credential: process.env.TAB_CREDENTIAL,{"\n"}
 {"  "}maxPayment: <span className="s">"500000"</span>, <span className="c">// 0.50 USDC</span>{"\n"}

@@ -133,9 +133,9 @@ Upload this file and ask questions such as: "Explain TAB to a non-technical inve
 <p>TAB therefore has <b>no per-payment cost</b>: revenue is 0.20 USDC per tab opened, and the marginal cost of a tab to TAB is effectively zero. Treasury address (public): <code>3VjaxvebqEA8J6gCLLwU6Vu1jYdNQH4cYKFMiPN8cBmH</code>.</p>
 
 <h2>6. For developers: integrating an agent</h2>
-<pre>npm i @tabpay/sdk
+<pre>npm i @tabpaysi/sdk
 
-import { Tab } from "@tabpay/sdk";
+import { Tab } from "@tabpaysi/sdk";
 
 const tab = new Tab({
   credential: process.env.TAB_CREDENTIAL,  // the agent key, tab_live_…
@@ -165,7 +165,7 @@ const res = await tab.fetch("https://api.example.com/forecast");
 <tr><td>Database</td><td>PostgreSQL on Neon (pooled connections). Tables: users, tabs, allowed recipients, payments, auth nonces.</td></tr>
 <tr><td>Blockchain</td><td>Solana mainnet, SPL Token program, USDC (mint <code>EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v</code>), libraries @solana/web3.js and @solana/spl-token</td></tr>
 <tr><td>Payments protocol</td><td>x402 version 2, "exact" scheme on Solana (official @x402 packages)</td></tr>
-<tr><td>Agent SDK</td><td>TypeScript package <code>@tabpay/sdk</code> (in the repository; not yet published to npm)</td></tr>
+<tr><td>Agent SDK</td><td>TypeScript package <code>@tabpaysi/sdk</code> (in the repository; not yet published to npm)</td></tr>
 <tr><td>Background jobs</td><td>A reconcile job settles or releases stuck payments from chain evidence. It runs on every read of a tab and once a day by scheduled job.</td></tr>
 <tr><td>Source code</td><td>Private GitHub repository</td></tr>
 </table>
