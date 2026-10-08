@@ -514,6 +514,13 @@ td code{white-space:nowrap}
 .who{display:inline-flex;align-items:center;gap:12px}
 .mark-net{font:500 10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--paper-2);padding:5px 9px;border:1px solid var(--line-2);border-radius:999px}
 .stage-pad{padding:80px 0}
+.boot{display:grid;place-content:center;justify-items:center;gap:22px;min-height:50svh;animation:in .6s var(--ease) both}
+.boot.full{min-height:calc(100svh - 72px)}
+.boot-ring{width:112px}
+.boot-ring .ring-box{--spent:.22;--band:26%;--inset:6%;--groove:11%}
+.boot-ring .ring-box::before{display:none}
+.boot-ring .arc{animation:spin 1.1s linear infinite;will-change:transform}
+.boot span{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--paper-2)}
 
 /* sign-in: the ring frames the screen, like the landing hero */
 .gate{position:relative;min-height:calc(100svh - 72px);overflow:hidden;margin-inline:calc(var(--edge) * -1);--D:min(112vh,138vw);--top:clamp(16px,3vh,40px)}

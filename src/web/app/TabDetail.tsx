@@ -6,6 +6,7 @@ import { ConnectInline } from "./ConnectInline";
 import { KeyReveal } from "./KeyReveal";
 import { Console, type LogLine } from "../components/Console";
 import { Ring } from "../components/Ring";
+import { Loader } from "../components/Loader";
 import { Tab, TabError } from "../../../packages/sdk/src/index";
 
 type Detail = { tab: TabView; payments: PaymentView[]; allowlist: string[] };
@@ -25,7 +26,7 @@ export function TabDetail({ s, tabId, credential, rememberKey, onChange }: { s: 
   useEffect(() => { setD(null); setErr(null); setConfirmRevoke(false); load(); const t = setInterval(load, 15_000); return () => clearInterval(t); }, [load]);
 
   if (err && !d) return <div className="stage-pad"><p className="err-line">{err}</p><a className="btn" href="/app" data-nav>Back</a></div>;
-  if (!d) return <div className="stage-pad"><span className="spinner" /></div>;
+  if (!d) return <Loader label="Loading the tab" full={false} />;
   const t = d.tab;
   const dec = t.decimals;
   const net = t.network;

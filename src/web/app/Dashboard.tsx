@@ -6,6 +6,7 @@ import { fromUnits, short, until } from "../lib/format";
 import { useSession, type Session } from "./session";
 import { Composer } from "./Composer";
 import { TabDetail } from "./TabDetail";
+import { Loader } from "../components/Loader";
 
 function useRoute() {
   const [p, setP] = useState(location.pathname);
@@ -33,7 +34,7 @@ export function Dashboard() {
   return (
     <div className="dash">
       <TopBar current="app" right={right} />
-      {s.me === undefined ? <p className="label wrap" style={{ paddingBlock: 80 }}>Loading…</p>
+      {s.me === undefined ? <Loader />
         : !s.me ? <main className="wrap"><Gate s={s} /></main>
         : (
           <div className="app">
