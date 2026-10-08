@@ -4,6 +4,19 @@
   "installCommand": "npm ci --include=dev",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/((?!api/).*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "tab-agent-one.vercel.app"
+        }
+      ],
+      "destination": "https://tabpay.si/$1",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/:path*",
