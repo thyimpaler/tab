@@ -1,4 +1,5 @@
-// Prints the mainnet demo's fee-payer address and SOL balance, so you know where to send SOL.
+// Only for DEMO_FACILITATOR=self (the default mainnet demo uses a hosted facilitator that pays its own fees).
+// Prints the self-run demo fee payer's address and SOL balance, so you know where to send SOL.
 // Reads DEMO_FEE_PAYER_KEY from .env.vercel or .env (never prints the key). Usage: node scripts/demo-fee-payer.mjs
 import { existsSync, readFileSync } from "node:fs";
 import { Connection, Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
