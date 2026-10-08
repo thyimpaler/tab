@@ -39,18 +39,25 @@ app.get("/v1/config", (c) => c.json({
 }));
 
 // ---------- wallet session (dashboard) ----------
-const appUrl = () => new URL(config().appOrigin);
+// The allowed origin this request was served from (by Host), else APP_ORIGIN.
+const appUrl = (c: Context<Env>) => {
+  const host = c.req.header("host");
+  const hit = config().appOrigins.find((o) => new URL(o).host === host);
+  return new URL(hit ?? config().appOrigin);
+};
 
 app.post("/v1/auth/nonce", async (c) => {
   const nonce = await issueNonce();
-  return c.json({ input: signInInput(appUrl().host, appUrl().origin, nonce) });
+  const u = appUrl(c);
+  return c.json({ input: signInInput(u.host, u.origin, nonce) });
 });
 
 app.post("/v1/auth/verify", async (c) => {
   const body = await json(c);
-  const wallet = await verifySignIn(body, appUrl().host);
+  const u = appUrl(c);
+  const wallet = await verifySignIn(body, u.host);
   setCookie(c, SESSION_COOKIE, makeSession(wallet), {
-    httpOnly: true, secure: appUrl().protocol === "https:", sameSite: "Lax", path: "/", maxAge: SESSION_TTL_S,
+    httpOnly: true, secure: u.protocol === "https:", sameSite: "Lax", path: "/", maxAge: SESSION_TTL_S,
   });
   return c.json({ wallet });
 });
@@ -64,7 +71,7 @@ const session = async (c: Context<Env>, next: () => Promise<void>) => {
   // Cookie routes: block cross-site writes.
   if (c.req.method !== "GET") {
     const origin = c.req.header("origin");
-    if (origin && origin !== appUrl().origin) throw new TabError("UNAUTHORIZED", "cross-site request");
+    if (origin && !config().appOrigins.includes(origin)) throw new TabError("UNAUTHORIZED", "cross-site request");
   }
   const wallet = readSession(getCookie(c, SESSION_COOKIE));
   if (!wallet) throw new TabError("UNAUTHORIZED", "sign in with your wallet");
