@@ -1,0 +1,369 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>TAB launch video, scenes after the opening</title>
+<style>
+/* TAB launch film: everything after the opening + continuation. 24fps, 1920x1080, frame-exact:
+   the renderer calls render(f) for local frames 0..803 and screenshots each.
+   Inter stands in for SF Pro; Geist Mono for numbers; Funnel Display only for the wordmark. */
+@font-face{font-family:"Film";src:url(fonts/inter-latin.woff2) format("woff2");font-weight:100 900;font-display:block}
+@font-face{font-family:"Mono";src:url(fonts/geist-mono-latin.woff2) format("woff2");font-weight:100 900;font-display:block}
+@font-face{font-family:"Mark";src:url(fonts/funnel-display-latin.woff2) format("woff2");font-weight:600;font-display:block}
+:root{--stone:#e3ddd6;--ink:#0a0a09;--ink2:#6b6862;--coral:#ff4d2e}
+html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:var(--stone)}
+canvas{position:absolute;inset:0;width:1920px;height:1080px}
+#ui{position:absolute;inset:0;pointer-events:none}
+.scene{position:absolute;inset:0;display:none;transform-origin:50% 50%}
+.w{display:inline-block;transform-origin:0 85%}
+.head{position:absolute;left:173px;top:150px;font:500 92px/1.08 "Film";letter-spacing:-.025em;color:var(--ink)}
+.head .m{color:var(--ink2)}
+.label{position:absolute;left:176px;top:112px;font:500 22px "Mono";letter-spacing:.14em;color:var(--ink2)}
+.chip{position:absolute;font:500 30px "Mono";color:var(--ink);padding:14px 26px;border:2px solid rgba(10,10,9,.22);border-radius:999px;white-space:nowrap}
+.ticket{position:absolute;left:880px;top:420px;width:860px;background:#f1efe9;border-radius:30px;padding:34px 40px 0;box-shadow:0 40px 70px -30px rgba(10,10,9,.35);overflow:hidden}
+.ticket .top{display:flex;justify-content:space-between;align-items:baseline}
+.ticket .top b{font:600 46px/1 "Mark";letter-spacing:-.04em}
+.ticket .top span,.ticket .lab{font:500 18px "Mono";letter-spacing:.14em;color:var(--ink2)}
+.ticket .lab{display:block;margin-top:26px;color:#b8321a;font-weight:600}
+.ticket code{display:block;font:600 34px/1.35 "Mono";margin-top:12px;color:var(--ink);word-break:break-all}
+.ticket .stub{position:relative;display:flex;justify-content:space-between;align-items:center;margin:26px -40px 0;padding:24px 40px 30px;border-top:3px dashed rgba(10,10,9,.25);font:400 22px "Film";color:var(--ink2)}
+.ticket .stub::before,.ticket .stub::after{content:"";position:absolute;top:-19px;width:36px;height:36px;border-radius:50%;background:var(--stone)}
+.ticket .stub::before{left:-18px}.ticket .stub::after{right:-18px}
+.checks{position:absolute;left:173px;top:420px;width:1180px;list-style:none;margin:0;padding:0;border-top:2px solid rgba(10,10,9,.14)}
+.checks li{display:grid;grid-template-columns:80px 1fr 60px;align-items:baseline;padding:20px 0;border-bottom:2px solid rgba(10,10,9,.14);font:500 40px "Film";letter-spacing:-.015em;color:var(--ink)}
+.checks .n{font:500 22px "Mono";color:var(--ink2)}
+.checks i{font:600 34px "Mono";font-style:normal;text-align:right;color:var(--ink)}
+.big{position:absolute;left:160px;top:300px;font:500 420px/.8 "Film";letter-spacing:-.07em;color:var(--ink)}
+.price-r{position:absolute;left:1150px;top:430px;font:500 64px/1.12 "Film";letter-spacing:-.02em;color:var(--ink)}
+.price-r .m{color:var(--ink2)}
+.lockup{position:absolute;left:50%;top:330px;transform:translateX(-50%);display:flex;align-items:center;gap:34px}
+.lockup img{width:190px;height:190px;border-radius:44px;box-shadow:0 30px 50px -24px rgba(10,10,9,.45)}
+.lockup b{font:600 190px/1 "Mark";letter-spacing:-.05em;color:var(--ink)}
+.tag{position:absolute;left:0;right:0;text-align:center;top:640px;font:500 64px/1.1 "Film";letter-spacing:-.025em;color:var(--ink)}
+.tag .m{color:var(--ink2)}
+.foot{position:absolute;left:0;right:0;text-align:center;top:850px;font:500 24px "Mono";letter-spacing:.12em;color:var(--ink2)}
+.wallet{position:absolute;font:500 34px "Mono";color:var(--ink)}
+.revoke{position:absolute;left:1260px;top:540px;font:500 36px "Film";color:#b8321a;padding:18px 34px;border:2px solid rgba(184,50,26,.5);border-radius:999px;background:transparent}
+</style>
+</head>
+<body>
+<canvas id="gl" width="1920" height="1080"></canvas>
+<canvas id="ov" width="1920" height="1080"></canvas>
+<div id="ui">
+  <!-- T: reveal -->
+  <div class="scene" id="sT">
+    <div class="lockup" id="lock"><img src="mark.png" alt="" id="tMark"><b id="tWord">tab</b></div>
+    <div class="tag"><span class="w">Give</span> <span class="w">your</span> <span class="w">agent</span> <span class="w">a</span> <span class="w">tab.</span> <span class="w m">Not</span> <span class="w m">your</span> <span class="w m">wallet.</span></div>
+  </div>
+  <!-- L: set a limit -->
+  <div class="scene" id="sL">
+    <div class="label w">01</div>
+    <div class="head"><span class="w">Set</span> <span class="w">a</span> <span class="w">limit.</span><br><span class="w m">Turn</span> <span class="w m">it</span> <span class="w m">like</span> <span class="w m">a</span> <span class="w m">dial.</span></div>
+    <div class="chip" id="cCap" style="left:173px;top:520px">max 0.50 per payment</div>
+    <div class="chip" id="cExp" style="left:173px;top:610px">ends in 7 days</div>
+  </div>
+  <!-- K: key -->
+  <div class="scene" id="sK">
+    <div class="label w">02</div>
+    <div class="head"><span class="w">Give</span> <span class="w">your</span> <span class="w">agent</span> <span class="w">a</span> <span class="w">key.</span><br><span class="w m">Not</span> <span class="w m">your</span> <span class="w m">wallet</span> <span class="w m">key.</span></div>
+    <div class="ticket" id="tk"><div class="top"><b>tab</b><span>ADMIT ONE AGENT</span></div><span class="lab">TAB_CREDENTIAL</span><code>tab_live_9deb53e1…Xq8vK2mP</code><div class="stub"><span>Shown once. Stored only as a hash.</span><span>scoped to one tab</span></div></div>
+  </div>
+  <!-- P: pays -->
+  <div class="scene" id="sP">
+    <div class="label w">03</div>
+    <div class="head"><span class="w">It</span> <span class="w">pays</span> <span class="w">as</span> <span class="w">it</span> <span class="w">goes.</span><br><span class="w m">Inside</span> <span class="w m">your</span> <span class="w m">rules.</span></div>
+  </div>
+  <!-- X: five checks -->
+  <div class="scene" id="sX">
+    <div class="label w">04</div>
+    <div class="head"><span class="w">Five</span> <span class="w">checks.</span><br><span class="w m">Before</span> <span class="w m">every</span> <span class="w m">payment.</span></div>
+    <ol class="checks" id="ck">
+      <li><span class="n">01</span><span>The tab is open</span><i>✓</i></li>
+      <li><span class="n">02</span><span>It hasn’t expired</span><i>✓</i></li>
+      <li><span class="n">03</span><span>It’s under the cap</span><i>✓</i></li>
+      <li><span class="n">04</span><span>It’s a service you allow</span><i>✓</i></li>
+      <li><span class="n">05</span><span>There’s room left</span><i>✓</i></li>
+    </ol>
+  </div>
+  <!-- N: non-custodial -->
+  <div class="scene" id="sN">
+    <div class="head"><span class="w">Your</span> <span class="w">money</span> <span class="w">stays</span> <span class="w">in</span> <span class="w">your</span> <span class="w">wallet.</span><br><span class="w m">Revoke</span> <span class="w m">any</span> <span class="w m">time.</span></div>
+    <div class="revoke" id="rv">Revoke tab</div>
+    <div class="wallet" id="wl" style="left:1260px;top:690px">+8.80 USDC → your wallet</div>
+  </div>
+  <!-- $: price -->
+  <div class="scene" id="s$">
+    <div class="big" id="pz">0.20</div>
+    <div class="price-r"><span class="w">USDC</span> <span class="w">to</span> <span class="w">open</span> <span class="w">a</span> <span class="w">tab.</span><br><span class="w m">Nothing</span> <span class="w m">per</span> <span class="w m">payment.</span></div>
+  </div>
+  <!-- E: end -->
+  <div class="scene" id="sE">
+    <div class="lockup" id="eLock"><img src="mark.png" alt=""><b>tab</b></div>
+    <div class="tag"><span class="w">Give</span> <span class="w">your</span> <span class="w">agent</span> <span class="w">a</span> <span class="w">tab.</span> <span class="w m">Not</span> <span class="w m">your</span> <span class="w m">wallet.</span></div>
+    <div class="foot w" id="eFoot">LIVE ON SOLANA · PAYS OVER x402 · TAB-AGENT-ONE.VERCEL.APP</div>
+  </div>
+</div>
+<script>
+const W = 1920, H = 1080;
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+function bez(x1, y1, x2, y2) { return (t) => { if (t <= 0) return 0; if (t >= 1) return 1; let u = t; for (let i = 0; i < 8; i++) { const x = 3*(1-u)*(1-u)*u*x1 + 3*(1-u)*u*u*x2 + u*u*u - t; const dx = 3*(1-u)*(1-u)*x1 + 6*(1-u)*u*(x2-x1) + 3*u*u*(1-x2); if (Math.abs(dx) < 1e-6) break; u = clamp(u - x / dx); } return 3*(1-u)*(1-u)*u*y1 + 3*(1-u)*u*u*y2 + u*u*u; }; }
+const soft = bez(.22, 1, .36, 1), out = bez(.16, 1, .3, 1), inE = bez(.55, 0, 1, .45), mech = bez(.7, 0, .2, 1), io = bez(.45, 0, .55, 1), stop = bez(.2, .8, .3, 1);
+const span = (f, a, b) => clamp((f - a) / (b - a));
+const $ = (id) => document.getElementById(id);
+
+// scene table: local frame ranges (24fps)
+const SC = [
+  { id: "sT", a: 0, b: 83 }, { id: "sL", a: 84, b: 203 }, { id: "sK", a: 204, b: 275 }, { id: "sP", a: 276, b: 419 },
+  { id: "sX", a: 420, b: 503 }, { id: "sN", a: 504, b: 611 }, { id: "s$", a: 612, b: 683 }, { id: "sE", a: 684, b: 803 },
+];
+
+// word reveal: opacity, 12px rise, 94% → 100%, 2-frame stagger
+function words(el, f, start, step = 2) {
+  [...el.querySelectorAll(".w")].forEach((w, i) => {
+    const t = soft(span(f, start + step * i, start + step * i + 6));
+    w.style.opacity = t; w.style.transform = `translateY(${12 * (1 - t)}px) scale(${.94 + .06 * t})`;
+  });
+}
+
+// ---------- 2D scene canvas (also the texture the glass refracts) ----------
+const tex2d = document.createElement("canvas"); tex2d.width = W; tex2d.height = H; const g = tex2d.getContext("2d");
+const STONE = "#e3ddd6";
+function ring(cx, cy, R, spent, o = {}) {
+  const band = R * .22, dim = o.dim ?? 0;
+  g.save();
+  // soft shadow
+  g.filter = "blur(26px)"; g.fillStyle = "rgba(10,10,9,.22)"; g.beginPath(); g.arc(cx, cy + 34, R * .97, 0, 7); g.arc(cx, cy + 34, R - band * .9, 0, 7, true); g.fill("evenodd"); g.filter = "none";
+  // chrome band (same conic stops as the site ring)
+  const cg = g.createConicGradient((210 - 90) * Math.PI / 180, cx, cy);
+  [[0, "#fbfaf7"], [.12, "#8e8c86"], [.24, "#2a2a28"], [.36, "#cfccc5"], [.46, "#ffffff"], [.6, "#6f6d68"], [.72, "#e8e6e0"], [.84, "#3a3936"], [1, "#fbfaf7"]].forEach(([s, c]) => cg.addColorStop(s, c));
+  g.globalAlpha = 1 - dim * .55;
+  g.fillStyle = cg; g.beginPath(); g.arc(cx, cy, R, 0, 7); g.arc(cx, cy, R - band, 0, 7, true); g.fill("evenodd");
+  // groove + spent arc
+  const go = R * (1 - .046), gw = R * .042;
+  g.fillStyle = "rgba(0,0,0,.4)"; g.beginPath(); g.arc(cx, cy, go, 0, 7); g.arc(cx, cy, go - gw, 0, 7, true); g.fill("evenodd");
+  g.globalAlpha = 1;
+  if (spent > 0.0005) {
+    const a0 = -Math.PI / 2, a1 = a0 + spent * Math.PI * 2;
+    g.fillStyle = dim ? "#8a8781" : "#ff4d2e"; g.beginPath(); g.arc(cx, cy, go, a0, a1); g.arc(cx, cy, go - gw, a1, a0, true); g.closePath(); g.fill();
+  }
+  // readout
+  if (o.value !== undefined) {
+    g.fillStyle = "#0a0a09"; g.textAlign = "center"; g.textBaseline = "alphabetic";
+    g.font = `500 ${Math.round(R * .3)}px Mono`; g.fillText(o.value, cx, cy + R * .07);
+    g.fillStyle = "#6b6862"; g.font = `500 ${Math.round(R * .078)}px Mono`;
+    g.letterSpacing = "3px"; g.fillText(o.sub ?? "USDC LEFT", cx, cy + R * .22); g.letterSpacing = "0px";
+  }
+  g.restore();
+}
+function dialTicks(cx, cy, R, t) {
+  g.save();
+  for (let i = 0; i < 72; i++) {
+    const a = -Math.PI / 2 + i / 72 * Math.PI * 2, on = i / 72 < t;
+    g.strokeStyle = on ? "#ff4d2e" : "rgba(10,10,9,.28)"; g.lineWidth = on ? 4 : 3;
+    g.beginPath(); g.moveTo(cx + Math.cos(a) * (R + 26), cy + Math.sin(a) * (R + 26)); g.lineTo(cx + Math.cos(a) * (R + 46), cy + Math.sin(a) * (R + 46)); g.stroke();
+  }
+  // knob on the groove
+  const a = -Math.PI / 2 + t * Math.PI * 2, kr = R * (1 - .046 - .021);
+  const kx = cx + Math.cos(a) * kr, ky = cy + Math.sin(a) * kr;
+  g.shadowColor = "rgba(0,0,0,.35)"; g.shadowBlur = 16; g.shadowOffsetY = 6;
+  const kg = g.createRadialGradient(kx - 8, ky - 10, 2, kx, ky, 26); kg.addColorStop(0, "#fff"); kg.addColorStop(.5, "#d6d4cd"); kg.addColorStop(1, "#8e8c86");
+  g.fillStyle = kg; g.beginPath(); g.arc(kx, ky, 26, 0, 7); g.fill();
+  g.shadowColor = "transparent"; g.strokeStyle = "#ff4d2e"; g.lineWidth = 5; g.beginPath(); g.arc(kx, ky, 28, 0, 7); g.stroke();
+  g.restore();
+}
+function pillLabel(p) {
+  g.save(); g.translate(p.x, p.y); g.scale(p.s, p.s); g.globalAlpha = p.a;
+  g.fillStyle = "#0a0a09"; g.textBaseline = "alphabetic"; g.textAlign = "left";
+  g.font = "600 40px Mono"; const a = p.amt + "  "; const wa = g.measureText(a).width;
+  g.font = "500 34px Film"; const wb = g.measureText(p.what).width;
+  const x0 = -(wa + wb) / 2;
+  g.font = "600 40px Mono"; g.fillText(a, x0, 14);
+  g.font = "500 34px Film"; g.fillStyle = "#3a3936"; g.fillText(p.what, x0 + wa, 13);
+  g.restore();
+}
+
+// ---------- WebGL: draws the scene canvas, with up to 4 glass pills refracting it ----------
+const glc = $("gl").getContext("webgl", { preserveDrawingBuffer: true, antialias: false });
+const VS = `attribute vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }`;
+const FS = `
+precision highp float;
+uniform sampler2D tex; uniform vec2 res;
+uniform vec2 ctr[4]; uniform vec2 hs[4]; uniform float scl[4]; uniform float alp[4];
+float sdPill(vec2 q, vec2 b){ float r = b.y; vec2 d = abs(q) - b + r; return length(max(d, 0.)) + min(max(d.x, d.y), 0.) - r; }
+float hgt(vec2 q, vec2 b){ float t = -sdPill(q, b); float bw = b.y * .62; float h = t >= bw ? 1. : sqrt(max(0., 1. - pow(1. - clamp(t / bw, 0., 1.), 2.))); return h * b.y * .55; }
+vec3 bg(vec2 px){ return texture2D(tex, px / res).rgb; }
+void main(){
+  vec2 px = vec2(gl_FragCoord.x, res.y - gl_FragCoord.y);
+  vec3 col = bg(px);
+  for (int i = 0; i < 4; i++) {
+    if (alp[i] <= 0.001) continue;
+    vec2 q = (px - ctr[i]) / scl[i]; vec2 b = hs[i];
+    float ds = sdPill((px - ctr[i] - vec2(0., 30. * scl[i])) / scl[i], b * vec2(.96, .82));
+    col *= 1. - (1. - smoothstep(-20., 70., ds)) * .15 * alp[i];
+    float d = sdPill(q, b);
+    if (d < 1.5) {
+      float e = 1.2;
+      float hx = (hgt(q + vec2(e, 0.), b) - hgt(q - vec2(e, 0.), b)) / (2. * e);
+      float hy = (hgt(q + vec2(0., e), b) - hgt(q - vec2(0., e), b)) / (2. * e);
+      vec3 n = normalize(vec3(-hx, -hy, 1.)); float th = hgt(q, b);
+      vec3 gcol = bg(px + n.xy * th * 2.7 * scl[i] - (px - ctr[i]) * .018) * vec3(.985, .99, .992);
+      float fres = pow(1. - n.z, 2.4);
+      vec3 env = mix(vec3(.10, .10, .11), vec3(1.), smoothstep(-.35, .55, -n.y));
+      gcol = mix(gcol, env, clamp(fres * .55, 0., .6));
+      vec3 L = normalize(vec3(-.32, -.78, .54));
+      gcol += pow(max(dot(n, normalize(L + vec3(0., 0., 1.))), 0.), 140.) * .55;
+      float steep = smoothstep(.3, .92, 1. - n.z);
+      gcol *= 1. - steep * (.12 + .26 * smoothstep(-.1, .7, n.y));
+      gcol += exp(-pow((-d - b.y * .2) / 2.4, 2.)) * smoothstep(.15, -.65, q.y / b.y) * .45;
+      gcol += (1. - smoothstep(0., 1.6, abs(d + .6))) * .18;
+      col = mix(col, gcol, (1. - smoothstep(-.8, .8, d)) * alp[i]);
+    }
+  }
+  gl_FragColor = vec4(col, 1.);
+}`;
+function shd(t, s) { const o = glc.createShader(t); glc.shaderSource(o, s); glc.compileShader(o); if (!glc.getShaderParameter(o, glc.COMPILE_STATUS)) throw new Error(glc.getShaderInfoLog(o)); return o; }
+const prog = glc.createProgram(); glc.attachShader(prog, shd(glc.VERTEX_SHADER, VS)); glc.attachShader(prog, shd(glc.FRAGMENT_SHADER, FS)); glc.linkProgram(prog); glc.useProgram(prog);
+glc.bindBuffer(glc.ARRAY_BUFFER, glc.createBuffer()); glc.bufferData(glc.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), glc.STATIC_DRAW);
+const pl = glc.getAttribLocation(prog, "p"); glc.enableVertexAttribArray(pl); glc.vertexAttribPointer(pl, 2, glc.FLOAT, false, 0, 0);
+const tex = glc.createTexture(); glc.bindTexture(glc.TEXTURE_2D, tex);
+[glc.TEXTURE_MIN_FILTER, glc.TEXTURE_MAG_FILTER].forEach((k) => glc.texParameteri(glc.TEXTURE_2D, k, glc.LINEAR));
+[glc.TEXTURE_WRAP_S, glc.TEXTURE_WRAP_T].forEach((k) => glc.texParameteri(glc.TEXTURE_2D, k, glc.CLAMP_TO_EDGE));
+const U = (n) => glc.getUniformLocation(prog, n);
+function present(pills = []) {
+  glc.bindTexture(glc.TEXTURE_2D, tex); glc.texImage2D(glc.TEXTURE_2D, 0, glc.RGB, glc.RGB, glc.UNSIGNED_BYTE, tex2d);
+  const c = [], h = [], s = [], a = [];
+  for (let i = 0; i < 4; i++) { const p = pills[i]; c.push(p ? p.x : 0, p ? p.y : 0); h.push(p ? p.hw : 1, p ? p.hh : 1); s.push(p ? p.s : 1); a.push(p ? p.a : 0); }
+  glc.uniform2f(U("res"), W, H); glc.uniform2fv(U("ctr"), c); glc.uniform2fv(U("hs"), h); glc.uniform1fv(U("scl"), s); glc.uniform1fv(U("alp"), a);
+  glc.viewport(0, 0, W, H); glc.drawArrays(glc.TRIANGLE_STRIP, 0, 4);
+}
+
+// ---------- overlay: coral traces, cursor ----------
+const ov = $("ov").getContext("2d");
+function pillTrace(p, prog, from = "bottom") {
+  if (prog <= 0) return;
+  const hw = p.hw * p.s + 7, hh = p.hh * p.s + 7, r = hh, N = 600, pts = [];
+  const st = 2 * (hw - r), ar = Math.PI * r, per = 2 * st + 2 * ar;
+  for (let i = 0; i < N; i++) {
+    let s = i / N * per, x, y;
+    if (s < st) { x = -hw + r + s; y = -hh; } else if ((s -= st) < ar) { const a = -Math.PI / 2 + s / r; x = hw - r + r * Math.cos(a); y = r * Math.sin(a); }
+    else if ((s -= ar) < st) { x = hw - r - s; y = hh; } else { s -= st; const a = Math.PI / 2 + s / r; x = -hw + r + r * Math.cos(a); y = r * Math.sin(a); }
+    pts.push([p.x + x, p.y + y]);
+  }
+  const k = Math.round(N * (from === "bottom" ? .5 + (st / 2) / per : 0));
+  const n = Math.round(N / 2 * prog);
+  ov.save(); ov.strokeStyle = "#ff4d2e"; ov.lineWidth = 3.5; ov.lineCap = "round"; ov.globalAlpha = p.a;
+  for (const dir of [1, -1]) { ov.beginPath(); for (let j = 0; j <= n; j++) { const [x, y] = pts[(k + dir * j + N * 4) % N]; j ? ov.lineTo(x, y) : ov.moveTo(x, y); } ov.stroke(); }
+  ov.restore();
+}
+const ARROW = [[0,0],[0,16.6],[4.1,12.7],[6.7,18.7],[9.5,17.5],[6.9,11.7],[12.4,11.7]];
+function cursor(x, y, s) {
+  ov.save(); ov.translate(x, y); ov.scale(2.3 * s, 2.3 * s);
+  ov.beginPath(); ARROW.forEach(([u, v], i) => i ? ov.lineTo(u, v) : ov.moveTo(u, v)); ov.closePath();
+  ov.shadowColor = "rgba(0,0,0,.28)"; ov.shadowBlur = 6; ov.shadowOffsetY = 1.5; ov.lineJoin = "round"; ov.lineWidth = 1.3; ov.strokeStyle = "#fff"; ov.stroke();
+  ov.shadowColor = "transparent"; ov.fillStyle = "#000"; ov.fill(); ov.restore();
+}
+
+// ---------- scenes ----------
+function base() { g.fillStyle = STONE; g.fillRect(0, 0, W, H); ov.clearRect(0, 0, W, H); }
+
+function sceneT(f) { // reveal: mark, wordmark, line
+  base(); present();
+  const m = out(span(f, 0, 12));
+  $("tMark").style.opacity = clamp(f / 4); $("tMark").style.transform = `scale(${.9 + .1 * m})`;
+  const wv = io(span(f, 12, 26));
+  $("tWord").style.clipPath = `inset(0 ${100 - 100 * wv}% 0 0)`;
+  $("tWord").style.transform = `translateX(${-30 * (1 - wv)}px)`;
+  words(document.querySelector("#sT .tag"), f, 34, 2);
+}
+const LIMIT_T = .62; // dial travel for 10.00 (of a 16 USDC dial)
+function sceneL(f) {
+  base();
+  const t = LIMIT_T * mech(span(f, 14, 62));
+  const v = (16 * t / 1).toFixed(2);
+  ring(1290, 580, 300, t, { value: (Math.round(Number(v) * 4) / 4).toFixed(2), sub: "USDC LIMIT" });
+  dialTicks(1290, 580, 300, t);
+  present();
+  words($("sL"), f, 0, 2);
+  [["cCap", 70], ["cExp", 80]].forEach(([id, s]) => { const k = soft(span(f, s, s + 8)); $(id).style.opacity = k; $(id).style.transform = `translateY(${14 * (1 - k)}px)`; });
+}
+function sceneK(f) {
+  base(); present();
+  words($("sK"), f, 0, 2);
+  const k = out(span(f, 8, 26));
+  $("tk").style.transform = `translateY(${(1 - k) * 520}px) rotate(${-1.5 - 5 * (1 - k)}deg)`;
+}
+const PAY = [ // pills: amount, label, enter frame, refused?
+  { amt: "0.42", what: "llm.gateway", f0: 10 }, { amt: "0.05", what: "search", f0: 28 }, { amt: "0.25", what: "scrape.page", f0: 46 },
+  { amt: "2.40", what: "data.vendor", f0: 66, no: true }, { amt: "0.48", what: "llm.gateway", f0: 96 },
+];
+const RC = { x: 1180, y: 650, R: 240 };
+function sceneP(f) {
+  base();
+  let spent = 0; const pills = [];
+  PAY.forEach((p) => {
+    const lf = f - p.f0; if (lf < 0) return;
+    const travel = p.no ? out(span(lf, 0, 18)) : io(span(lf, 0, 20));
+    const sx = 2160, ex = p.no ? RC.x + RC.R + 250 : RC.x + RC.R + 150;
+    let x = sx + (ex - sx) * travel, y = RC.y + (p.no ? -200 : 0), s = 1, a = 1;
+    if (!p.no) {   // paid: glides across the chrome band into the ring and is absorbed
+      const absorb = inE(span(lf, 18, 28)); x += (RC.x + RC.R * .62 - ex) * absorb; s = 1 - .65 * absorb; a = 1 - inE(span(lf, 21, 28));
+      if (lf >= 28) spent += Number(p.amt);
+    }
+    else { a = 1 - io(span(lf, 46, 54)); }
+    if (a > 0.01) pills.push({ ...p, x, y, s, a, hw: 210, hh: 56, lf });
+  });
+  const left = 10 - spent;
+  ring(RC.x, RC.y, RC.R, spent / 10, { value: left.toFixed(2), sub: "USDC LEFT OF 10.00" });
+  pills.forEach(pillLabel);
+  present(pills);
+  pills.forEach((p) => { if (p.no) pillTrace(p, mech(span(p.lf, 22, 30)), "bottom"); });
+  words($("sP"), f, 0, 2);
+}
+function sceneX(f) {
+  base(); present();
+  words($("sX"), f, 0, 2);
+  [...$("ck").children].forEach((li, i) => {
+    const r = soft(span(f, 8 + 3 * i, 16 + 3 * i)); li.style.opacity = r; li.style.transform = `translateY(${12 * (1 - r)}px)`;
+    const c = out(span(f, 30 + 7 * i, 34 + 7 * i)); const ic = li.querySelector("i"); ic.style.opacity = c; ic.style.transform = `scale(${.6 + .4 * c})`;
+  });
+}
+function sceneN(f) {
+  base();
+  const rev = mech(span(f, 54, 66)), back = io(span(f, 60, 76));
+  const spent = .12 + .88 * back;               // the arc retracts as the balance leaves
+  ring(800, 640, 230, f < 60 ? .12 : 0, { value: f < 66 ? "8.80" : "0.00", sub: f < 66 ? "USDC LEFT" : "TAB REVOKED", dim: rev });
+  present();
+  words($("sN"), f, 0, 2);
+  const b = soft(span(f, 26, 34)); $("rv").style.opacity = b * (1 - .5 * rev); $("rv").style.transform = `translateY(${10 * (1 - b)}px) scale(${f >= 48 && f < 51 ? .97 : 1})`;
+  const wl = soft(span(f, 68, 78)); $("wl").style.opacity = wl; $("wl").style.transform = `translateX(${-40 * (1 - wl)}px)`;
+  // the owner's cursor clicks Revoke on f48
+  if (f >= 34) { const t = out(span(f, 34, 44)); cursor(2000 + (1470 - 2000) * t, 1150 + (592 - 1150) * t, f >= 48 && f < 50 ? .9 : 1); }
+}
+function scene$(f) {
+  base(); present();
+  const k = out(span(f, 0, 10)); $("pz").style.opacity = k; $("pz").style.transform = `translateY(${30 * (1 - k)}px)`;
+  words(document.querySelector("#s\\$ .price-r"), f, 8, 2);
+}
+function sceneE(f) {
+  base(); present();
+  const m = out(span(f, 0, 12)); $("eLock").style.opacity = m; $("eLock").style.transform = `translateX(-50%) scale(${.94 + .06 * m})`;
+  words(document.querySelector("#sE .tag"), f, 14, 2);
+  const ft = soft(span(f, 40, 50)); $("eFoot").style.opacity = ft; $("eFoot").style.transform = `translateY(${8 * (1 - ft)}px)`;
+}
+const FN = { sT: sceneT, sL: sceneL, sK: sceneK, sP: sceneP, sX: sceneX, sN: sceneN, "s$": scene$, sE: sceneE };
+
+window.render = (f) => {
+  const sc = SC.find((s) => f >= s.a && f <= s.b) ?? SC[SC.length - 1];
+  SC.forEach((s) => ($(s.id).style.display = s === sc ? "block" : "none"));
+  const lf = f - sc.a, len = sc.b - sc.a;
+  $(sc.id).style.transform = `scale(${1 + .02 * io(lf / len)})`;   // slow camera creep in every scene
+  FN[sc.id](lf);
+  return sc.id;
+};
+window.ready = Promise.all([
+  ...[...document.images].map((im) => (im.complete ? 1 : new Promise((r) => (im.onload = r)))),
+  document.fonts.load('500 40px "Film"'), document.fonts.load('600 40px "Mono"'), document.fonts.load('500 40px "Mono"'), document.fonts.load('600 40px "Mark"'), document.fonts.ready,
+]).then(() => "ready");
+</script>
+</body>
+</html>

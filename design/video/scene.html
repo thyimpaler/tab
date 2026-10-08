@@ -190,14 +190,12 @@ function shotB(f) {
   // coral trace: the payment is refused (f39–44), held to the cut
   trace(easeMech(span(f, 39, 44)), sx, sy);
   // cursor: f24–33 travel (fast, then slow), rests, clicks on f36
-  if (f >= 24) {
-    const shutter = 8;
-    for (let s = 0; s < shutter; s++) {
-      const t = easeOut(span(f - .5 + s / shutter, 24, 33));
-      const p = qb(t);
-      const click = f >= 36 && f < 38 ? .9 : 1;
-      cursor(p.x, p.y, click, f >= 34 ? (s === 0 ? 1 : 0) : 1 / shutter * 1.6);
-    }
+  if (f >= 24) {   // one arrow, blurred by its speed (stacked copies read as dashes)
+    const p = qb(easeOut(span(f, 24, 33))), q = qb(easeOut(span(f - 1, 24, 33)));
+    const v = Math.hypot(p.x - q.x, p.y - q.y);
+    ov.filter = v > 3 ? `blur(${Math.min(5, v / 22).toFixed(2)}px)` : "none";
+    cursor(p.x, p.y, f >= 36 && f < 38 ? .9 : 1, 1);
+    ov.filter = "none";
   }
 }
 

@@ -1,12 +1,13 @@
 // Renders scene.html frame by frame through the Chrome DevTools protocol.
-// Usage: node design/video/render.mjs <outDir> <firstFrame> <lastFrame> [port]   (FRAMES=22,37 renders just those)
+// Usage: node render.mjs <outDir> <first> <last> [port] [page=scene.html] [offset=0]   (FRAMES=22,37 renders just those)
+// Files are named by global frame: f<frame+offset>.png, 4 digits.
 // Serve this folder first (python -m http.server <port>), so WebGL can read plate.png.
 import { spawn } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-const [outDir, a = "16", b = "107", port = "8765"] = process.argv.slice(2);
+const [outDir, a = "16", b = "107", port = "8765", page = "scene.html", offset = "0"] = process.argv.slice(2);
 mkdirSync(outDir, { recursive: true });
 const CHROME = process.env.CHROME ?? "C:/Program Files/Google/Chrome/Application/chrome.exe";
 const profile = mkdtempSync(join(tmpdir(), "tab-video-"));
@@ -24,15 +25,15 @@ const evaluate = async (expr) => { const r = await send("Runtime.evaluate", { ex
 
 await send("Emulation.setDeviceMetricsOverride", { width: 1920, height: 1080, deviceScaleFactor: 1, mobile: false });
 await send("Page.enable");
-await send("Page.navigate", { url: `http://127.0.0.1:${port}/scene.html` });
+await send("Page.navigate", { url: `http://127.0.0.1:${port}/${page}` });
 await sleep(1500);
 console.log(await evaluate("window.ready"));
 const list = process.env.FRAMES ? process.env.FRAMES.split(",").map(Number) : Array.from({ length: Number(b) - Number(a) + 1 }, (_, i) => Number(a) + i);
 for (const f of list) {
   await evaluate(`render(${f})`);
   await evaluate("new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))");
-  const shot = await send("Page.captureScreenshot", { format: "png" });
-  writeFileSync(join(outDir, `f${String(f).padStart(3, "0")}.png`), Buffer.from(shot.result.data, "base64"));
+  const shot = await send("Page.captureScreenshot", { format: "jpeg", quality: 95 });   // jpeg keeps 1000+ frames small on disk
+  writeFileSync(join(outDir, `f${String(f + Number(offset)).padStart(4, "0")}.jpg`), Buffer.from(shot.result.data, "base64"));
 }
 console.log(`rendered ${a}..${b}`);
 ws.close(); chrome.kill(); await sleep(500);
