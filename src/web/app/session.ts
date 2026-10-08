@@ -79,6 +79,8 @@ export function walletMessage(e: unknown): string {
   const msg = String(err?.message ?? err ?? "");
   if (err?.code === 4001 || /reject|denied|cancel/i.test(msg)) return "You cancelled in your wallet. Nothing was signed.";
   if (/-32002|already pending/i.test(msg)) return "Your wallet already has a request open. Check the wallet popup (it may be behind this window).";
+  // A wallet with 0 SOL doesn't exist on chain yet, so the fee payer debit fails with this instead.
+  if (/no record of a prior credit|AccountNotFound/i.test(msg)) return "Your wallet has no SOL. Opening a tab needs about 0.003 SOL for the network fee and the account rent (the rent comes back when you close the tab). Add a little SOL and try again.";
   if (/insufficient|0x1\b/i.test(msg)) return "Your wallet doesn't have enough SOL for the network fee, or not enough USDC.";
   return msg && msg.length < 200 ? msg : "The wallet returned an error. Try again.";
 }
