@@ -41,8 +41,8 @@ export function Docs() {
           </ol>
 
           <h2 id="sdk">SDK</h2>
-          <pre className="code"><code>{`npm i @tabpay/sdk`}</code></pre>
-          <pre className="code"><code>{`import { Tab } from "@tabpay/sdk";
+          <pre className="code"><code>{`npm i @tabpaysi/sdk`}</code></pre>
+          <pre className="code"><code>{`import { Tab } from "@tabpaysi/sdk";
 
 const tab = new Tab({
   credential: process.env.TAB_CREDENTIAL!,   // tab_live_… or tab_test_…

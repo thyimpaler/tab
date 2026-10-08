@@ -1,13 +1,13 @@
-# @tabpay/sdk
+# @tabpaysi/sdk
 
 Give an AI agent a **capped, expiring, revocable USDC allowance** on Solana. The agent pays x402 V2 services through TAB and never holds a wallet key.
 
 ```bash
-npm i @tabpay/sdk
+npm i @tabpaysi/sdk
 ```
 
 ```ts
-import { Tab } from "@tabpay/sdk";
+import { Tab } from "@tabpaysi/sdk";
 
 const tab = new Tab({
   credential: process.env.TAB_CREDENTIAL!, // tab_live_…, shown once when you open a tab

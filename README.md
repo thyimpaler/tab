@@ -13,7 +13,7 @@ Capped, expiring, revocable USDC allowances for AI agents on Solana. Agents pay 
 api/index.ts            Vercel function: all /api/* → Hono app
 src/server/             API: config, db, pay engine, settlement, tabs, auth (SIWS), x402, demo paid API
 src/web/                Vite + React site, docs and dashboard
-packages/sdk/           @tabpay/sdk: new Tab({ credential, maxPayment }).fetch(url)
+packages/sdk/           @tabpaysi/sdk: new Tab({ credential, maxPayment }).fetch(url)
 db/migrations/          SQL migrations (applied in order, once)
 tests/                  vitest on a real embedded Postgres (concurrency, crash injection, replay, errors)
 scripts/e2e-devnet.ts   full devnet run against a local API: sign-in → open → agent pays → revoke → reclaim
