@@ -24,6 +24,18 @@ export function TabDetail({ s, tabId, credential, rememberKey, onChange }: { s: 
 
   const load = useCallback(() => api<Detail>(`/v1/tabs/${tabId}`).then(setD).catch((e) => setErr(e.message)), [tabId]);
   useEffect(() => { setD(null); setErr(null); setConfirmRevoke(false); load(); const t = setInterval(load, 15_000); return () => clearInterval(t); }, [load]);
+  // A pending tab whose deposit is already on chain only needs activating: do it once, unprompted.
+  const autoActivated = useRef<string | null>(null);
+  const funded = !!d && d.tab.status === "pending" && !!d.tab.chain && BigInt(d.tab.chain.amount) >= BigInt(d.tab.limit);
+  useEffect(() => {
+    if (!funded || autoActivated.current === tabId) return;
+    autoActivated.current = tabId;
+    setBusy("activate");
+    api<{ credential: string }>(`/v1/tabs/${tabId}/activate`, {})
+      .then((r) => { rememberKey(r.credential); setNewKey(r.credential); load(); onChange(); })
+      .catch((e) => setErr((e as Error).message))
+      .finally(() => setBusy(null));
+  }, [funded, tabId, load, onChange, rememberKey]);
 
   if (err && !d) return <div className="stage-pad"><p className="err-line">{err}</p><a className="btn" href="/app" data-nav>Back</a></div>;
   if (!d) return <Loader label="Loading the tab" full={false} />;
@@ -112,9 +124,14 @@ export function TabDetail({ s, tabId, credential, rememberKey, onChange }: { s: 
 
       {t.status === "pending" && (
         <div className="notice">
-          <strong>This tab isn't funded yet.</strong>
-          <p style={{ margin: "8px 0 14px" }}>If you approved the transaction, check again. If you didn't, open a new tab instead. Nothing was moved.</p>
-          <button type="button" className="btn small" onClick={activate} disabled={!!busy}>{busy === "activate" ? <span className="spinner" /> : null} Check again</button>
+          {funded ? <>
+            <strong>Your deposit landed. Finishing setup.</strong>
+            <p style={{ margin: "8px 0 14px" }}>{fromUnits(t.chain!.amount, dec)} USDC is in this tab's token account, which your wallet owns. TAB just needs to confirm it and issue the agent key.</p>
+          </> : <>
+            <strong>This tab isn't funded yet.</strong>
+            <p style={{ margin: "8px 0 14px" }}>If you approved the transaction, it may still be confirming: check again in a moment. If you didn't approve it, no funds left your wallet; open a new tab instead.</p>
+          </>}
+          <button type="button" className="btn small" onClick={activate} disabled={!!busy}>{busy === "activate" ? <span className="spinner" /> : null} {funded ? "Finish setup" : "Check again"}</button>
         </div>
       )}
 

@@ -61,9 +61,15 @@ export function Composer({ s, onCreated, maxUsd }: { s: Session; onCreated: (id:
       const sig = await s.sendTx(r.transaction).catch((e) => { throw new Error(walletMessage(e)); });
       setStage("activate");
       let key: string | null = null;
-      for (let i = 0; i < 6 && !key; i++) {
+      // Mainnet can take a while to show the new account to every RPC node: keep checking for ~60s, and
+      // ride out a flaky RPC answer too. If it still isn't there, the tab page picks it up on its own.
+      for (let i = 0; i < 24 && !key; i++) {
         try { key = (await api<{ credential: string }>(`/v1/tabs/${r.tabId}/activate`, { signature: sig })).credential; }
-        catch (e) { if (!(e instanceof ApiError && e.code === "NOT_ACTIVATED") || i === 5) throw e; await new Promise((res) => setTimeout(res, 2500)); }
+        catch (e) {
+          const retry = e instanceof ApiError && (e.code === "NOT_ACTIVATED" || e.code === "CHAIN_UNAVAILABLE");
+          if (!retry || i === 23) { navigate(`/app/tab/${r.tabId}`); throw e; }
+          await new Promise((res) => setTimeout(res, 2500));
+        }
       }
       setCreated({ id: r.tabId, key: key! });
       onCreated(r.tabId, key!);
