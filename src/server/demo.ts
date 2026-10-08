@@ -1,9 +1,10 @@
 // Demo paid API: real x402 V2 endpoints that a test agent pays from its tab.
 //   devnet:  settled by the public x402.org facilitator (free).
-//   mainnet: settled by TAB's own in-process facilitator. Its fee payer (DEMO_FEE_PAYER_KEY, a
-//            separate key, never the TAB delegate) pays ~0.000005 SOL per call; the call itself pays
-//            real USDC to DEMO_MERCHANT (the owner's wallet), so the demo funds itself.
-// The facilitator is only reachable through these routes; it is not a public facilitator.
+//   mainnet: settled by a hosted facilitator (PayAI by default, DEMO_FACILITATOR_URL to change it), which
+//            pays the SOL network fee itself, so TAB keeps no fee-payer wallet to top up. Each call
+//            pays real USDC to DEMO_MERCHANT (the owner's wallet), so the demo funds itself.
+//            DEMO_FACILITATOR=self switches back to the in-process facilitator, whose fee payer is
+//            DEMO_FEE_PAYER_KEY (a separate key, never the TAB delegate).
 import { Hono, type Context } from "hono";
 import { Connection, Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { createKeyPairSignerFromBytes } from "@solana/kit";
@@ -41,10 +42,12 @@ const MIN_FEE_PAYER_LAMPORTS = 0.002 * LAMPORTS_PER_SOL;
 const recovered = new Set<string>();
 
 /** Whether this deployment serves the demo API (used by /v1/config so the UI can show the test agent). */
+const selfFacilitated = () => config().network === "mainnet" && process.env.DEMO_FACILITATOR === "self";
+const DEFAULT_FACILITATOR = { devnet: "https://x402.org/facilitator", mainnet: "https://facilitator.payai.network" } as const;
+
 export function demoEnabled(): boolean {
-  const cfg = config();
   if (!process.env.DEMO_MERCHANT) return false;
-  return cfg.network === "devnet" || !!process.env.DEMO_FEE_PAYER_KEY;
+  return !selfFacilitated() || !!process.env.DEMO_FEE_PAYER_KEY;
 }
 
 export function demoApp() {
@@ -60,7 +63,7 @@ export function demoApp() {
 
   let facilitatorClient: ConstructorParameters<typeof x402ResourceServer>[0];
   let feePayer: Keypair | null = null;
-  if (cfg.network === "mainnet") {
+  if (selfFacilitated()) {
     const raw = process.env.DEMO_FEE_PAYER_KEY!.trim();
     const bytes = raw.startsWith("[") ? Uint8Array.from(JSON.parse(raw)) : bs58.decode(raw);
     feePayer = Keypair.fromSecretKey(bytes);
@@ -75,7 +78,7 @@ export function demoApp() {
       getSupported: async () => { await init(); return local.getSupported(); },
     } as any;
   } else {
-    facilitatorClient = new HTTPFacilitatorClient({ url: process.env.FACILITATOR_URL ?? "https://x402.org/facilitator" });
+    facilitatorClient = new HTTPFacilitatorClient({ url: process.env.DEMO_FACILITATOR_URL ?? DEFAULT_FACILITATOR[cfg.network] });
   }
 
   // Mainnet: pause cleanly if the fee payer can't cover fees.
