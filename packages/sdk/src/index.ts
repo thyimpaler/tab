@@ -38,7 +38,7 @@ export class TabError extends Error {
   }
 }
 
-const DEFAULT_API = "https://tab-agent-one.vercel.app/api";
+const DEFAULT_API = "https://tappay.si/api";
 const SOLANA = /^solana:/;
 
 function b64json(s: string): any {
