@@ -23,7 +23,7 @@
 - **Score is temporary** (synthesised pad + soft pulse in `audio.py`). Swap for a licensed track by replacing the music block; foley stays.
 - **Opening** comes from the owner's clip (WhatsApp copy, 848×480, so soft when upscaled). Point `TAB_OPENING` at the original high-res file and rebuild. Its original audio (a loud constant bed) is replaced by matching foley.
 - **Type**: Inter stands in for SF Pro (swap the `@font-face` in `scene.html` / `launch.html` on a Mac), Geist Mono for numbers, Funnel Display only for the wordmark.
-- **URL** on the end card is `tab-agent-one.vercel.app`; change `#eFoot` in `launch.html` when the domain is live.
+- **URL** on the end card is `tabpay.si` (`#eFoot` in `launch.html`). Rebuild the film to bake it into the frames.
 
 ## Rebuild
 ```

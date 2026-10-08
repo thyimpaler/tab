@@ -6,6 +6,7 @@ import { TryIt } from "../components/TryIt";
 import { Gates } from "../components/Gates";
 import { Custody } from "../components/Custody";
 import { Wire } from "../components/Wire";
+import { CaSection } from "../components/Ca";
 import { reducedMotion } from "../components/sim";
 import { clamp01, useScrollFrame } from "../components/scroll";
 
@@ -169,6 +170,8 @@ export function Landing() {
             <Wire />
           </div>
         </section>
+
+        <CaSection />
 
         <section className="faq-sec" aria-labelledby="faq-h">
           <div className="faq-side">

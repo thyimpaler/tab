@@ -17,7 +17,7 @@ env.CREDENTIAL_HASH_SECRET ??= randomBytes(32).toString("hex");
 env.SESSION_SECRET ??= randomBytes(32).toString("hex");
 env.CRON_SECRET ??= randomBytes(24).toString("hex");
 env.DEMO_MERCHANT ??= local.DEMO_MERCHANT;
-env.APP_ORIGIN = process.env.APP_ORIGIN ?? env.APP_ORIGIN ?? "https://tab-agent-one.vercel.app";
+env.APP_ORIGIN = process.env.APP_ORIGIN ?? env.APP_ORIGIN ?? "https://tabpay.si";
 env.PG_POOL_MAX ??= "3";
 if (local.NEON_DATABASE_URL) env.DATABASE_URL = local.NEON_DATABASE_URL;
 writeFileSync(FILE, "# Vercel production env (devnet). NEVER commit.\n" + Object.entries(env).map(([k, v]) => `${k}=${v}`).join("\n") + "\n");

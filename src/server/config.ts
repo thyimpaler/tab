@@ -38,6 +38,10 @@ function load() {
     credentialPepper: req("CREDENTIAL_HASH_SECRET"),
     sessionSecret: req("SESSION_SECRET"),
     appOrigin: process.env.APP_ORIGIN ?? "http://localhost:5173",
+    // Every origin the dashboard may be served from (sign-in domain + cookie-route origin check).
+    // APP_ORIGIN first; APP_ALT_ORIGINS (comma-separated) adds more, e.g. while moving domains.
+    appOrigins: [...new Set([process.env.APP_ORIGIN ?? "http://localhost:5173", ...(process.env.APP_ALT_ORIGINS ?? "https://tabpay.si").split(",")]
+      .map((s) => s.trim()).filter(Boolean).map((s) => new URL(s).origin))],
     // Fee charged when a tab is opened, in the tab mint's base units, paid to TREASURY_WALLET.
     // Off unless both are set.
     tabFee: process.env.TAB_FEE && process.env.TREASURY_WALLET ? BigInt(process.env.TAB_FEE) : 0n,
