@@ -40,6 +40,6 @@ Request bodies must be re-sendable (string, bytes or FormData), because a paid r
 | `onPayment` | Called after every paid request with amount, recipient and what's left. |
 | `fetch` | Custom fetch implementation. |
 
-Open a tab and get a key at the [TAB dashboard](https://tappay.si/app). Docs: https://tappay.si/docs
+Open a tab and get a key at the [TAB dashboard](https://tabpay.si/app). Docs: https://tabpay.si/docs
 
 MIT licensed.

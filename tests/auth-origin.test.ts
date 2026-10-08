@@ -6,7 +6,7 @@ import { setTestEnv } from "./helpers.ts";
 
 setTestEnv();
 process.env.APP_ORIGIN = "https://tab-agent-one.vercel.app";
-process.env.APP_ALT_ORIGINS = "https://tappay.si";
+process.env.APP_ALT_ORIGINS = "https://tabpay.si";
 const { db } = await import("../src/server/db.ts");
 const { migrate } = await import("../src/server/migrate.ts");
 const { app } = await import("../src/server/app.ts");
@@ -32,7 +32,7 @@ async function signIn(host: string) {
 
 describe("app origins", () => {
   it("signs in on each allowed host, with that host as the SIWS domain", async () => {
-    for (const host of ["tappay.si", "tab-agent-one.vercel.app"]) {
+    for (const host of ["tabpay.si", "tab-agent-one.vercel.app"]) {
       const { input, res } = await signIn(host);
       expect(input.domain).toBe(host);
       expect(input.uri).toBe(`https://${host}`);
@@ -46,7 +46,7 @@ describe("app origins", () => {
   });
 
   it("refuses cookie-route writes from an origin that isn't allowed", async () => {
-    const res = await post("/tabs", "tappay.si", {}, "https://evil.example");
+    const res = await post("/tabs", "tabpay.si", {}, "https://evil.example");
     expect(res.status).toBe(401);
     expect((await res.json()).error?.code ?? "").toMatch(/UNAUTHORIZED/);
   });
