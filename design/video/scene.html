@@ -1,0 +1,237 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>TAB video, shots B and C</title>
+<style>
+/* TAB explainer, shots B (glass capsule, refused click) and C (organized → fixed).
+   Frame-exact: the renderer calls render(frame) for f16..107 at 24fps and screenshots each frame.
+   Font: Inter stands in for SF Pro (swap the @font-face src for SF Pro Display on a Mac). */
+@font-face{font-family:"Film";src:url(fonts/inter-latin.woff2) format("woff2");font-weight:100 900;font-display:block}
+html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#e3ddd6}
+canvas{position:absolute;inset:0;width:1920px;height:1080px}
+#c{position:absolute;inset:0;background:#e3ddd6;display:none}
+#cam{position:absolute;inset:0;transform-origin:50% 50%}
+#push{position:absolute;inset:0}
+.txt{position:absolute;left:173px;top:352px;font:500 98px/1.12 "Film";letter-spacing:-.02em;color:#0a0a09;font-feature-settings:"ss01" 0}
+.line{display:block;white-space:nowrap}
+.w{display:inline-block;transform-origin:0 85%;will-change:transform,opacity}
+.mask{display:block;position:relative;height:1.16em;overflow:hidden;margin-top:.04em}
+.mask .w{position:absolute;left:0;top:.06em}
+#fixed{color:#ff4d2e;font-weight:600}
+</style>
+</head>
+<body>
+<canvas id="gl" width="1920" height="1080"></canvas>
+<canvas id="ov" width="1920" height="1080"></canvas>
+<div id="c"><div id="cam"><div id="push"><div class="txt">
+  <span class="line"><span class="w" id="w0">your</span> <span class="w" id="w1">agent’s</span> <span class="w" id="w2">spending</span> <span class="w" id="w3">should</span> <span class="w" id="w4">be</span></span>
+  <span class="mask"><span class="w" id="w5">organized</span><span class="w" id="fixed">fixed</span></span>
+</div></div></div></div>
+<script>
+const W = 1920, H = 1080;
+// ---------- easing ----------
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+function bez(x1, y1, x2, y2) { // CSS cubic-bezier
+  return (t) => {
+    if (t <= 0) return 0; if (t >= 1) return 1;
+    let u = t;
+    for (let i = 0; i < 8; i++) { const x = 3*(1-u)*(1-u)*u*x1 + 3*(1-u)*u*u*x2 + u*u*u - t; const dx = 3*(1-u)*(1-u)*x1 + 6*(1-u)*u*(x2-x1) + 3*u*u*(1-x2); if (Math.abs(dx) < 1e-6) break; u = clamp(u - x / dx); }
+    return 3*(1-u)*(1-u)*u*y1 + 3*(1-u)*u*u*y2 + u*u*u;
+  };
+}
+const easeSoft = bez(.22, 1, .36, 1), easeOut = bez(.16, 1, .3, 1), easeIn = bez(.55, 0, 1, .45), easeMech = bez(.7, 0, .2, 1), easeStop = bez(.2, .8, .3, 1), easeIO = bez(.45, 0, .55, 1);
+const span = (f, a, b) => clamp((f - a) / (b - a));
+
+// ---------- shot B geometry ----------
+const C = { x: 960, y: 548, hw: 365, hh: 104 }; // capsule centre and half size (38% of frame width)
+const CLICK = { x: C.x + 262, y: C.y + 46 };
+
+// ---------- background texture: defocused robot plate + text behind the glass ----------
+const plate = new Image(); plate.src = "plate.png";
+const tex2d = document.createElement("canvas"); tex2d.width = W; tex2d.height = H;
+const tx = tex2d.getContext("2d");
+function drawTexture(sx, sy) {
+  tx.drawImage(plate, 0, 0, W, H);
+  tx.save();
+  tx.translate(C.x, C.y); tx.scale(sx, sy);
+  tx.fillStyle = "#0a0a09"; tx.textBaseline = "alphabetic";
+  const size = 66;
+  tx.font = `500 ${size}px Film`; const a = "PAY ";
+  tx.font = `600 ${size}px Film`; const b = "100 USDC";
+  tx.font = `500 ${size}px Film`; const wa = tx.measureText(a).width;
+  tx.font = `600 ${size}px Film`; const wb = tx.measureText(b).width;
+  const x0 = -(wa + wb) / 2, base = size * 0.36;
+  tx.font = `500 ${size}px Film`; tx.fillText(a, x0, base);
+  tx.font = `600 ${size}px Film`; tx.fillText(b, x0 + wa, base);
+  tx.restore();
+}
+
+// ---------- WebGL glass ----------
+const gl = document.getElementById("gl").getContext("webgl", { preserveDrawingBuffer: true, antialias: false });
+const vs = `attribute vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }`;
+const fs = `
+precision highp float;
+uniform sampler2D tex; uniform vec2 res; uniform vec2 ctr; uniform vec2 hs; uniform vec2 scl;
+uniform float alpha; uniform vec3 dent; uniform float vis;
+float sdPill(vec2 q, vec2 b){ float r = b.y; vec2 d = abs(q) - b + r; return length(max(d, 0.)) + min(max(d.x, d.y), 0.) - r; }
+float height(vec2 q){
+  float d = sdPill(q, hs); float t = -d; float bw = hs.y * .62;
+  float h = t >= bw ? 1. : sqrt(max(0., 1. - pow(1. - clamp(t / bw, 0., 1.), 2.)));
+  vec2 dq = q - dent.xy; h -= dent.z * .16 * exp(-dot(dq, dq) / (2. * 58. * 58.));
+  return h * hs.y * .55;
+}
+vec3 bg(vec2 px){ return texture2D(tex, vec2(px.x / res.x, px.y / res.y)).rgb; }
+void main(){
+  vec2 px = vec2(gl_FragCoord.x, res.y - gl_FragCoord.y);
+  vec3 base = bg(px);
+  if (vis < .5) { gl_FragColor = vec4(base, 1.); return; }
+  vec2 q = (px - ctr) / scl;
+  float d = sdPill(q, hs);
+  // soft contact shadow on the backdrop, below and behind the capsule
+  float ds = sdPill((px - ctr - vec2(0., 46.)) / scl, hs * vec2(.96, .82));
+  float sh = (1. - smoothstep(-30., 90., ds)) * .16 * alpha;
+  vec3 col = base * (1. - sh);
+  if (d < 1.5) {
+    float e = 1.2;
+    float hx = (height(q + vec2(e, 0.)) - height(q - vec2(e, 0.))) / (2. * e);
+    float hy = (height(q + vec2(0., e)) - height(q - vec2(0., e))) / (2. * e);
+    vec3 n = normalize(vec3(-hx, -hy, 1.));
+    float thick = height(q);
+    vec2 lens = (px - ctr) * .018;                       // slight magnification through the flat top
+    vec2 off = n.xy * thick * 2.7 - lens;                 // refraction through the bevel
+    vec3 g = bg(px + off);
+    g *= vec3(.985, .99, .992);                           // a touch of absorption, no colour cast
+    float fres = pow(1. - n.z, 2.4);
+    vec3 env = mix(vec3(.10, .10, .11), vec3(1.), smoothstep(-.35, .55, -n.y));   // bright above, dark below
+    g = mix(g, env, clamp(fres * .55, 0., .6));
+    vec3 L = normalize(vec3(-.32, -.78, .54)); vec3 V = vec3(0., 0., 1.);
+    float spec = pow(max(dot(n, normalize(L + V)), 0.), 140.) * .55;
+    g += spec;
+    float steep = smoothstep(.3, .92, 1. - n.z);                                  // light lost at the steep bevel
+    g *= 1. - steep * (.12 + .26 * smoothstep(-.1, .7, n.y));                     // darker along the bottom edge
+    float t = -d;
+    float strip = exp(-pow((t - hs.y * .2) / 2.4, 2.)) * smoothstep(.15, -.65, q.y / hs.y);
+    g += strip * .45;                                                              // thin highlight inside the top edge
+    g += (1. - smoothstep(0., 1.6, abs(d + .6))) * .18;  // fine rim
+    float a = (1. - smoothstep(-.8, .8, d)) * alpha;
+    col = mix(col, g, a);
+  }
+  gl_FragColor = vec4(col, 1.);
+}`;
+function sh(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
+const prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(prog); gl.useProgram(prog);
+const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+const loc = gl.getAttribLocation(prog, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+const U = (n) => gl.getUniformLocation(prog, n);
+
+// ---------- overlay: cursor + coral trace ----------
+const ov = document.getElementById("ov").getContext("2d");
+const ARROW = [[0,0],[0,16.6],[4.1,12.7],[6.7,18.7],[9.5,17.5],[6.9,11.7],[12.4,11.7]];
+function cursor(x, y, s, a) {
+  ov.save(); ov.translate(x, y); ov.scale(2.3 * s, 2.3 * s); ov.globalAlpha = a;
+  ov.beginPath(); ARROW.forEach(([u, v], i) => i ? ov.lineTo(u, v) : ov.moveTo(u, v)); ov.closePath();
+  ov.shadowColor = "rgba(0,0,0,.28)"; ov.shadowBlur = 6; ov.shadowOffsetY = 1.5;
+  ov.lineJoin = "round"; ov.lineWidth = 1.5 / 2.3 * 2; ov.strokeStyle = "#fff"; ov.stroke();
+  ov.shadowColor = "transparent"; ov.fillStyle = "#000"; ov.fill();
+  ov.restore();
+}
+const P0 = { x: 2010, y: 1190 }, P1 = { x: 1660, y: 770 }, P2 = { x: CLICK.x, y: CLICK.y };
+const qb = (t) => ({ x: (1-t)*(1-t)*P0.x + 2*(1-t)*t*P1.x + t*t*P2.x, y: (1-t)*(1-t)*P0.y + 2*(1-t)*t*P1.y + t*t*P2.y });
+// capsule outline as a polyline, starting from the point nearest the click
+function outline(sx, sy, grow) {
+  const pts = [], hw = C.hw * sx + grow, hh = C.hh * sy + grow, r = hh, N = 900;
+  const straight = 2 * (hw - r), arc = Math.PI * r, per = 2 * straight + 2 * arc;
+  for (let i = 0; i < N; i++) {
+    let s = (i / N) * per, x, y;
+    if (s < straight) { x = -hw + r + s; y = -hh; }
+    else if ((s -= straight) < arc) { const a = -Math.PI / 2 + s / r; x = hw - r + r * Math.cos(a); y = r * Math.sin(a); }
+    else if ((s -= arc) < straight) { x = hw - r - s; y = hh; }
+    else { s -= straight; const a = Math.PI / 2 + s / r; x = -hw + r + r * Math.cos(a); y = r * Math.sin(a); }
+    pts.push([C.x + x, C.y + y]);
+  }
+  let k = 0, best = 1e9; pts.forEach(([x, y], i) => { const d = (x - CLICK.x) ** 2 + (y - (C.y + hh)) ** 2; if (d < best) { best = d; k = i; } });
+  return { pts, k };
+}
+function trace(p, sx, sy) {
+  if (p <= 0) return;
+  const { pts, k } = outline(sx, sy, 7), N = pts.length, n = Math.round((N / 2) * p);
+  ov.save(); ov.strokeStyle = "#ff4d2e"; ov.lineWidth = 3; ov.lineCap = "round"; ov.lineJoin = "round";
+  for (const dir of [1, -1]) { ov.beginPath(); for (let j = 0; j <= n; j++) { const [x, y] = pts[(k + dir * j + N) % N]; j ? ov.lineTo(x, y) : ov.moveTo(x, y); } ov.stroke(); }
+  ov.restore();
+}
+
+// ---------- shot B ----------
+function shotB(f) {
+  // entry: 88% → 100%, no overshoot
+  const ent = easeOut(span(f, 16, 22));
+  let sx = .88 + .12 * ent, sy = sx;
+  const alpha = clamp((f - 16 + 1) / 3);
+  // press on f36: squash to 96% height, widen 1.5%; release with ≤1% overshoot, settled by f45
+  let dent = 0;
+  if (f >= 36) {
+    const pin = easeIO(span(f, 36, 39));
+    const rel = span(f, 39, 45);
+    const back = rel <= 0 ? 0 : (1 - easeOut(rel)) - .01 * Math.sin(Math.PI * rel) * (rel < 1 ? 1 : 0);
+    const k = f < 39 ? pin : clamp(back, -.25, 1);
+    sx *= 1 + .015 * k; sy *= 1 - .04 * k; dent = f < 39 ? pin : clamp(back, 0, 1);
+  }
+  drawTexture(sx, sy);
+  gl.bindTexture(gl.TEXTURE_2D, tex); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, tex2d);
+  gl.uniform2f(U("res"), W, H); gl.uniform2f(U("ctr"), C.x, C.y); gl.uniform2f(U("hs"), C.hw, C.hh);
+  gl.uniform2f(U("scl"), sx, sy); gl.uniform1f(U("alpha"), alpha); gl.uniform1f(U("vis"), 1);
+  gl.uniform3f(U("dent"), (CLICK.x - C.x) / sx, (CLICK.y - C.y) / sy, dent);
+  gl.viewport(0, 0, W, H); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  ov.clearRect(0, 0, W, H);
+  // coral trace: the payment is refused (f39–44), held to the cut
+  trace(easeMech(span(f, 39, 44)), sx, sy);
+  // cursor: f24–33 travel (fast, then slow), rests, clicks on f36
+  if (f >= 24) {
+    const shutter = 8;
+    for (let s = 0; s < shutter; s++) {
+      const t = easeOut(span(f - .5 + s / shutter, 24, 33));
+      const p = qb(t);
+      const click = f >= 36 && f < 38 ? .9 : 1;
+      cursor(p.x, p.y, click, f >= 34 ? (s === 0 ? 1 : 0) : 1 / shutter * 1.6);
+    }
+  }
+}
+
+// ---------- shot C ----------
+const words = [0, 1, 2, 3, 4, 5].map((i) => document.getElementById("w" + i));
+const fixed = document.getElementById("fixed");
+function shotC(f) {
+  document.getElementById("gl").style.display = "none"; document.getElementById("ov").style.display = "none";
+  document.getElementById("c").style.display = "block";
+  // camera: cut in at 102%, creep to 105% across the shot
+  const creep = 1.02 + .03 * easeIO(span(f, 48, 107));
+  document.getElementById("cam").style.transform = `scale(${creep})`;
+  // reveal: 3-frame stagger, 6 frames each: opacity, 12px rise, 94% → 100%
+  words.forEach((w, i) => {
+    const t = easeSoft(span(f, 48 + 3 * i, 54 + 3 * i));
+    let y = 12 * (1 - t);
+    if (i === 5) y -= 128 * easeIn(span(f, 81, 85));        // organized exits up through the mask (f81–85)
+    w.style.opacity = t; w.style.transform = `translateY(${y}px) scale(${.94 + .06 * t})`;
+  });
+  const fin = easeStop(span(f, 85, 90));                   // then fixed rises in and stops hard on f90
+  fixed.style.opacity = f >= 85 ? 1 : 0;
+  fixed.style.transform = `translateY(${128 * (1 - fin)}px)`;
+  // push toward "fixed"
+  const push = 1 + .04 * easeOut(span(f, 84, 98));
+  const push_el = document.getElementById("push");
+  push_el.style.transformOrigin = `${173 + 130}px ${352 + 98 * 1.7}px`;
+  push_el.style.transform = `scale(${push})`;
+}
+
+window.render = (f) => { if (f < 48) shotB(f); else shotC(f); return f; };
+window.ready = Promise.all([
+  new Promise((r) => (plate.complete ? r() : (plate.onload = r))),
+  document.fonts.load('500 66px "Film"'), document.fonts.load('600 66px "Film"'), document.fonts.ready,
+]).then(() => "ready");
+</script>
+</body>
+</html>
