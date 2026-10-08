@@ -139,7 +139,10 @@ async function ownedTab(wallet: string, tabId: string) {
 export async function activateTab(wallet: string, tabId: string, signature?: string) {
   const t = await ownedTab(wallet, tabId);
   if (t.status !== "pending") throw new TabError("BAD_REQUEST", "tab is already activated");
-  const acct = await chain().getTokenAccount(t.token_account).catch(() => { throw new TabError("CHAIN_UNAVAILABLE"); });
+  const acct = await chain().getTokenAccount(t.token_account).catch((e) => {
+    console.error("activate: chain read failed", tabId, e instanceof Error ? e.message : e);
+    throw new TabError("CHAIN_UNAVAILABLE");
+  });
   if (!acct) throw new TabError("NOT_ACTIVATED", "token account not found yet, wait for confirmation");
   const problems: string[] = [];
   if (acct.owner !== wallet) problems.push("owner");
@@ -149,6 +152,7 @@ export async function activateTab(wallet: string, tabId: string, signature?: str
   if (acct.amount < t.limit_amount) problems.push("balance");
   if (acct.closeAuthority) problems.push("close authority");
   if (acct.frozen) problems.push("frozen");
+  if (problems.length) console.error("activate: on-chain mismatch", tabId, problems.join(","));
   if (problems.length) throw new TabError("CHAIN_STATE_MISMATCH", `on-chain account mismatch: ${problems.join(", ")}`);
 
   const credential = newCredential(tabId);
@@ -246,7 +250,10 @@ export async function revokeTab(wallet: string, tabId: string) {
 /** Marks a tab closed once its token account is gone on chain (after the reclaim tx). */
 export async function closeTab(wallet: string, tabId: string) {
   const t = await ownedTab(wallet, tabId);
-  const acct = await chain().getTokenAccount(t.token_account).catch(() => { throw new TabError("CHAIN_UNAVAILABLE"); });
+  const acct = await chain().getTokenAccount(t.token_account).catch((e) => {
+    console.error("activate: chain read failed", tabId, e instanceof Error ? e.message : e);
+    throw new TabError("CHAIN_UNAVAILABLE");
+  });
   if (acct) {
     // Still open: revoke first (if needed) and hand back the reclaim tx.
     if (t.status !== "revoked") await revokeTab(wallet, tabId);
