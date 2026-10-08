@@ -121,17 +121,22 @@ export function HeroOrbit() {
   useEffect(() => {
     const el = hero.current; if (!el) return;
     const nav = document.querySelector(".landing .top") as HTMLElement | null;
-    let raf = 0, past = false;
+    // Height is read on resize only, and --hp is written only when it changes: below the hero it sits
+    // at 1, so scrolling the rest of the page costs no style recalc here.
+    let raf = 0, past = false, h = 0, hp = "";
+    const measure = () => { h = el.offsetHeight || innerHeight; };
     const frame = () => {
       raf = 0;
-      const h = el.offsetHeight || innerHeight;
       const p = Math.min(1, Math.max(0, scrollY / h));
-      el.style.setProperty("--hp", p.toFixed(3));
+      const s = p.toFixed(3);
+      if (s !== hp) { hp = s; el.style.setProperty("--hp", s); }
       if (p > 0.85 !== past) { past = p > 0.85; nav?.classList.toggle("past", past); }
     };
     const on = () => { if (!raf) raf = requestAnimationFrame(frame); };
-    frame(); addEventListener("scroll", on, { passive: true });
-    return () => { removeEventListener("scroll", on); cancelAnimationFrame(raf); };
+    const resize = () => { measure(); on(); };
+    measure(); frame();
+    addEventListener("scroll", on, { passive: true }); addEventListener("resize", resize);
+    return () => { removeEventListener("scroll", on); removeEventListener("resize", resize); cancelAnimationFrame(raf); };
   }, []);
 
   return (

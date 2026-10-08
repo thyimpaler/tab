@@ -12,11 +12,14 @@ const STEPS = [
   { k: "HTTP 402 → paid", h: "It pays as it goes", p: "Every x402 bill is checked against your rules, then signed. Anything over the line is refused and nothing is signed." },
   { k: "revoke · reclaim", h: "Close it out", p: "Revoke in one click. Whatever's left goes back to your wallet, rent included." },
 ];
+// The spent arc is always drawn at 0.38 and only faded in on the third step (CSS): fading a layer is free,
+// animating --spent repaints a masked conic gradient every frame, which stutters on phones.
+const SPENT = 0.38;
 const RING = [
-  { spent: 0, value: "5.00", sub: <>USDC limit</> },
-  { spent: 0, value: "5.00", sub: <>USDC limit</> },
-  { spent: 0.38, value: "3.10", sub: <>USDC left <em>of 5.00</em></> },
-  { spent: 0, value: "3.10", sub: <>back in your wallet</> },
+  { value: "5.00", sub: <>USDC limit</> },
+  { value: "5.00", sub: <>USDC limit</> },
+  { value: "3.10", sub: <>USDC left <em>of 5.00</em></> },
+  { value: "3.10", sub: <>back in your wallet</> },
 ];
 
 export function Story() {
@@ -24,8 +27,11 @@ export function Story() {
   const [step, setStep] = useState(0);
   const cur = useRef(0);
 
-  useScrollFrame(sec, (r, vh) => {
-    const p = clamp01(-r.top / Math.max(1, r.height - vh));
+  // Progress is measured against the pinned panel (100svh, fixed), not innerHeight, which jumps when a
+  // phone's address bar shows or hides and would flip the step back and forth mid-scroll.
+  useScrollFrame(sec, (r, vh, el) => {
+    const pin = (el.firstElementChild as HTMLElement | null)?.offsetHeight || vh;
+    const p = clamp01(-r.top / Math.max(1, r.height - pin));
     const s = Math.min(3, Math.floor(p * 4.0001));
     if (s !== cur.current) { cur.current = s; setStep(s); }
   });
@@ -49,7 +55,7 @@ export function Story() {
         </div>
         <div className="story-stage" data-step={step} style={{ "--step": step } as CSSProperties} aria-hidden="true">
           <div className="story-ring">
-            <Ring spent={ring.spent} value={ring.value} sub={ring.sub} void={step === 3} />
+            <Ring spent={SPENT} value={ring.value} sub={ring.sub} />
           </div>
           <div className="sat s0 a">cap 0.50</div>
           <div className="sat s0 b">ends in 7 days</div>
