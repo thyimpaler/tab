@@ -1,6 +1,6 @@
 {
   "name": "@tabpaysi/mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server that lets Claude, Cursor or any MCP agent pay x402 APIs on Solana from a capped TAB allowance. The agent never holds a wallet key.",
   "type": "module",
   "bin": {
@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",
-    "@tabpaysi/sdk": "^0.1.0",
+    "@tabpaysi/sdk": "^0.1.1",
     "zod": "^4.6.7"
   },
   "repository": {

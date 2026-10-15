@@ -2,7 +2,7 @@ import { Hono, type Context } from "hono";
 import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 import { z } from "zod";
 import { config, delegatePubkey } from "./config.js";
-import { TabError } from "./errors.js";
+import { ERROR_NUMBER, TabError } from "./errors.js";
 import { issueNonce, makeSession, readSession, signInInput, verifySignIn, SESSION_COOKIE, SESSION_TTL_S } from "./auth.js";
 import { authTab, pay } from "./pay.js";
 import { confirmPayment, reconcile } from "./settle.js";
@@ -18,10 +18,10 @@ type Env = { Variables: { wallet: string; tabId: string } };
 export const app = new Hono<Env>().basePath("/api");
 
 app.onError((err, c) => {
-  if (err instanceof TabError) return c.json({ error: { code: err.code, message: err.message } }, err.status as any);
-  if (err instanceof z.ZodError) return c.json({ error: { code: "BAD_REQUEST", message: err.issues[0]?.message ?? "invalid body" } }, 400);
+  if (err instanceof TabError) return c.json({ error: { code: err.code, number: err.number, message: err.message } }, err.status as any);
+  if (err instanceof z.ZodError) return c.json({ error: { code: "BAD_REQUEST", number: ERROR_NUMBER.BAD_REQUEST, message: err.issues[0]?.message ?? "invalid body" } }, 400);
   console.error("unhandled", err instanceof Error ? err.message : err);
-  return c.json({ error: { code: "INTERNAL", message: "Something went wrong. Try again." } }, 500);
+  return c.json({ error: { code: "INTERNAL", number: ERROR_NUMBER.INTERNAL, message: "Something went wrong. Try again." } }, 500);
 });
 
 const json = async (c: Context) => {

@@ -25,7 +25,7 @@ const { remaining } = await tab.balance();
 3. retries your request with the `PAYMENT-SIGNATURE` header,
 4. reports the service's `PAYMENT-RESPONSE` so the tab settles straight away.
 
-Refusals throw a `TabError` with a `code` such as `TAB_EXPIRED`, `PAYMENT_EXCEEDS_TAB_LIMIT`, `RECIPIENT_NOT_ALLOWED` or `INSUFFICIENT_TAB_BALANCE`. Nothing is signed when a check fails.
+Refusals throw a `TabError` with a `code` and a unique `number` (for example `3001` for `PAYMENT_EXCEEDS_TAB_LIMIT`), such as `TAB_EXPIRED`, `PAYMENT_EXCEEDS_TAB_LIMIT`, `RECIPIENT_NOT_ALLOWED` or `INSUFFICIENT_TAB_BALANCE`. Nothing is signed when a check fails.
 
 Request bodies must be re-sendable (string, bytes or FormData), because a paid request is sent twice.
 

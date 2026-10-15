@@ -97,14 +97,14 @@ export function createTabMcp(o: TabMcpOptions) {
       return text({ ok: true, status: res.status, charged, data, receipt });
     } catch (e) {
       if (e instanceof TabError) {
-        return text({ ok: false, refusedBy: "TAB", code: e.code, message: e.message, next: HINTS[e.code] ?? "Don't retry this call.", charged: false }, true);
+        return text({ ok: false, refusedBy: "TAB", code: e.code, number: e.number ?? null, message: e.message, next: HINTS[e.code] ?? "Don't retry this call.", charged: false }, true);
       }
       const msg = e instanceof Error && e.name === "TimeoutError" ? "The request timed out." : "The request failed.";
       return text({ ok: false, message: msg, charged: false }, true);
     }
   }
 
-  const server = new McpServer({ name: "tab", version: "0.1.0" });
+  const server = new McpServer({ name: "tab", version: "0.1.1" });
 
   server.registerTool("tab_balance", {
     title: "TAB balance",
@@ -121,7 +121,7 @@ export function createTabMcp(o: TabMcpOptions) {
         expiresAt: b.expiresAt, thisServerMaxPerCallUsd: usd(maxPayment), raw: b,
       });
     } catch (e) {
-      if (e instanceof TabError) return text({ code: e.code, message: e.message, next: HINTS[e.code] }, true);
+      if (e instanceof TabError) return text({ code: e.code, number: e.number ?? null, message: e.message, next: HINTS[e.code] }, true);
       return text({ message: "Couldn't reach TAB." }, true);
     }
   });

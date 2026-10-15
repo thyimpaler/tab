@@ -13,7 +13,7 @@ When a service answers HTTP 402 (x402 V2), the server asks TAB to sign the payme
 | `market_call` | Calls one market service and pays for it. Returns the data plus a receipt (amount, tx, explorer link, remaining) |
 | `paid_fetch` | Calls any http(s) URL. If it asks for an x402 Solana payment, pays from the tab |
 
-Refusals come back as tool errors with a `code` and a `next` hint, so the agent can tell the user why it stopped. Examples: `PAYMENT_EXCEEDS_TAB_LIMIT`, `INSUFFICIENT_TAB_BALANCE`, `TAB_REVOKED`, `RECIPIENT_NOT_ALLOWED`.
+Refusals come back as tool errors with a `code`, a unique `number` and a `next` hint, so the agent can tell the user why it stopped. Examples: `PAYMENT_EXCEEDS_TAB_LIMIT`, `INSUFFICIENT_TAB_BALANCE`, `TAB_REVOKED`, `RECIPIENT_NOT_ALLOWED`.
 
 A service that fails after the payment was signed reports `charged: false`. x402 doesn't settle failed calls, and TAB releases the held amount once the signed payment expires.
 

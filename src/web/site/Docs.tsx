@@ -1,17 +1,20 @@
 import { TopBar, Footer } from "../components/Chrome";
 
-const ERRORS: [string, string, string][] = [
-  ["INVALID_CREDENTIAL", "401", "The key is malformed, rotated or wrong. Ask the owner for a new one."],
-  ["TAB_NOT_FOUND", "404", "The tab doesn't exist or hasn't been activated."],
-  ["TAB_REVOKED", "403", "The owner revoked the tab. Nothing more will be signed."],
-  ["TAB_CLOSED", "403", "The tab was closed and its funds returned."],
-  ["TAB_EXPIRED", "403", "Past the tab's expiry."],
-  ["PAYMENT_EXCEEDS_TAB_LIMIT", "403", "This payment is above the tab's per-payment cap (or the SDK's maxPayment)."],
-  ["RECIPIENT_NOT_ALLOWED", "403", "The service's payTo address isn't on the tab's allowlist."],
-  ["INSUFFICIENT_TAB_BALANCE", "402", "Not enough left: spent plus in-flight payments would pass the limit."],
-  ["UNSUPPORTED_MINT", "400", "The service doesn't accept the tab's token (V1: USDC)."],
-  ["UNSUPPORTED_PAYMENT_REQUIREMENT", "400", "Not an x402 V2 exact payment on this Solana network."],
-  ["DUPLICATE_REQUEST", "409", "The idempotency key was reused with a different request."],
+const ERRORS: [number, string, string, string][] = [
+  [1001, "INVALID_CREDENTIAL", "401", "The key is malformed, rotated or wrong. Ask the owner for a new one."],
+  [2001, "TAB_NOT_FOUND", "404", "The tab doesn't exist or hasn't been activated."],
+  [2002, "TAB_REVOKED", "403", "The owner revoked the tab. Nothing more will be signed."],
+  [2003, "TAB_CLOSED", "403", "The tab was closed and its funds returned."],
+  [2004, "TAB_EXPIRED", "403", "Past the tab's expiry."],
+  [3001, "PAYMENT_EXCEEDS_TAB_LIMIT", "403", "This payment is above the tab's per-payment cap (or the SDK's maxPayment)."],
+  [3002, "RECIPIENT_NOT_ALLOWED", "403", "The service's payTo address isn't on the tab's allowlist."],
+  [3003, "INSUFFICIENT_TAB_BALANCE", "402", "Not enough left: spent plus in-flight payments would pass the limit."],
+  [4001, "UNSUPPORTED_MINT", "400", "The service doesn't accept the tab's token (V1: USDC)."],
+  [4002, "UNSUPPORTED_PAYMENT_REQUIREMENT", "400", "Not an x402 V2 exact payment on this Solana network."],
+  [4003, "DUPLICATE_REQUEST", "409", "The idempotency key was reused with a different request."],
+  [4004, "BAD_REQUEST", "400", "The request body or parameters are invalid."],
+  [5000, "INTERNAL", "500", "Something went wrong on TAB's side. Safe to retry with the same idempotency key."],
+  [5001, "CHAIN_UNAVAILABLE", "503", "The Solana RPC didn't answer. Nothing was signed. Try again."],
 ];
 
 const MARKET: [string, string, string, string][] = [
@@ -99,7 +102,7 @@ const { remaining } = await tab.balance();`}</code></pre>
           <p>A request with bad input gets a 400 before any 402, so nothing is signed for it. If the service fails after payment was signed, x402 doesn't settle and you aren't charged. See <a href="#settlement">Settlement</a>.</p>
 
           <h2 id="api">HTTP API</h2>
-          <p>Agent endpoints authenticate with <code>Authorization: Bearer tab_…</code>. Amounts are strings in base units. Errors are <code>{`{ "error": { "code", "message" } }`}</code>.</p>
+          <p>Agent endpoints authenticate with <code>Authorization: Bearer tab_…</code>. Amounts are strings in base units. Errors are <code>{`{ "error": { "code", "number", "message" } }`}</code>. <code>number</code> is unique per code and never changes; see <a href="#errors">Error codes</a>.</p>
           <div className="table-wrap"><table>
             <thead><tr><th>Endpoint</th><th>What it does</th></tr></thead>
             <tbody>
@@ -121,9 +124,10 @@ const { remaining } = await tab.balance();`}</code></pre>
 
           <h2 id="errors">Error codes</h2>
           <div className="table-wrap"><table>
-            <thead><tr><th>Code</th><th>HTTP</th><th>Meaning</th></tr></thead>
-            <tbody>{ERRORS.map(([c, s, m]) => <tr key={c}><td><code>{c}</code></td><td className="num">{s}</td><td>{m}</td></tr>)}</tbody>
+            <thead><tr><th>#</th><th>Code</th><th>HTTP</th><th>Meaning</th></tr></thead>
+            <tbody>{ERRORS.map(([n, c, s, m]) => <tr key={c}><td className="num">{n}</td><td><code>{c}</code></td><td className="num">{s}</td><td>{m}</td></tr>)}</tbody>
           </table></div>
+          <p>Each code has its own number, grouped by kind: 1xxx key, 2xxx tab state, 3xxx payment rules, 4xxx bad request, 5xxx chain or system. The HTTP status can be shared (several are 403), the number never is. The SDK exposes it as <code>TabError.number</code>.</p>
           <p>Checks run in this order: status, expiry, per-payment cap, allowlist, remaining balance. A failed check signs nothing.</p>
 
           <h2 id="security">Security model</h2>

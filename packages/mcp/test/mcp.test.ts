@@ -141,7 +141,7 @@ describe("TAB MCP server", () => {
     const { call } = await connect(credential);
     const r = await call("market_call", { service: "wallet-report", params: { address: "vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg" } });
     expect(r.isError).toBe(true);
-    expect(r.body).toMatchObject({ refusedBy: "TAB", code: "PAYMENT_EXCEEDS_TAB_LIMIT", charged: false });
+    expect(r.body).toMatchObject({ refusedBy: "TAB", code: "PAYMENT_EXCEEDS_TAB_LIMIT", number: 3001, charged: false });
     expect(r.body.next).toMatch(/cap/);
     const signed = await db().query(`SELECT count(*) FROM payments WHERE tab_id = $1`, [id]);
     expect(Number(signed.rows[0].count)).toBe(0);
@@ -161,7 +161,7 @@ describe("TAB MCP server", () => {
     await db().query(`UPDATE tabs SET status = 'revoked' WHERE id = $1`, [id]);
     const { call } = await connect(credential);
     const r = await call("market_call", { service: "price", params: { tokens: "SOL" } });
-    expect(r.body).toMatchObject({ refusedBy: "TAB", code: "TAB_REVOKED" });
+    expect(r.body).toMatchObject({ refusedBy: "TAB", code: "TAB_REVOKED", number: 2002 });
     expect(r.body.next).toMatch(/Stop/);
   });
 

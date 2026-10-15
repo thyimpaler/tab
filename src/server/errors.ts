@@ -20,6 +20,31 @@ export const ERROR_STATUS = {
 
 export type ErrorCode = keyof typeof ERROR_STATUS;
 
+/**
+ * A unique, stable number per error code (the HTTP status is shared, e.g. several 403s). Never reuse or
+ * renumber: agents and integrations may switch on it. Groups: 1xxx key/session, 2xxx tab state,
+ * 3xxx payment rules, 4xxx bad request, 5xxx chain/system. Mirrored in packages/sdk (a test keeps them equal).
+ */
+export const ERROR_NUMBER: Record<ErrorCode | "INTERNAL", number> = {
+  INVALID_CREDENTIAL: 1001,
+  UNAUTHORIZED: 1002,
+  TAB_NOT_FOUND: 2001,
+  TAB_REVOKED: 2002,
+  TAB_CLOSED: 2003,
+  TAB_EXPIRED: 2004,
+  NOT_ACTIVATED: 2005,
+  PAYMENT_EXCEEDS_TAB_LIMIT: 3001,
+  RECIPIENT_NOT_ALLOWED: 3002,
+  INSUFFICIENT_TAB_BALANCE: 3003,
+  UNSUPPORTED_MINT: 4001,
+  UNSUPPORTED_PAYMENT_REQUIREMENT: 4002,
+  DUPLICATE_REQUEST: 4003,
+  BAD_REQUEST: 4004,
+  INTERNAL: 5000,
+  CHAIN_UNAVAILABLE: 5001,
+  CHAIN_STATE_MISMATCH: 5002,
+};
+
 const DEFAULT_MESSAGE: Partial<Record<ErrorCode, string>> = {
   TAB_NOT_FOUND: "This tab doesn't exist or isn't active.",
   TAB_EXPIRED: "This tab has expired.",
@@ -42,5 +67,8 @@ export class TabError extends Error {
   }
   get status() {
     return ERROR_STATUS[this.code];
+  }
+  get number() {
+    return ERROR_NUMBER[this.code];
   }
 }

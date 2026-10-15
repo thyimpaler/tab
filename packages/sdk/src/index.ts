@@ -31,10 +31,22 @@ export type PaymentEvent = {
   transaction?: string;
 };
 
+/** Unique number per error code (stable; the HTTP status is shared). Same table as the TAB API. */
+export const ERROR_NUMBERS: Record<string, number> = {
+  INVALID_CREDENTIAL: 1001, UNAUTHORIZED: 1002,
+  TAB_NOT_FOUND: 2001, TAB_REVOKED: 2002, TAB_CLOSED: 2003, TAB_EXPIRED: 2004, NOT_ACTIVATED: 2005,
+  PAYMENT_EXCEEDS_TAB_LIMIT: 3001, RECIPIENT_NOT_ALLOWED: 3002, INSUFFICIENT_TAB_BALANCE: 3003,
+  UNSUPPORTED_MINT: 4001, UNSUPPORTED_PAYMENT_REQUIREMENT: 4002, DUPLICATE_REQUEST: 4003, BAD_REQUEST: 4004,
+  INTERNAL: 5000, CHAIN_UNAVAILABLE: 5001, CHAIN_STATE_MISMATCH: 5002, TAB_API_ERROR: 5003,
+};
+
 export class TabError extends Error {
-  constructor(public code: string, message: string, public status?: number) {
+  /** Unique error number, e.g. 3001 for PAYMENT_EXCEEDS_TAB_LIMIT. */
+  public number: number | undefined;
+  constructor(public code: string, message: string, public status?: number, number?: number) {
     super(message);
     this.name = "TabError";
+    this.number = number ?? ERROR_NUMBERS[code];
   }
 }
 
@@ -87,7 +99,7 @@ export class Tab {
       signal: AbortSignal.timeout(this.timeoutMs),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new TabError(data?.error?.code ?? "TAB_API_ERROR", data?.error?.message ?? `TAB API ${res.status}`, res.status);
+    if (!res.ok) throw new TabError(data?.error?.code ?? "TAB_API_ERROR", data?.error?.message ?? `TAB API ${res.status}`, res.status, typeof data?.error?.number === "number" ? data.error.number : undefined);
     return data;
   }
 
