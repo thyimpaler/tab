@@ -2,6 +2,8 @@
 
 Track: **Best Use of x402 on Solana**.
 
+**Live demo (Solana devnet):** https://tab-devnet.vercel.app. The dashboard is at `/app`, the docs at `/docs`, and the free market catalogue at `/api/market/catalog`. You need a devnet wallet with devnet SOL and devnet USDC (faucet.circle.com). The production site, tabpay.si, runs on mainnet and is a separate deployment.
+
 ## Disclosure: what existed before the hackathon
 
 TAB existed before the hackathon started on 2026-10-12. The git tag **`hackathon-baseline`** (commit `cbb08be`, 2026-10-08) marks exactly what was already built:
@@ -64,6 +66,8 @@ git log hackathon-baseline..HEAD --oneline
 | Ledger vs chain | spent 0.06, on-chain allowance left 0.24 = TAB's remaining | |
 | Revoke | agent gets `TAB_REVOKED` | |
 | Reclaim + close | funds back to the wallet | [reclaim](https://explorer.solana.com/tx/2JNixJPFzCrtUMQQb3hXzrYQNTQ3sXPEEqKBsc9WwcaF3FjNgLFAm5gFwSUyk8prRYqrW68K4iBArDnGrURaGRqf?cluster=devnet) |
+
+The same run against the live deployment (`API=https://tab-devnet.vercel.app/api`) also passed every check. Its paid calls: [price](https://explorer.solana.com/tx/tAHnJGNFQqR7qhKxjjuJJtVDvCVP154455eRhpDwBAEe2bf7XNtTRGkYSBMgsNQcZsma71srjeN8LmTwnjemhfN?cluster=devnet), [token-check](https://explorer.solana.com/tx/2VvgngxQqrxh5reQmMd6xaNWzcbKvgvCmGFXofCN2nohFfL8my3oirUUFAWaXBYH6Y1jFJ9vEtRpU1T4P7BXBo2g?cluster=devnet), [read](https://explorer.solana.com/tx/9Nd1SBArBrKr1TMAGwgfo5KSGBYk3XWXZngso3FsNcK7Npc6R4BFZ4QTP875F6ZHXhzxsJjAQ2XGoPW82jdCuyG?cluster=devnet).
 
 ## Run it
 
