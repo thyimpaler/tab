@@ -3,7 +3,7 @@
 Final deadline: **Mon 9 Nov**. Midpoint checkpoint: **Mon 2 Nov**.
 
 Encode requires four things:
-- **A working demo on devnet.** https://tab-devnet.vercel.app (or devnet.tabpay.si once its DNS record is added). Verified live on 2026-10-15.
+- **A working demo on devnet.** https://devnet.tabpay.si (mirror: https://tab-devnet.vercel.app). Verified live on 2026-10-15.
 - **A repo with a README and setup steps.** README.md and HACKATHON.md. The repo is private, so either make it public or share it with the judges before submitting.
 - **A 2–4 minute video.** Script below.
 - **An explanation of how Solana powers the project.** See "How Solana powers TAB" in HACKATHON.md, and the short version below.
@@ -14,7 +14,7 @@ Encode requires four things:
 
 ## Copy-paste: midpoint update (Nov 2)
 
-> Built so far: a paid-API market (5 real x402 services on Solana devnet, including a service that always fails to prove failed calls aren't charged), and an MCP server so Claude, Cursor or any MCP agent can pay from a TAB. A real MCP agent ran end to end on devnet: it bought 3 services with real x402 settlement, the failing call wasn't charged, the over-cap call was refused, revoking stopped the agent, and the ledger matched the chain. 89 tests pass. Live on devnet at tab-devnet.vercel.app. Next: demo video, polish.
+> Built so far: a paid-API market (5 real x402 services on Solana devnet, including a service that always fails to prove failed calls aren't charged), and an MCP server so Claude, Cursor or any MCP agent can pay from a TAB. A real MCP agent ran end to end on devnet: it bought 3 services with real x402 settlement, the failing call wasn't charged, the over-cap call was refused, revoking stopped the agent, and the ledger matched the chain. 89 tests pass. Live on devnet at devnet.tabpay.si. Next: demo video, polish.
 
 ## Demo video: 3 minutes, shot list
 
@@ -34,5 +34,5 @@ Encode requires four things:
 
 **Before recording:**
 - A devnet wallet with devnet SOL and devnet USDC (faucet.circle.com).
-- The MCP server set to `TAB_API_URL=https://tab-devnet.vercel.app/api`, built from this repo or installed with `npx` once it's published.
+- The MCP server set to `TAB_API_URL=https://devnet.tabpay.si/api`, built from this repo or installed with `npx` once it's published.
 - Record shot 6 last. It needs a 1–2 minute wait, which gets cut out.

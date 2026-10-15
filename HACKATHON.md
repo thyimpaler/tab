@@ -2,7 +2,7 @@
 
 Track: **Best Use of x402 on Solana**.
 
-**Live demo (Solana devnet):** https://tab-devnet.vercel.app. The dashboard is at `/app`, the docs at `/docs`, and the free market catalogue at `/api/market/catalog`. You need a devnet wallet with devnet SOL and devnet USDC (faucet.circle.com). The production site, tabpay.si, runs on mainnet and is a separate deployment.
+**Live demo (Solana devnet):** https://devnet.tabpay.si (mirror: https://tab-devnet.vercel.app). The dashboard is at `/app`, the docs at `/docs`, and the free market catalogue at `/api/market/catalog`. You need a devnet wallet with devnet SOL and devnet USDC (faucet.circle.com). The production site, tabpay.si, runs on mainnet and is a separate deployment.
 
 ## Disclosure: what existed before the hackathon
 

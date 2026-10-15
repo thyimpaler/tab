@@ -25,7 +25,7 @@ A service that fails after the payment was signed reports `charged: false`. x402
 | Variable | Meaning |
 |---|---|
 | `TAB_CREDENTIAL` | The tab key (`tab_live_…` / `tab_test_…`). Required. |
-| `TAB_API_URL` | TAB API base. Defaults to `https://tabpay.si/api`. Use `https://tab-devnet.vercel.app/api` for the devnet demo. |
+| `TAB_API_URL` | TAB API base. Defaults to `https://tabpay.si/api`. Use `https://devnet.tabpay.si/api` for the devnet demo. |
 | `TAB_MAX_PAYMENT` | This server's own ceiling per call, in base units (USDC: `100000` = 0.10). Default `1000000` (1.00). |
 | `TAB_MARKET_URL` | Market catalogue URL. Defaults to `<TAB_API_URL>/market/catalog`. |
 
@@ -39,7 +39,7 @@ A service that fails after the payment was signed reports `charged: false`. x402
       "args": ["-y", "@tabpaysi/mcp"],
       "env": {
         "TAB_CREDENTIAL": "tab_test_…",
-        "TAB_API_URL": "https://tab-devnet.vercel.app/api",
+        "TAB_API_URL": "https://devnet.tabpay.si/api",
         "TAB_MAX_PAYMENT": "100000"
       }
     }
@@ -50,7 +50,7 @@ A service that fails after the payment was signed reports `charged: false`. x402
 **Claude Code:**
 
 ```bash
-claude mcp add tab --env TAB_CREDENTIAL=tab_test_… --env TAB_API_URL=https://tab-devnet.vercel.app/api -- npx -y @tabpaysi/mcp
+claude mcp add tab --env TAB_CREDENTIAL=tab_test_… --env TAB_API_URL=https://devnet.tabpay.si/api -- npx -y @tabpaysi/mcp
 ```
 
 **From this repo, before the package is on npm:** build it with `npm run build -w packages/sdk` then `npm run build -w packages/mcp`. Then set `"command": "node"` and `"args": ["<path to TAB>/packages/mcp/dist/index.js"]`.
