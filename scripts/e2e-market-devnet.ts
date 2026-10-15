@@ -3,7 +3,8 @@
 //
 //   npm run dev:db ; npm run dev:api          (local, SOLANA_NETWORK=devnet, DEMO_MERCHANT set)
 //   npm run build -w packages/sdk ; npm run build -w packages/mcp
-//   npx tsx scripts/e2e-market-devnet.ts      (API=https://<devnet host>/api to run against a deployment)
+//   npx tsx scripts/e2e-market-devnet.ts      (API=https://<devnet host>/api to run against a deployment;
+//                                              MCP_FROM_NPM=1 runs the published @tabpaysi/mcp via npx instead)
 //
 // Plays the user with the spike owner keypair (devnet only): sign in -> open a tab -> agent works through
 // the market over MCP -> failing service isn't charged -> cap refusal -> revoke stops the agent ->
@@ -14,6 +15,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import bs58 from "bs58";
 import nacl from "tweetnacl";
 import { readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 
 const API = process.env.API ?? "http://localhost:8787/api";
 const ORIGIN = process.env.APP_ORIGIN ?? new URL(API).origin.replace(":8787", ":5173");
@@ -68,9 +70,14 @@ const { credential } = await call(`/v1/tabs/${created.tabId}/activate`, { signat
 console.log("agent key issued (not printed)");
 
 step("start the MCP server as an agent would (stdio)");
+const fromNpm = process.env.MCP_FROM_NPM === "1";
+console.log(fromNpm ? "server: npx -y @tabpaysi/mcp (published)" : "server: packages/mcp/dist (local build)");
 const transport = new StdioClientTransport({
-  command: process.execPath,
-  args: ["packages/mcp/dist/index.js"],
+  // Node refuses to spawn npx.cmd directly on Windows, so go through cmd there.
+  command: fromNpm ? (process.platform === "win32" ? "cmd" : "npx") : process.execPath,
+  args: fromNpm ? [...(process.platform === "win32" ? ["/c", "npx"] : []), "-y", "@tabpaysi/mcp"] : ["packages/mcp/dist/index.js"],
+  // Outside the repo, or npx resolves the local workspace copy of @tabpaysi/mcp instead of the published one.
+  ...(fromNpm ? { cwd: tmpdir() } : {}),
   env: { ...process.env as Record<string, string>, TAB_CREDENTIAL: credential, TAB_API_URL: API, TAB_MAX_PAYMENT: "100000" },
   stderr: "inherit",
 });

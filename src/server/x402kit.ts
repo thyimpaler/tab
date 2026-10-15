@@ -12,6 +12,8 @@ import { config } from "./config.js";
 
 export type FacilitatorClient = ConstructorParameters<typeof x402ResourceServer>[0];
 
+const FACILITATOR_TIMEOUT_MS = 20_000;
+
 export const DEFAULT_FACILITATOR = { devnet: "https://x402.org/facilitator", mainnet: "https://facilitator.payai.network" } as const;
 
 /** mainnet + DEMO_FACILITATOR=self: settle in-process with DEMO_FEE_PAYER_KEY instead of a hosted facilitator. */
@@ -27,7 +29,8 @@ export const selfFacilitated = () => config().network === "mainnet" && process.e
 export function makeFacilitator(): { client: FacilitatorClient; feePayer: Keypair | null } {
   const cfg = config();
   if (!selfFacilitated()) {
-    return { client: new HTTPFacilitatorClient({ url: process.env.DEMO_FACILITATOR_URL ?? DEFAULT_FACILITATOR[cfg.network] }), feePayer: null };
+    // The library waits 90s by default; a cold or slow facilitator should fail fast (nothing is charged) instead.
+    return { client: new HTTPFacilitatorClient({ url: process.env.DEMO_FACILITATOR_URL ?? DEFAULT_FACILITATOR[cfg.network], timeoutMs: FACILITATOR_TIMEOUT_MS }), feePayer: null };
   }
   const raw = process.env.DEMO_FEE_PAYER_KEY!.trim();
   const bytes = raw.startsWith("[") ? Uint8Array.from(JSON.parse(raw)) : bs58.decode(raw);
