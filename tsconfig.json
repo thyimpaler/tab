@@ -10,7 +10,8 @@
     "esModuleInterop": true,
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["node"]
+    "types": ["node"],
+    "paths": { "@tabpaysi/sdk": ["./packages/sdk/src/index.ts"] }
   },
-  "include": ["src", "api", "tests", "packages/sdk/src", "vite.config.ts"]
+  "include": ["src", "api", "tests", "packages/sdk/src", "packages/mcp/src", "packages/mcp/test", "vite.config.ts"]
 }
