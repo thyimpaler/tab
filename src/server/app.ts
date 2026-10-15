@@ -11,6 +11,7 @@ import {
 } from "./tabs.js";
 import { db } from "./db.js";
 import { demoApp, demoEnabled } from "./demo.js";
+import { marketApp, marketEnabled } from "./market.js";
 
 type Env = { Variables: { wallet: string; tabId: string } };
 
@@ -33,6 +34,7 @@ app.get("/v1/config", (c) => c.json({
   network: config().network, caip2: config().caip2, mints: config().acceptedMints, delegate: delegatePubkey().toBase58(),
   // Public endpoint only: never expose a keyed RPC URL.
   demo: demoEnabled(),
+  market: marketEnabled(),
   tabFee: config().tabFee.toString(),
   maxTabLimit: process.env.MAX_TAB_LIMIT ?? null,
   rpcUrl: process.env.PUBLIC_RPC_URL ?? (config().network === "devnet" ? "https://api.devnet.solana.com" : "https://api.mainnet-beta.solana.com"),
@@ -142,3 +144,7 @@ app.get("/v1/internal/reconcile", async (c) => {
 // ---------- demo paid API (devnet) ----------
 let demo: ReturnType<typeof demoApp> | undefined;
 app.all("/demo/*", (c) => (demo ??= demoApp()).fetch(c.req.raw));
+
+// ---------- paid-API market ----------
+let market: ReturnType<typeof marketApp> | undefined;
+app.all("/market/*", (c) => (market ??= marketApp()).fetch(c.req.raw));
