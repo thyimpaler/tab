@@ -1,0 +1,8 @@
+# Never upload local secrets or test keys with `vercel deploy`.
+.env
+.env.*
+!env.example
+spike/.keys
+.data
+dist
+packages/*/dist
