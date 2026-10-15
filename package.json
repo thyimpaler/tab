@@ -15,7 +15,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "migrate": "tsx src/server/migrate.ts",
-    "dev:db": "tsx src/server/devdb.ts"
+    "dev:db": "tsx src/server/devdb.ts",
+    "build:mcp": "npm run build -w packages/sdk && npm run build -w packages/mcp",
+    "e2e:market": "tsx scripts/e2e-market-devnet.ts"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.3",

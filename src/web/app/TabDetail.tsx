@@ -183,7 +183,7 @@ export function TabDetail({ s, tabId, credential, rememberKey, onChange }: { s: 
             <ul>
               {d.payments.map((p) => (
                 <li key={p.id} className={p.state === "RELEASED" ? "rel" : p.state === "SETTLED" ? "ok" : "wait"}>
-                  <span className="what" title={p.resource ?? p.recipient}>{p.resource ? hostOf(p.resource) : short(p.recipient)}</span>
+                  <span className="what" title={p.resource ?? p.recipient}>{p.resource ? whatOf(p.resource) : short(p.recipient)}</span>
                   <span className="amt">{p.tx_signature && p.state === "SETTLED" ? <a href={explorerTx(p.tx_signature, net)} target="_blank" rel="noreferrer">{fromUnits(p.amount, dec, 3)}</a> : fromUnits(p.amount, dec, 3)}</span>
                   <span className="state">{STATE_LABEL[p.state]} · {new Date(p.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                 </li>
@@ -196,8 +196,8 @@ export function TabDetail({ s, tabId, credential, rememberKey, onChange }: { s: 
             <div><span>{leftWord}</span><b>{fromUnits(t.remaining, dec)}</b></div>
           </div>
         </section>
-        {open && s.cfg?.demo
-          ? <TestAgent tabId={tabId} credential={credential} onKey={rememberKey} onPaid={refresh} decimals={dec} net={net} />
+        {open && (s.cfg?.market || s.cfg?.demo)
+          ? <TestAgent tabId={tabId} credential={credential} onKey={rememberKey} onPaid={refresh} decimals={dec} net={net} market={!!s.cfg?.market} wallet={s.me ?? undefined} />
           : open && <div className="testagent"><span className="eyebrow">Connect your agent</span><p className="muted" style={{ margin: "12px 0 0" }}>Give the agent its key and point the SDK at <code>{location.origin}/api</code>. Payments print on the ledger as they settle.</p></div>}
       </div>
     </div>
@@ -205,17 +205,47 @@ export function TabDetail({ s, tabId, credential, rememberKey, onChange }: { s: 
 }
 
 function hostOf(u: string) { try { return new URL(u).host + new URL(u).pathname; } catch { return u; } }
+/** Ledger label: "market · price" for TAB's own market, host + path for anything else. */
+function whatOf(u: string) {
+  try {
+    const url = new URL(u);
+    const m = url.pathname.match(/\/api\/market\/([\w-]+)$/);
+    return m && url.origin === location.origin ? `market · ${m[1]}` : hostOf(u);
+  } catch { return u; }
+}
 
-const DEMO = [
-  { path: "quote", label: "Buy a quote", price: "0.01" },
-  { path: "search", label: "Run a search", price: "0.05" },
-  { path: "summary", label: "Summarise a page", price: "0.25" },
+type AgentCall = { path: string; label: string; price: string };
+const DEMO: AgentCall[] = [
+  { path: "demo/quote", label: "Buy a quote", price: "0.01" },
+  { path: "demo/search", label: "Run a search", price: "0.05" },
+  { path: "demo/summary", label: "Summarise a page", price: "0.25" },
+];
+const MARKET = (wallet?: string): AgentCall[] => [
+  { path: "market/price?tokens=SOL,JUP", label: "SOL and JUP prices", price: "0.01" },
+  { path: "market/token-check?mint=DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263", label: "Safety check BONK", price: "0.03" },
+  ...(wallet ? [{ path: `market/wallet-report?address=${wallet}`, label: "Report on my wallet", price: "0.05" }] : []),
+  { path: "market/read?url=https://solana.com/docs/core/tokens", label: "Read a docs page", price: "0.02" },
+  { path: "market/flaky", label: "A service that fails", price: "0.01" },
 ];
 
-/** A real agent, in this browser: pays TAB's devnet demo API through the SDK. */
-function TestAgent({ tabId, credential, onKey, onPaid, decimals, net }: { tabId: string; credential?: string; onKey: (k: string) => void; onPaid: () => void; decimals: number; net: string }) {
+/** One line of what the agent got back, per market service. */
+function gist(path: string, body: string): string {
+  try {
+    const j = JSON.parse(body);
+    if (path.startsWith("market/price")) return j.prices.map((p: any) => `${p.token} $${p.usd === null ? "?" : Number(p.usd).toPrecision(4)}`).join(" · ");
+    if (path.startsWith("market/token-check")) return j.flags.length ? `${j.flags.length} flag${j.flags.length > 1 ? "s" : ""}: ${j.flags[0]}` : "no red flags";
+    if (path.startsWith("market/wallet-report")) return `${Number(j.sol).toFixed(3)} SOL · ${j.tokens.length} tokens · ${j.recentActivity.length} recent txs`;
+    if (path.startsWith("market/read")) return `"${j.title || j.url}" · ${j.chars} chars`;
+  } catch {}
+  return body.slice(0, 70);
+}
+
+/** A real agent, in this browser: pays TAB's paid APIs (the market, or the older demo API) through the SDK. */
+function TestAgent({ tabId, credential, onKey, onPaid, decimals, net, market, wallet }: { tabId: string; credential?: string; onKey: (k: string) => void; onPaid: () => void; decimals: number; net: string; market: boolean; wallet?: string }) {
   const real = net === "mainnet";
-  const [lines, setLines] = useState<LogLine[]>([{ kind: "dim", text: real ? "$ test agent ready. It pays TAB's demo API in real USDC from this tab." : "$ test agent ready. It pays TAB's demo API on devnet with this tab." }]);
+  const what = market ? "TAB's market of paid APIs" : "TAB's demo API";
+  const calls = market ? MARKET(wallet) : DEMO;
+  const [lines, setLines] = useState<LogLine[]>([{ kind: "dim", text: real ? `$ test agent ready. It pays ${what} in real USDC from this tab.` : `$ test agent ready. It pays ${what} on devnet with this tab.` }]);
   const [left, setLeft] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const [paste, setPaste] = useState("");
@@ -233,19 +263,21 @@ function TestAgent({ tabId, credential, onKey, onPaid, decimals, net }: { tabId:
 
   async function call(path: string) {
     if (!tab.current) return;
-    const url = `${location.origin}/api/demo/${path}`;
-    add({ text: <><span className="dim">GET </span>/api/demo/{path}</> });
+    const url = `${location.origin}/api/${path}`;
+    add({ text: <><span className="dim">GET </span>/api/{path.split("?")[0]}</> });
     try {
       const res = await tab.current.fetch(url);
       const body = await res.text();
       const b = await tab.current.balance();
       setLeft(b.remaining);
-      if (res.ok) add({ kind: "dim", text: `  ${res.status} paid · ${fromUnits(b.remaining, decimals, 3)} left · ${body.slice(0, 70)}` });
+      if (res.ok) add({ kind: "dim", text: `  ${res.status} paid · ${fromUnits(b.remaining, decimals, 3)} left · ${gist(path, body)}` });
       else {
         // Show the service's own reason when it gives one (e.g. the demo pausing to top up its fee payer).
         let msg: string | undefined;
         try { msg = JSON.parse(body)?.error?.message; } catch {}
         add({ kind: "no", text: msg ? `  service answered ${res.status}: ${msg}` : `  service answered ${res.status}. If TAB signed, the payment still settles from the chain.` });
+        // x402 never settles an error response: the tab holds the amount until the signed payment expires, then frees it.
+        if (market) add({ kind: "dim", text: `  not charged · ${fromUnits(b.reserved, decimals, 3)} held until the signed payment expires (~1-2 min), then released` });
       }
     } catch (e) {
       add({ kind: "no", text: `  refused · ${e instanceof TabError ? `${e.code}: ${e.message}` : (e as Error).message} Nothing was signed.` });
@@ -255,7 +287,8 @@ function TestAgent({ tabId, credential, onKey, onPaid, decimals, net }: { tabId:
 
   async function loop() {
     setRunning(true);
-    for (const p of ["quote", "search", "quote", "summary", "quote"]) await call(p);
+    const run = market ? [calls[0].path, calls[1].path, calls[calls.length - 2].path, calls[calls.length - 1].path, calls[0].path] : ["demo/quote", "demo/search", "demo/quote", "demo/summary", "demo/quote"];
+    for (const p of run) await call(p);
     setRunning(false);
   }
 
@@ -281,7 +314,7 @@ function TestAgent({ tabId, credential, onKey, onPaid, decimals, net }: { tabId:
       balanceNote={<>USDC left<br />{real ? "real USDC payments" : "devnet payments"}</>}
       lines={lines}
       actions={<>
-        {DEMO.map((x) => <button key={x.path} type="button" disabled={running} onClick={async () => { setRunning(true); await call(x.path); setRunning(false); }}>{x.label} · {x.price}</button>)}
+        {calls.map((x) => <button key={x.path} type="button" disabled={running} onClick={async () => { setRunning(true); await call(x.path); setRunning(false); }}>{x.label} · {x.price}</button>)}
         <button type="button" disabled={running} onClick={loop}>Run a 5-call task</button>
       </>}
     />
