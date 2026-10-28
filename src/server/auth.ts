@@ -11,11 +11,27 @@ const NONCE_TTL_MS = 10 * 60_000;
 export const SESSION_TTL_S = 7 * 86_400;
 export const SESSION_COOKIE = "tab_session";
 
+// Nonces are signed, not stored: bs58(16 random bytes | 4-byte expiry in seconds | 16-byte HMAC).
+// Issuing one writes nothing, so an anonymous caller can't fill the database; a row is only
+// written when a signed sign-in uses it (single use, see verifySignIn).
+const nonceMac = (body: Buffer) => createHmac("sha256", config().sessionSecret).update("siws-nonce:").update(body).digest().subarray(0, 16);
+
 export async function issueNonce() {
-  const nonce = bs58.encode(randomBytes(16));
-  await db().query(`INSERT INTO auth_nonces (nonce, expires_at) VALUES ($1, $2)`, [nonce, new Date(Date.now() + NONCE_TTL_MS)]);
-  await db().query(`DELETE FROM auth_nonces WHERE expires_at < now() - interval '1 day'`).catch(() => {});
-  return nonce;
+  const body = Buffer.alloc(20);
+  randomBytes(16).copy(body);
+  body.writeUInt32BE(Math.floor((Date.now() + NONCE_TTL_MS) / 1000), 16);
+  return bs58.encode(Buffer.concat([body, nonceMac(body)]));
+}
+
+/** Expiry of a nonce this server issued, or null if it's forged, malformed or expired. */
+function nonceExpiry(nonce: string): Date | null {
+  let raw: Buffer;
+  try { raw = Buffer.from(bs58.decode(nonce)); } catch { return null; }
+  if (raw.length !== 36) return null;
+  const body = raw.subarray(0, 20);
+  if (!timingSafeEqual(raw.subarray(20), nonceMac(body))) return null;
+  const exp = new Date(body.readUInt32BE(16) * 1000);
+  return exp.getTime() > Date.now() ? exp : null;
 }
 
 /** SIWS input that wallets with `solana:signIn` take directly, and the same text for signMessage fallback. */
@@ -65,11 +81,14 @@ export async function verifySignIn(args: { address: string; message: string; sig
   const ok = sig.length === 64 && nacl.sign.detached.verify(new TextEncoder().encode(message), sig, bs58.decode(address));
   if (!ok) throw new TabError("UNAUTHORIZED", "signature does not verify");
 
-  // Single use.
+  // Ours and unexpired, then single use: the first sign-in with it inserts the row, any repeat conflicts.
+  const nonceExp = nonceExpiry(nonce);
+  if (!nonceExp) throw new TabError("UNAUTHORIZED", "nonce already used or unknown");
   const used = await db().query(
-    `UPDATE auth_nonces SET used_at = now() WHERE nonce = $1 AND used_at IS NULL AND expires_at > now()`, [nonce],
+    `INSERT INTO auth_nonces (nonce, expires_at, used_at) VALUES ($1, $2, now()) ON CONFLICT (nonce) DO NOTHING`, [nonce, nonceExp],
   );
   if (used.rowCount !== 1) throw new TabError("UNAUTHORIZED", "nonce already used or unknown");
+  await db().query(`DELETE FROM auth_nonces WHERE expires_at < now() - interval '1 day'`).catch(() => {});
   return address;
 }
 

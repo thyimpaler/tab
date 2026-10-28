@@ -45,6 +45,28 @@ describe("app origins", () => {
     expect(input.domain).toBe("tab-agent-one.vercel.app");
   });
 
+  it("issuing a nonce writes nothing to the database", async () => {
+    const count = async () => Number((await db().query(`SELECT count(*) FROM auth_nonces`)).rows[0].count);
+    const before = await count();
+    for (let i = 0; i < 5; i++) expect((await post("/auth/nonce", "tabpay.si")).status).toBe(200);
+    expect(await count()).toBe(before);
+  });
+
+  it("a nonce signs in once; a replay and a forged nonce are refused", async () => {
+    const kp = Keypair.generate();
+    const address = kp.publicKey.toBase58();
+    const verify = (input: any) => {
+      const message = siwsMessage(address, input);
+      const signature = bs58.encode(nacl.sign.detached(new TextEncoder().encode(message), kp.secretKey));
+      return post("/auth/verify", "tabpay.si", { address, message, signature });
+    };
+    const { input } = await (await post("/auth/nonce", "tabpay.si")).json();
+    expect((await verify(input)).status).toBe(200);
+    expect((await verify(input)).status).toBe(401);
+    const forged = { ...input, nonce: bs58.encode(Buffer.alloc(36, 7)) };
+    expect((await verify(forged)).status).toBe(401);
+  });
+
   it("refuses cookie-route writes from an origin that isn't allowed", async () => {
     const res = await post("/tabs", "tabpay.si", {}, "https://evil.example");
     expect(res.status).toBe(401);
